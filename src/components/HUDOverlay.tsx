@@ -137,8 +137,8 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         >
           {/* HP Label & Bar */}
           <div style={{ minWidth: isMobileScreen ? '110px' : '165px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.72rem' : '0.95rem', fontWeight: 900, color: isHpFlashing ? '#ff0055' : hpTheme.color, marginBottom: '4px', transition: 'color 0.25s' }}>
-              <span>{isHpFlashing ? '⚠️ 支持度告急!' : hpTheme.label}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.72rem' : '0.95rem', fontWeight: 900, color: isHpFlashing && stats.supportRate <= 30 ? '#ff0055' : hpTheme.color, marginBottom: '4px', transition: 'color 0.25s' }}>
+              <span>{hpTheme.label}</span>
               <span>{stats.supportRate.toFixed(0)}%</span>
             </div>
             <div style={{
@@ -245,7 +245,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             flex: 1,
             height: isMobileScreen ? '62px' : '110px',
             background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(0, 119, 182, 0.55) 100%)',
-            border: '2px solid #00f0ff',
+            border: '2.5px solid #00f0ff',
             borderRadius: isMobileScreen ? '14px' : '22px',
             backdropFilter: 'blur(10px)',
             boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
@@ -272,7 +272,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             flex: 1,
             height: isMobileScreen ? '62px' : '110px',
             background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.35) 0%, rgba(216, 0, 104, 0.55) 100%)',
-            border: '2px solid #ff007f',
+            border: '2.5px solid #ff007f',
             borderRadius: isMobileScreen ? '14px' : '22px',
             backdropFilter: 'blur(10px)',
             boxShadow: '0 0 25px rgba(255, 0, 127, 0.5)',

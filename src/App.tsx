@@ -85,6 +85,26 @@ export const App: React.FC = () => {
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
     noteSpeed: number = 1.0
   ) => {
+    if (gameLoopRef.current) {
+      gameLoopRef.current.stop();
+      gameLoopRef.current = null;
+    }
+
+    // Force Reset Game Stats to Initial Fresh Values (Score = 0, SupportRate = 100%)
+    const freshStats: GameStats = {
+      score: 0,
+      supportRate: 100,
+      combo: 0,
+      maxCombo: 0,
+      perfectCount: 0,
+      greatCount: 0,
+      missCount: 0,
+      feverGauge: 0,
+      isFeverActive: false,
+      totalNotesCount: 0
+    };
+    setGameStats(freshStats);
+
     setCurrentBeatmap(beatmap);
     setCurrentDifficulty(difficulty);
     setCurrentNoteSpeed(noteSpeed);
@@ -102,9 +122,9 @@ export const App: React.FC = () => {
           selectedCostume,
           difficulty,
           noteSpeed,
-          stats => setGameStats(stats),
+          stats => setGameStats({ ...stats }),
           finalStats => {
-            setGameStats(finalStats);
+            setGameStats({ ...finalStats });
             setGameState('result');
           }
         );
