@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Wand2, Play, Music, AlertCircle } from 'lucide-react';
+import { X, Upload, Wand2, Play, Music, AlertCircle, Maximize, ArrowDown } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
 
@@ -21,6 +21,14 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -35,10 +43,8 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       const decodedBuf = await tempCtx.decodeAudioData(arrayBuffer);
       setAudioBuffer(decodedBuf);
 
-      // Pass custom audio buffer to AudioEngine for 100% custom song playback!
       audioEngine.setCustomAudioBuffer(decodedBuf);
 
-      // Auto capture notes
       const notes = audioEngine.detectBeatsFromBuffer(decodedBuf, difficulty);
       setGeneratedNotes(notes);
     } catch (err) {
@@ -104,46 +110,86 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
         border: '2px solid #ffe600',
         boxShadow: '0 0 35px rgba(255, 230, 0, 0.4)'
       }}>
-        {/* Close Button */}
-        <button
-          onClick={() => {
-            audioEngine.clearCustomAudioBuffer();
-            onClose();
-          }}
-          style={{
-            position: 'absolute',
-            top: '0.6rem',
-            right: '0.6rem',
-            background: 'rgba(255, 0, 127, 0.2)',
-            border: '1.5px solid #ff007f',
-            color: '#fff',
-            borderRadius: '50%',
-            width: '34px',
-            height: '34px',
+        {/* Top Control Action Buttons (Fullscreen & Close) */}
+        <div style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', display: 'flex', gap: '8px', zIndex: 10 }}>
+          <button
+            onClick={handleFullscreen}
+            style={{
+              background: 'rgba(255, 230, 0, 0.15)',
+              border: '1.5px solid #ffe600',
+              color: '#ffe600',
+              borderRadius: '16px',
+              padding: '4px 12px',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              fontSize: '0.78rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(255,230,0,0.4)'
+            }}
+          >
+            <Maximize size={14} /> 全螢幕
+          </button>
+
+          <button
+            onClick={() => {
+              audioEngine.clearCustomAudioBuffer();
+              onClose();
+            }}
+            style={{
+              background: 'rgba(255, 0, 127, 0.2)',
+              border: '1.5px solid #ff007f',
+              color: '#fff',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)'
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Title Header with Scroll Hint Badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              color: '#ffe600',
+              textShadow: '0 0 12px rgba(255,230,0,0.6)'
+            }}>
+              ⚡ A+B 智慧譜面創作者 (BEAT PRODUCER)
+            </h2>
+            <p style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '2px' }}>
+              上傳您最喜愛的 MP3 歌曲，AI 演算法自動抓拍並生成專屬音遊譜面！
+            </p>
+          </div>
+
+          {/* Scroll Hint Badge */}
+          <div style={{
+            background: 'rgba(0, 240, 255, 0.12)',
+            border: '1px solid rgba(0, 240, 255, 0.4)',
+            color: '#00f0ff',
+            borderRadius: '12px',
+            padding: '3px 10px',
+            fontSize: '0.72rem',
+            fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)',
-            zIndex: 10
-          }}
-        >
-          <X size={18} />
-        </button>
-
-        <h2 style={{
-          fontSize: '1.6rem',
-          fontFamily: 'Chakra Petch, sans-serif',
-          fontWeight: 900,
-          color: '#ffe600',
-          marginBottom: '0.2rem',
-          textShadow: '0 0 12px rgba(255,230,0,0.6)'
-        }}>
-          ⚡ A+B 智慧譜面創作者 (BEAT PRODUCER)
-        </h2>
-        <p style={{ color: '#aaa', fontSize: '0.82rem', marginBottom: '1rem' }}>
-          上傳您最喜愛的 MP3 歌曲，AI 演算法自動抓拍並生成專屬音遊譜面！
-        </p>
+            gap: '4px',
+            marginRight: '120px'
+          }}>
+            <ArrowDown size={13} /> ↕️ 上下滑動檢視
+          </div>
+        </div>
 
         {/* Upload Audio File Area (Compact for Mobile) */}
         <div

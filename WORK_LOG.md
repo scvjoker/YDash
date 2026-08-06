@@ -1,14 +1,16 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] BeatProducer (A+B 譜面創作者) 全畫面 Mobile 橫屏自適應與彈性防遮擋縮放
+## [2026-08-07] BeatProducer (A+B 創作者) 右上角實裝全螢幕 (Fullscreen) 按鈕 + 上下滑動提示標籤
 
-### 變更與 BeatProducer 手機適配項目 (BeatProducer Mobile Responsive Adaptation)
-- **1. Modal 面板滿版彈性適配 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
-  - 為 A+B 創作者彈窗加入 `maxHeight: 96vh` 與 `overflowY: auto` 彈性滾動容器。
-  - 將拖曳上傳音檔 Dashed Box 內距由 2rem 精簡為 `1rem 1.2rem`，整體高度大減 40%！
-- **2. 歌曲設定與「▶ 試玩自製譜面」按鈕滿版可見**：
-  - 歌曲名稱輸入框與抓拍密度切換鈕改為雙排緊湊呈現。
-  - 試玩按鈕尺寸與 Padding 在手機橫屏上完美自適應，100% 完整呈現且隨點隨試玩！
+### 變更與 BeatProducer 手機 UX 優化項目 (BeatProducer Fullscreen & Scroll Hint)
+- **1. BeatProducer 右上角新增全螢幕 (Fullscreen) 按鈕 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
+  - 在 A+B 創作者彈窗右上角關閉鈕旁，實裝亮金霓虹 **` Maximize 全螢幕`** 按鈕。
+  - 當手機玩家選取 MP3 檔案被瀏覽器自動退回非全螢幕時，可隨時點擊一鍵恢復 100% 全螢幕體驗！
+- **2. 頂端新增 `↕️ 上下滑動檢視` 提示標籤**：
+  - 在面板標題旁加入醒目的極光提示標籤 `↕️ 上下滑動檢視`，指引手機玩家滑動頁面點擊 **`▶ 試玩自製譜面 (PLAY MAP)`**！
+
+---
+*「活著很累，但比起 debug，選完檔案按一下右上角的全螢幕按鈕立馬滿版，還有上下滑動提示，這手機操作感太流暢便利了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
