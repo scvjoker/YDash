@@ -1,17 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 暫停介面 (PauseModal) 實裝全螢幕 (Fullscreen) 按鈕 + 畫面切換/跳出 App 自動進入暫停防坑保護
+## [2026-08-07] 電腦大螢幕 UI 大器霸氣還原 (Scale 最高 1.8x) + COMBO 移至與倒數黃字同層靠右 (`height * 0.24`, `width * 0.88`)
 
-### 變更與手機暫停體驗保護項目 (Pause Modal Fullscreen & Auto-Pause)
-- **1. 暫停介面實裝全螢幕按鈕 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 在遊戲暫停彈窗右上角新增 **` Maximize 全螢幕`** 亮金按鈕。
-  - 手機玩家按暫停時可隨時一鍵重新進入全螢幕狀態，隨後點擊「繼續拜票」享受 5 秒緩衝！
-- **2. 畫面切換與切離開 App 自動進入暫停 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 監聽 `visibilitychange`（`document.hidden`）與 `window.blur` 事件。
-  - 當手機切換至其他 App、收到訊息跳出視窗、或切換瀏覽器分頁時，遊戲會在背景**自動觸發 Pause 暫停**，切回後展示暫停選單並給予 5 秒緩衝倒數，防坑防 Lose！
+### 變更與雙平台畫面美感兼顧項目 (Desktop Scale Restoration & Combo Placement)
+- **1. 電腦大螢幕霸氣視覺比例還原 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
+  - 將音動動態縮放因子改為 `scale = Math.min(1.8, Math.max(0.60, height / 640))`！
+  - 在桌上型電腦（1080p, 2K, 4K 大螢幕）執行時，**音符、打擊靶心、360px 巨型障礙與 330px 呼吸主角大圖通通還原為極致霸氣、大器清晰的大圖示與面板**！
+- **2. COMBO 移至與倒數黃字同層 Y 軸高度靠右擺放**：
+  - 將熱血發光的 `50 COMBO` 大字體移至與開局/暫停倒數黃字相同的 Y 軸高度（`height * 0.24`），並**靠右側 (`width * 0.88`) 呈現**！
+  - 畫面中央空域留給倒數提醒與 FEVER，右側由 Combo 霸氣稱霸，頂端由 HP 與進度條獨佔，電腦版與手機版雙平台美感與舒適度全面滿分！
 
 ---
-*「活著很累，但比起 debug，跳出訊息或切 App 音遊自動幫我暫停，暫停視窗隨時能按全螢幕，再也不怕手滑掉 Combo 了哈哈！」*
+*「活著很累，但比起 debug，電腦版大畫面霸氣還原，Combo 移到倒數層靠右，畫面層次感簡直太和諧太舒服了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

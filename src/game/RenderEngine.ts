@@ -104,8 +104,8 @@ export class RenderEngine {
     const height = this.canvas.height;
     const ctx = this.ctx;
 
-    // Dynamic Scale Factor for Mobile Responsive Aspect Ratio (Baseline Height = 720px)
-    const scale = Math.min(1.25, Math.max(0.45, height / 720));
+    // Responsive Scale Factor for Desktop & Mobile (Baseline Height = 640px)
+    const scale = Math.min(1.8, Math.max(0.60, height / 640));
 
     ctx.clearRect(0, 0, width, height);
 
@@ -113,9 +113,9 @@ export class RenderEngine {
     this.drawBackground(ctx, width, height, currentTime, stats.isFeverActive);
 
     // Dynamic Responsive Positions
-    const airY = height * 0.35;
+    const airY = height * 0.36;
     const groundY = height * 0.70;
-    const hitX = Math.max(140 * scale, width * 0.22);
+    const hitX = Math.max(160 * scale, width * 0.22);
     const noteSpeed = width * 0.45 * speedMultiplier;
 
     // Smooth Yoaka Track Switch Animation & Extended Trail Tracking
@@ -180,7 +180,7 @@ export class RenderEngine {
     });
 
     // 5. Draw Borderless Hero Side Standee with Breathing Pulse
-    const sideCardX = Math.max(65 * scale, hitX - 160 * scale);
+    const sideCardX = Math.max(80 * scale, hitX - 175 * scale);
     this.drawHeroSideCard2X(ctx, sideCardX, this.yoakaCurrentY, costume, currentTime, activeTrack, scale);
 
     // 6. Draw Hero Runner Stage
@@ -203,7 +203,7 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    // 8. Start & Unpause Buffer Countdown Text (Adjusted Y to height * 0.24 to prevent HUD overlap!)
+    // 8. Start & Unpause Buffer Countdown Text (Center at height * 0.24)
     if (currentTime < 4.8) {
       const countdown = Math.ceil(5.0 - currentTime);
       ctx.save();
@@ -216,12 +216,32 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    // 9. Draw Fever Effects
+    // 9. DRAW COMBO COUNT AT SAME Y-ROW (height * 0.24), RIGHT-ALIGNED (width * 0.85)!
+    if (stats.combo > 1) {
+      ctx.save();
+      ctx.textAlign = 'right';
+
+      ctx.font = `italic 900 ${Math.floor(48 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.fillStyle = '#ffe600';
+      ctx.shadowColor = '#ff007f';
+      ctx.shadowBlur = 22 * scale;
+      ctx.fillText(`${stats.combo}`, width * 0.88 - Math.floor(65 * scale), height * 0.24);
+
+      ctx.font = `900 ${Math.floor(18 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 15 * scale;
+      ctx.fillText(`COMBO`, width * 0.88, height * 0.24);
+
+      ctx.restore();
+    }
+
+    // 10. Draw Fever Effects
     if (stats.isFeverActive) {
       this.drawFeverEffects(ctx, width, height, currentTime, scale);
     }
 
-    // 10. Update & Draw Particles & Shockwaves
+    // 11. Update & Draw Particles & Shockwaves
     this.updateAndDrawParticles(ctx, scale);
   }
 
@@ -276,7 +296,7 @@ export class RenderEngine {
     ctx.save();
     
     ctx.strokeStyle = isFever ? '#ff007f' : '#00f0ff';
-    ctx.lineWidth = Math.max(2, 4 * scale);
+    ctx.lineWidth = Math.max(2.5, 4.5 * scale);
     ctx.shadowColor = ctx.strokeStyle;
     ctx.shadowBlur = 14 * scale;
     ctx.beginPath();
@@ -366,8 +386,8 @@ export class RenderEngine {
     ctx.translate(x, y);
 
     const breathScale = 1.0 + Math.sin(time * 3.5) * 0.04;
-    const baseW = 220 * scale;
-    const baseH = 220 * scale;
+    const baseW = 240 * scale;
+    const baseH = 240 * scale;
     const cardW = baseW * breathScale;
     const cardH = baseH * breathScale;
 
@@ -397,7 +417,7 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    ctx.font = `900 ${Math.floor(13 * scale)}px "Chakra Petch", sans-serif`;
+    ctx.font = `900 ${Math.floor(14 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = accentColor;
     ctx.textAlign = 'center';
     ctx.shadowColor = accentColor;
@@ -422,7 +442,7 @@ export class RenderEngine {
     const isObstacle = note.type === 'obstacle' || note.entity.startsWith('hater');
 
     if (isObstacle) {
-      const size = 300 * scale;
+      const size = 320 * scale;
       const targetHaterImg = note.entity === 'hater_dog_board' ? this.haterDogImage : this.haterSharkImage;
 
       ctx.shadowColor = '#ff0055';
@@ -447,7 +467,7 @@ export class RenderEngine {
     } else {
       const isAir = note.track === 'air';
       const mainColor = note.isDual ? '#ffe600' : isAir ? '#00f0ff' : '#ff007f';
-      const radius = 34 * scale;
+      const radius = 35 * scale;
 
       ctx.fillStyle = mainColor;
       ctx.strokeStyle = '#ffffff';
@@ -497,7 +517,7 @@ export class RenderEngine {
       ctx.shadowColor = trailColor;
       ctx.shadowBlur = 25 * scale;
 
-      const r = 38 * scale * trail.scale;
+      const r = 40 * scale * trail.scale;
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.stroke();
@@ -522,17 +542,17 @@ export class RenderEngine {
     ctx.shadowColor = isFever ? '#ffe600' : mainColor;
     ctx.shadowBlur = isStriking ? 35 * scale : 18 * scale;
 
-    const r = 38 * scale;
+    const r = 40 * scale;
     ctx.strokeStyle = mainColor;
     ctx.lineWidth = 4 * scale;
     ctx.beginPath();
     ctx.arc(0, bodyY, r, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.font = `900 ${Math.floor(10 * scale)}px "Chakra Petch", sans-serif`;
+    ctx.font = `900 ${Math.floor(11 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = mainColor;
     ctx.textAlign = 'center';
-    ctx.fillText(activeTrack === 'air' ? '☁️ AIR' : '🏃 GND', 0, bodyY - 45 * scale);
+    ctx.fillText(activeTrack === 'air' ? '☁️ AIR' : '🏃 GND', 0, bodyY - 48 * scale);
 
     if (this.tissuePackImage && this.tissuePackImage.complete && this.tissuePackImage.naturalWidth !== 0) {
       ctx.save();
