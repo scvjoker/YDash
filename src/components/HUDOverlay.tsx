@@ -21,8 +21,18 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
   const [isHpFlashing, setIsHpFlashing] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [totalDuration, setTotalDuration] = useState<number>(40);
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
   const isLowSupport = stats.supportRate <= 30;
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Poll Song Time Progress
   useEffect(() => {
@@ -78,40 +88,40 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '0.6rem 1.4rem',
+      padding: isMobileScreen ? '0.5rem 1.2rem' : '1.2rem 2.2rem',
       zIndex: 10
     }}>
-      {/* TOP HEADER: Unified Single-Line Bar (HP + Progress Bar in SAME Row!) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+      {/* TOP HEADER: Unified Single-Line Bar (HP + Progress Bar in SAME Row! Desktop Enlarged 2X) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.2rem' }}>
         {/* Left: Support Rate (HP) & Integrated Song Progress Bar (同一層) */}
         <div 
           className="cyber-panel" 
           style={{ 
             flex: 1,
-            maxWidth: '560px',
-            padding: '0.45rem 1.1rem',
+            maxWidth: isMobileScreen ? '520px' : '760px',
+            padding: isMobileScreen ? '0.4rem 0.9rem' : '0.85rem 1.6rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '14px',
-            border: isHpFlashing ? '2px solid #ff0055' : isLowSupport ? '2px solid #ff0055' : '1px solid rgba(0,240,255,0.4)',
-            boxShadow: isHpFlashing ? '0 0 25px #ff0055, inset 0 0 15px #ff0055' : '0 0 12px rgba(0,240,255,0.25)',
+            gap: isMobileScreen ? '12px' : '20px',
+            border: isHpFlashing ? '2.5px solid #ff0055' : isLowSupport ? '2.5px solid #ff0055' : '1.5px solid rgba(0,240,255,0.4)',
+            boxShadow: isHpFlashing ? '0 0 30px #ff0055, inset 0 0 15px #ff0055' : '0 0 20px rgba(0,240,255,0.3)',
             backgroundColor: isHpFlashing ? 'rgba(255, 0, 85, 0.35)' : 'rgba(10, 12, 28, 0.85)',
             transition: 'all 0.15s ease-out'
           }}
         >
           {/* HP Label & Bar */}
-          <div style={{ minWidth: '120px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 900, color: isLowSupport || isHpFlashing ? '#ff0055' : '#00f0ff', marginBottom: '3px' }}>
-              <span>支持度</span>
+          <div style={{ minWidth: isMobileScreen ? '110px' : '165px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.72rem' : '0.95rem', fontWeight: 900, color: isLowSupport || isHpFlashing ? '#ff0055' : '#00f0ff', marginBottom: '4px' }}>
+              <span>{isHpFlashing ? '⚠️ 支持度告急!' : '選民支持度 (HP)'}</span>
               <span>{stats.supportRate.toFixed(0)}%</span>
             </div>
             <div style={{
               width: '100%',
-              height: '9px',
+              height: isMobileScreen ? '8px' : '14px',
               background: 'rgba(0,0,0,0.6)',
-              borderRadius: '5px',
+              borderRadius: '6px',
               overflow: 'hidden',
-              border: isHpFlashing ? '1px solid #ff0055' : '1px solid rgba(255,255,255,0.2)'
+              border: isHpFlashing ? '1.5px solid #ff0055' : '1px solid rgba(255,255,255,0.2)'
             }}>
               <div style={{
                 width: `${stats.supportRate}%`,
@@ -122,48 +132,48 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             </div>
           </div>
 
-          <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1.5px', height: isMobileScreen ? '22px' : '36px', background: 'rgba(255,255,255,0.2)' }} />
 
           {/* Integrated Song Progress Bar in same row */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Music size={14} color="#ffe600" />
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: isMobileScreen ? '8px' : '14px' }}>
+            <Music size={isMobileScreen ? 13 : 18} color="#ffe600" />
             <div style={{
               flex: 1,
-              height: '7px',
+              height: isMobileScreen ? '6px' : '10px',
               background: 'rgba(0, 0, 0, 0.6)',
-              borderRadius: '4px',
+              borderRadius: '5px',
               overflow: 'hidden',
-              border: '1px solid rgba(255, 255, 255, 0.15)'
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <div style={{
                 width: `${songProgressPct}%`,
                 height: '100%',
                 background: 'linear-gradient(90deg, #00f0ff 0%, #ffe600 50%, #ff007f 100%)',
-                boxShadow: '0 0 10px #00f0ff',
+                boxShadow: '0 0 12px #00f0ff',
                 transition: 'width 0.1s linear'
               }} />
             </div>
-            <span style={{ fontSize: '0.78rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.92rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
               {formatTime(currentTime)} / {formatTime(totalDuration)}
             </span>
           </div>
         </div>
 
-        {/* Right: Score Badge & Pause Button */}
-        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-          <div className="cyber-panel" style={{ padding: '0.45rem 1rem', textAlign: 'right' }}>
-            <p style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 700, textTransform: 'uppercase' }}>
+        {/* Right: Score Badge & Pause Button (Desktop Enlarged 2X) */}
+        <div style={{ display: 'flex', gap: isMobileScreen ? '0.6rem' : '1.2rem', alignItems: 'center' }}>
+          <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.35rem 0.8rem' : '0.75rem 1.4rem', textAlign: 'right' }}>
+            <p style={{ fontSize: isMobileScreen ? '0.65rem' : '0.78rem', color: '#aaa', fontWeight: 700, textTransform: 'uppercase' }}>
               得票數 (SCORE)
             </p>
             <p style={{
-              fontSize: '1.4rem',
+              fontSize: isMobileScreen ? '1.25rem' : '2.2rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
-              textShadow: '0 0 12px rgba(255,230,0,0.6)',
+              textShadow: '0 0 15px rgba(255,230,0,0.6)',
               lineHeight: 1.1
             }}>
-              {stats.score.toLocaleString()} <span style={{ fontSize: '0.78rem', color: '#fff' }}>票</span>
+              {stats.score.toLocaleString()} <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.95rem', color: '#fff' }}>票</span>
             </p>
           </div>
 
@@ -173,20 +183,20 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             style={{
               pointerEvents: 'auto',
               background: 'rgba(255, 0, 127, 0.2)',
-              border: '1.5px solid #ff007f',
+              border: '2px solid #ff007f',
               color: '#fff',
-              borderRadius: '12px',
-              width: '42px',
-              height: '42px',
+              borderRadius: '14px',
+              width: isMobileScreen ? '38px' : '52px',
+              height: isMobileScreen ? '38px' : '52px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: '0 0 15px rgba(255,0,127,0.5)',
+              boxShadow: '0 0 20px rgba(255,0,127,0.5)',
               transition: 'all 0.2s'
             }}
           >
-            <Pause size={20} />
+            <Pause size={isMobileScreen ? 18 : 26} />
           </button>
         </div>
       </div>
@@ -197,7 +207,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        gap: '1rem',
+        gap: isMobileScreen ? '0.8rem' : '1.5rem',
         width: '100%'
       }}>
         {/* Air Touch Button (Left: D/F) */}
@@ -206,25 +216,25 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           onTouchStart={handleAirTouch}
           style={{
             flex: 1,
-            height: '65px',
+            height: isMobileScreen ? '62px' : '110px',
             background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(0, 119, 182, 0.55) 100%)',
-            border: '1.5px solid #00f0ff',
-            borderRadius: '16px',
+            border: '2px solid #00f0ff',
+            borderRadius: isMobileScreen ? '14px' : '22px',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 18px rgba(0, 240, 255, 0.4)',
+            boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
             color: '#fff',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '1.15rem',
+            fontSize: isMobileScreen ? '1.1rem' : '1.5rem',
             fontWeight: 900,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
+            gap: '0.8rem',
             touchAction: 'manipulation'
           }}
         >
-          上軌 (空中投紙) <span style={{ fontSize: '0.85rem', opacity: 0.85 }}>(D / F)</span>
+          上軌 (空中投紙/閃避) <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', opacity: 0.85 }}>(D / F)</span>
         </button>
 
         {/* Ground Touch Button (Right: J/K) */}
@@ -233,25 +243,25 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           onTouchStart={handleGroundTouch}
           style={{
             flex: 1,
-            height: '65px',
+            height: isMobileScreen ? '62px' : '110px',
             background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.35) 0%, rgba(216, 0, 104, 0.55) 100%)',
-            border: '1.5px solid #ff007f',
-            borderRadius: '16px',
+            border: '2px solid #ff007f',
+            borderRadius: isMobileScreen ? '14px' : '22px',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 18px rgba(255, 0, 127, 0.4)',
+            boxShadow: '0 0 25px rgba(255, 0, 127, 0.5)',
             color: '#fff',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '1.15rem',
+            fontSize: isMobileScreen ? '1.1rem' : '1.5rem',
             fontWeight: 900,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
+            gap: '0.8rem',
             touchAction: 'manipulation'
           }}
         >
-          下軌 (地面發紙) <span style={{ fontSize: '0.85rem', opacity: 0.85 }}>(J / K)</span>
+          下軌 (地面發紙/閃避) <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', opacity: 0.85 }}>(J / K)</span>
         </button>
       </div>
     </div>

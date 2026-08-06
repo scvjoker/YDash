@@ -1,17 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 電腦大螢幕 UI 大器霸氣還原 (Scale 最高 1.8x) + COMBO 移至與倒數黃字同層靠右 (`height * 0.24`, `width * 0.88`)
+## [2026-08-07] 電腦大螢幕 UI 大器豪邁全數還原 (HUD Panel 放大一倍 + 4.5rem 標題選單 + 造型館大卡片)
 
-### 變更與雙平台畫面美感兼顧項目 (Desktop Scale Restoration & Combo Placement)
-- **1. 電腦大螢幕霸氣視覺比例還原 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
-  - 將音動動態縮放因子改為 `scale = Math.min(1.8, Math.max(0.60, height / 640))`！
-  - 在桌上型電腦（1080p, 2K, 4K 大螢幕）執行時，**音符、打擊靶心、360px 巨型障礙與 330px 呼吸主角大圖通通還原為極致霸氣、大器清晰的大圖示與面板**！
-- **2. COMBO 移至與倒數黃字同層 Y 軸高度靠右擺放**：
-  - 將熱血發光的 `50 COMBO` 大字體移至與開局/暫停倒數黃字相同的 Y 軸高度（`height * 0.24`），並**靠右側 (`width * 0.88`) 呈現**！
-  - 畫面中央空域留給倒數提醒與 FEVER，右側由 Combo 霸氣稱霸，頂端由 HP 與進度條獨佔，電腦版與手機版雙平台美感與舒適度全面滿分！
+### 變更與電腦大螢幕豪邁還原項目 (Desktop Scale Restoration & Dual Adaptation)
+- **1. 音遊頂端 HUD Panel 電腦版放大一倍 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
+  - 在電腦大螢幕上（`isMobileScreen === false`），將「選民支持度 HP Panel + 音樂時間進度條 + 得票數 (Score) + 暫停按鈕」尺寸與字體**全面放大一倍**（Panel 寬度可達 `760px`，得票數 `2.2rem`，Pause 鈕 `52px`）！
+- **2. 主畫面右側選單電腦版 4.5rem 大標題與豪邁按鈕還原 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
+  - 還原主標題 `YOAKA DASH!` 為 **`4.5rem`** 豪邁霸氣字體！
+  - 開啟競選拜票 (START) 按鈕還原至 `fontSize: 1.45rem, padding: 1rem` 大尺寸！
+- **3. 造型換裝館 (CostumeModal) 電腦版大卡片還原 ([CostumeModal.tsx](file:///d:/pj/YoakaDash/src/components/CostumeModal.tsx))**：
+  - 在電腦大螢幕上還原 3 大造型卡片的豪邁尺寸：立繪圖片高度還原至 **`165px`**，卡片 Padding `1.2rem`！
+  - 完美達成「桌面大屏霸氣豪邁、手機橫屏緊湊精適」的雙平台 PERFECT 平衡！
 
 ---
-*「活著很累，但比起 debug，電腦版大畫面霸氣還原，Combo 移到倒數層靠右，畫面層次感簡直太和諧太舒服了哈哈！」*
+*「活著很累，但比起 debug，電腦版選單、造型館跟頂端 HUD 放大一倍還原霸氣，手機板保持精細緊湊，這雙平台適配簡直無懈可擊哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

@@ -15,6 +15,16 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
   onClose
 }) => {
   const [imagesMap, setImagesMap] = useState<{ [id: string]: string }>({});
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     COSTUMES_DATA.forEach(costume => {
@@ -53,14 +63,14 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '0.8rem'
+      padding: isMobileScreen ? '0.8rem' : '1.5rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '940px',
-        maxWidth: '98vw',
+        width: '960px',
+        maxWidth: '96vw',
         maxHeight: '96vh',
         overflowY: 'auto',
-        padding: '1rem 1.4rem',
+        padding: isMobileScreen ? '1rem 1.4rem' : '1.8rem 2.2rem',
         position: 'relative',
         border: '2px solid #00f0ff',
         boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
@@ -70,14 +80,14 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '0.6rem',
-            right: '0.6rem',
+            top: isMobileScreen ? '0.6rem' : '1rem',
+            right: isMobileScreen ? '0.6rem' : '1rem',
             background: 'rgba(255, 0, 127, 0.2)',
             border: '1.5px solid #ff007f',
             color: '#fff',
             borderRadius: '50%',
-            width: '34px',
-            height: '34px',
+            width: isMobileScreen ? '34px' : '42px',
+            height: isMobileScreen ? '34px' : '42px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -86,50 +96,50 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
             zIndex: 10
           }}
         >
-          <X size={18} />
+          <X size={isMobileScreen ? 18 : 22} />
         </button>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.6rem' : '1.2rem' }}>
           <div>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: isMobileScreen ? '1.5rem' : '2.2rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#00f0ff',
               textShadow: '0 0 12px rgba(0,240,255,0.6)',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '8px'
             }}>
-              <Sparkles size={20} color="#ffe600" /> 選民拜票換裝館 (COSTUME WARDROBE)
+              <Sparkles size={isMobileScreen ? 20 : 26} color="#ffe600" /> 選民拜票換裝館 (COSTUME WARDROBE)
             </h2>
-            <p style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '2px' }}>
+            <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.78rem' : '0.95rem', marginTop: '2px' }}>
               每款換裝皆擁有真實戰力加成效果，選擇最適合您競選風格的戰服！
             </p>
           </div>
 
-          {/* Scroll Hint Badge for Small Screen Mobile */}
+          {/* Scroll Hint Badge */}
           <div style={{
             background: 'rgba(255, 230, 0, 0.12)',
-            border: '1px solid rgba(255, 230, 0, 0.4)',
+            border: '1.5px solid rgba(255, 230, 0, 0.4)',
             color: '#ffe600',
             borderRadius: '12px',
-            padding: '3px 10px',
-            fontSize: '0.72rem',
+            padding: isMobileScreen ? '3px 10px' : '6px 14px',
+            fontSize: isMobileScreen ? '0.72rem' : '0.85rem',
             fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
           }}>
-            <ArrowDown size={13} /> ↕️ 上下滑動檢視
+            <ArrowDown size={isMobileScreen ? 13 : 16} /> ↕️ 上下滑動檢視
           </div>
         </div>
 
-        {/* Costume Cards 3-Column Parallel Layout (三欄並排) */}
+        {/* Costume Cards 3-Column Parallel Layout (Desktop Restored Grand Size) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '0.8rem',
+          gap: isMobileScreen ? '0.8rem' : '1.2rem',
           marginBottom: '0.5rem'
         }}>
           {COSTUMES_DATA.map(costume => {
@@ -142,12 +152,12 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                 onClick={() => onSelectCostume(costume.id)}
                 style={{
                   background: isSelected ? 'rgba(10, 20, 45, 0.95)' : 'rgba(15, 18, 38, 0.65)',
-                  border: isSelected ? `2px solid ${costume.accentColor}` : '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '14px',
-                  padding: '0.7rem',
+                  border: isSelected ? `2.5px solid ${costume.accentColor}` : '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '16px',
+                  padding: isMobileScreen ? '0.7rem' : '1.2rem',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: isSelected ? `0 0 20px ${costume.accentColor}` : 'none',
+                  transition: 'all 0.25s',
+                  boxShadow: isSelected ? `0 0 25px ${costume.accentColor}` : 'none',
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
@@ -158,30 +168,30 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                 {isSelected && (
                   <div style={{
                     position: 'absolute',
-                    top: '8px',
-                    right: '8px',
+                    top: isMobileScreen ? '8px' : '12px',
+                    right: isMobileScreen ? '8px' : '12px',
                     background: costume.accentColor,
                     color: '#000',
                     borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
+                    width: isMobileScreen ? '20px' : '26px',
+                    height: isMobileScreen ? '20px' : '26px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: `0 0 8px ${costume.accentColor}`,
+                    boxShadow: `0 0 10px ${costume.accentColor}`,
                     zIndex: 2
                   }}>
-                    <Check size={14} strokeWidth={3} />
+                    <Check size={isMobileScreen ? 14 : 18} strokeWidth={3} />
                   </div>
                 )}
 
-                {/* Costume Character Standee Image (Compact 95px) */}
+                {/* Costume Character Standee Image */}
                 <div style={{
                   width: '100%',
-                  height: '95px',
-                  borderRadius: '10px',
+                  height: isMobileScreen ? '95px' : '165px',
+                  borderRadius: '12px',
                   overflow: 'hidden',
-                  marginBottom: '0.4rem',
+                  marginBottom: isMobileScreen ? '0.4rem' : '0.8rem',
                   background: '#07091e',
                   display: 'flex',
                   alignItems: 'center',
@@ -200,20 +210,20 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
 
                 <div>
                   <h3 style={{
-                    fontSize: '1rem',
+                    fontSize: isMobileScreen ? '1rem' : '1.25rem',
                     fontWeight: 900,
                     color: costume.accentColor,
-                    marginBottom: '0.1rem'
+                    marginBottom: '0.2rem'
                   }}>
                     {costume.name}
                   </h3>
 
                   <p style={{
-                    fontSize: '0.72rem',
+                    fontSize: isMobileScreen ? '0.72rem' : '0.82rem',
                     color: '#ccc',
-                    lineHeight: 1.25,
-                    marginBottom: '0.4rem',
-                    height: '30px',
+                    lineHeight: 1.35,
+                    marginBottom: isMobileScreen ? '0.4rem' : '0.8rem',
+                    height: isMobileScreen ? '30px' : '40px',
                     overflow: 'hidden'
                   }}>
                     {costume.description}
@@ -222,16 +232,16 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                   {/* Skill Tag Badge */}
                   <div style={{
                     background: 'rgba(255,255,255,0.06)',
-                    borderRadius: '6px',
-                    padding: '3px 6px',
+                    borderRadius: '8px',
+                    padding: isMobileScreen ? '3px 6px' : '6px 10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                     border: `1px solid ${costume.accentColor}55`
                   }}>
-                    <Shield size={12} color={costume.accentColor} />
+                    <Shield size={isMobileScreen ? 12 : 15} color={costume.accentColor} />
                     <span style={{
-                      fontSize: '0.7rem',
+                      fontSize: isMobileScreen ? '0.7rem' : '0.8rem',
                       fontWeight: 800,
                       color: costume.accentColor
                     }}>
@@ -247,10 +257,10 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                     onSelectCostume(costume.id);
                   }}
                   style={{
-                    marginTop: '0.5rem',
+                    marginTop: isMobileScreen ? '0.5rem' : '1rem',
                     width: '100%',
-                    fontSize: '0.78rem',
-                    padding: '0.4rem',
+                    fontSize: isMobileScreen ? '0.78rem' : '0.9rem',
+                    padding: isMobileScreen ? '0.4rem' : '0.65rem',
                     background: isSelected ? costume.accentColor : undefined,
                     color: isSelected ? '#000' : undefined
                   }}
