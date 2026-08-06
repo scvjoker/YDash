@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Shield, Zap, Sparkles } from 'lucide-react';
+import { X, Check, Shield, Sparkles, ArrowDown } from 'lucide-react';
 import { CostumeId } from '../types/game';
 import { COSTUMES_DATA } from '../game/Beatmaps';
 
@@ -47,20 +47,20 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.92)',
+      backgroundColor: 'rgba(7, 8, 20, 0.94)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '1rem'
+      padding: '0.8rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '900px',
-        maxWidth: '96vw',
-        maxHeight: '94vh',
+        width: '940px',
+        maxWidth: '98vw',
+        maxHeight: '96vh',
         overflowY: 'auto',
-        padding: '1.2rem 1.6rem',
+        padding: '1rem 1.4rem',
         position: 'relative',
         border: '2px solid #00f0ff',
         boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
@@ -70,14 +70,14 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '0.8rem',
-            right: '0.8rem',
+            top: '0.6rem',
+            right: '0.6rem',
             background: 'rgba(255, 0, 127, 0.2)',
             border: '1.5px solid #ff007f',
             color: '#fff',
             borderRadius: '50%',
-            width: '36px',
-            height: '36px',
+            width: '34px',
+            height: '34px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -89,29 +89,48 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
           <X size={18} />
         </button>
 
-        <h2 style={{
-          fontSize: '1.8rem',
-          fontFamily: 'Chakra Petch, sans-serif',
-          fontWeight: 900,
-          color: '#00f0ff',
-          marginBottom: '0.2rem',
-          textShadow: '0 0 15px rgba(0,240,255,0.6)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <Sparkles size={24} color="#ffe600" /> 選民拜票換裝館 (COSTUME WARDROBE)
-        </h2>
-        <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          每款換裝皆擁有真實戰力加成效果，選擇最適合您競選風格的戰服！
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              color: '#00f0ff',
+              textShadow: '0 0 12px rgba(0,240,255,0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <Sparkles size={20} color="#ffe600" /> 選民拜票換裝館 (COSTUME WARDROBE)
+            </h2>
+            <p style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '2px' }}>
+              每款換裝皆擁有真實戰力加成效果，選擇最適合您競選風格的戰服！
+            </p>
+          </div>
 
-        {/* Costume Cards Grid (Responsive Grid for Mobile Landscape) */}
+          {/* Scroll Hint Badge for Small Screen Mobile */}
+          <div style={{
+            background: 'rgba(255, 230, 0, 0.12)',
+            border: '1px solid rgba(255, 230, 0, 0.4)',
+            color: '#ffe600',
+            borderRadius: '12px',
+            padding: '3px 10px',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <ArrowDown size={13} /> ↕️ 上下滑動檢視
+          </div>
+        </div>
+
+        {/* Costume Cards 3-Column Parallel Layout (三欄並排) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1rem'
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '0.8rem',
+          marginBottom: '0.5rem'
         }}>
           {COSTUMES_DATA.map(costume => {
             const isSelected = selectedCostume === costume.id;
@@ -123,12 +142,12 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                 onClick={() => onSelectCostume(costume.id)}
                 style={{
                   background: isSelected ? 'rgba(10, 20, 45, 0.95)' : 'rgba(15, 18, 38, 0.65)',
-                  border: isSelected ? `2.5px solid ${costume.accentColor}` : '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '16px',
-                  padding: '1rem',
+                  border: isSelected ? `2px solid ${costume.accentColor}` : '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '14px',
+                  padding: '0.7rem',
                   cursor: 'pointer',
-                  transition: 'all 0.25s',
-                  boxShadow: isSelected ? `0 0 25px ${costume.accentColor}` : 'none',
+                  transition: 'all 0.2s',
+                  boxShadow: isSelected ? `0 0 20px ${costume.accentColor}` : 'none',
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
@@ -139,29 +158,30 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                 {isSelected && (
                   <div style={{
                     position: 'absolute',
-                    top: '10px',
-                    right: '10px',
+                    top: '8px',
+                    right: '8px',
                     background: costume.accentColor,
                     color: '#000',
                     borderRadius: '50%',
-                    width: '24px',
-                    height: '24px',
+                    width: '20px',
+                    height: '20px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: `0 0 10px ${costume.accentColor}`
+                    boxShadow: `0 0 8px ${costume.accentColor}`,
+                    zIndex: 2
                   }}>
-                    <Check size={16} strokeWidth={3} />
+                    <Check size={14} strokeWidth={3} />
                   </div>
                 )}
 
-                {/* Costume Character Standee Image */}
+                {/* Costume Character Standee Image (Compact 95px) */}
                 <div style={{
                   width: '100%',
-                  height: '135px',
-                  borderRadius: '12px',
+                  height: '95px',
+                  borderRadius: '10px',
                   overflow: 'hidden',
-                  marginBottom: '0.6rem',
+                  marginBottom: '0.4rem',
                   background: '#07091e',
                   display: 'flex',
                   alignItems: 'center',
@@ -180,20 +200,20 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
 
                 <div>
                   <h3 style={{
-                    fontSize: '1.2rem',
+                    fontSize: '1rem',
                     fontWeight: 900,
                     color: costume.accentColor,
-                    marginBottom: '0.2rem'
+                    marginBottom: '0.1rem'
                   }}>
                     {costume.name}
                   </h3>
 
                   <p style={{
-                    fontSize: '0.78rem',
+                    fontSize: '0.72rem',
                     color: '#ccc',
-                    lineHeight: 1.35,
-                    marginBottom: '0.6rem',
-                    height: '36px',
+                    lineHeight: 1.25,
+                    marginBottom: '0.4rem',
+                    height: '30px',
                     overflow: 'hidden'
                   }}>
                     {costume.description}
@@ -202,16 +222,16 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                   {/* Skill Tag Badge */}
                   <div style={{
                     background: 'rgba(255,255,255,0.06)',
-                    borderRadius: '8px',
-                    padding: '5px 8px',
+                    borderRadius: '6px',
+                    padding: '3px 6px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '5px',
+                    gap: '4px',
                     border: `1px solid ${costume.accentColor}55`
                   }}>
-                    <Shield size={14} color={costume.accentColor} />
+                    <Shield size={12} color={costume.accentColor} />
                     <span style={{
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       fontWeight: 800,
                       color: costume.accentColor
                     }}>
@@ -227,15 +247,15 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
                     onSelectCostume(costume.id);
                   }}
                   style={{
-                    marginTop: '0.8rem',
+                    marginTop: '0.5rem',
                     width: '100%',
-                    fontSize: '0.85rem',
-                    padding: '0.5rem',
+                    fontSize: '0.78rem',
+                    padding: '0.4rem',
                     background: isSelected ? costume.accentColor : undefined,
                     color: isSelected ? '#000' : undefined
                   }}
                 >
-                  <span>{isSelected ? '✓ 當前穿著中' : '選擇此造型裝備'}</span>
+                  <span>{isSelected ? '✓ 當前裝備中' : '裝備此造型'}</span>
                 </button>
               </div>
             );
