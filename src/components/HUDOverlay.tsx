@@ -61,7 +61,6 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
     onGroundPress();
   };
 
-  // Helper format MM:SS
   const formatTime = (sec: number) => {
     const s = Math.max(0, Math.floor(sec));
     const mins = Math.floor(s / 60);
@@ -79,34 +78,34 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '1.2rem 2rem',
+      padding: '0.8rem 1.5rem',
       zIndex: 10
     }}>
       {/* TOP BAR: Support Rate & Song Progress Bar & Combo Count & Score */}
       <div>
-        {/* SONG PROGRESS BAR (頂端全寬流光歌曲進度條) */}
+        {/* SONG PROGRESS BAR */}
         <div style={{
           width: '100%',
-          maxWidth: '680px',
-          margin: '0 auto 1rem',
+          maxWidth: '560px',
+          margin: '0 auto 0.6rem',
           background: 'rgba(10, 12, 28, 0.85)',
           backdropFilter: 'blur(10px)',
           border: '1.5px solid rgba(0, 240, 255, 0.4)',
           borderRadius: '20px',
-          padding: '6px 16px',
+          padding: '4px 14px',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '10px',
           boxShadow: '0 0 20px rgba(0, 240, 255, 0.3)'
         }}>
-          <Music size={16} color="#ffe600" />
-          <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800, whiteSpace: 'nowrap' }}>
+          <Music size={14} color="#ffe600" />
+          <span style={{ fontSize: '0.75rem', color: '#aaa', fontWeight: 800, whiteSpace: 'nowrap' }}>
             {formatTime(currentTime)}
           </span>
 
           <div style={{
             flex: 1,
-            height: '8px',
+            height: '6px',
             background: 'rgba(0, 0, 0, 0.6)',
             borderRadius: '4px',
             overflow: 'hidden',
@@ -121,7 +120,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             }} />
           </div>
 
-          <span style={{ fontSize: '0.8rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: '0.75rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
             {formatTime(totalDuration)}
           </span>
         </div>
@@ -131,24 +130,24 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           <div 
             className="cyber-panel" 
             style={{ 
-              padding: '0.8rem 1.2rem', 
-              minWidth: '280px',
+              padding: '0.6rem 1rem', 
+              minWidth: '220px',
               border: isHpFlashing ? '2.5px solid #ff0055' : isLowSupport ? '2px solid #ff0055' : '1px solid rgba(0,240,255,0.4)',
               boxShadow: isHpFlashing ? '0 0 30px #ff0055, inset 0 0 20px #ff0055' : isLowSupport ? '0 0 20px #ff0055' : '0 0 10px rgba(0,240,255,0.3)',
               backgroundColor: isHpFlashing ? 'rgba(255, 0, 85, 0.35)' : 'rgba(10, 12, 28, 0.85)',
               transition: 'all 0.15s ease-out'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 900, color: isLowSupport || isHpFlashing ? '#ff0055' : '#00f0ff', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 900, color: isLowSupport || isHpFlashing ? '#ff0055' : '#00f0ff', marginBottom: '4px' }}>
               <span>{isHpFlashing ? '⚠️ 支持度告急!' : '選民支持度 (HP)'}</span>
               <span>{stats.supportRate.toFixed(0)}%</span>
             </div>
 
             <div style={{
               width: '100%',
-              height: '16px',
+              height: '12px',
               background: 'rgba(0,0,0,0.6)',
-              borderRadius: '8px',
+              borderRadius: '6px',
               overflow: 'hidden',
               border: isHpFlashing ? '2px solid #ff0055' : '1px solid rgba(255,255,255,0.2)'
             }}>
@@ -161,57 +160,39 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             </div>
           </div>
 
-          {/* Center: Fever Bar & Combo Count */}
+          {/* Center: Combo Count */}
           <div style={{ textAlign: 'center' }}>
             {stats.combo > 1 && (
               <div style={{
-                fontSize: '3.5rem',
+                fontSize: '2.8rem',
                 fontFamily: 'Chakra Petch, sans-serif',
                 fontWeight: 900,
                 fontStyle: 'italic',
                 background: 'linear-gradient(180deg, #ffe600 0%, #ff007f 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 15px rgba(255,0,127,0.8))',
+                filter: 'drop-shadow(0 0 12px rgba(255,0,127,0.8))',
                 lineHeight: 1
               }}>
-                {stats.combo} <span style={{ fontSize: '1.5rem', fontStyle: 'normal', color: '#fff' }}>COMBO</span>
+                {stats.combo} <span style={{ fontSize: '1.2rem', fontStyle: 'normal', color: '#fff' }}>COMBO</span>
               </div>
             )}
-
-            {/* Fever Bar */}
-            <div style={{ marginTop: '8px', width: '200px', margin: '8px auto 0' }}>
-              <div style={{
-                height: '10px',
-                background: 'rgba(0,0,0,0.6)',
-                borderRadius: '6px',
-                overflow: 'hidden',
-                border: stats.isFeverActive ? '2px solid #ffe600' : '1px solid rgba(255,0,127,0.4)',
-                boxShadow: stats.isFeverActive ? '0 0 20px #ffe600' : 'none'
-              }}>
-                <div style={{
-                  width: `${stats.feverGauge}%`,
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #ff007f, #ffe600)'
-                }} />
-              </div>
-            </div>
           </div>
 
           {/* Right: Score Badge & Pause Button */}
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div className="cyber-panel" style={{ padding: '0.8rem 1.4rem', textAlign: 'right' }}>
-              <p style={{ fontSize: '0.75rem', color: '#aaa', fontWeight: 700, textTransform: 'uppercase' }}>
-                當前得票數 (SCORE)
+          <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+            <div className="cyber-panel" style={{ padding: '0.5rem 1rem', textAlign: 'right' }}>
+              <p style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 700, textTransform: 'uppercase' }}>
+                得票數 (SCORE)
               </p>
               <p style={{
-                fontSize: '2rem',
+                fontSize: '1.5rem',
                 fontFamily: 'Chakra Petch, sans-serif',
                 fontWeight: 900,
                 color: '#ffe600',
-                textShadow: '0 0 15px rgba(255,230,0,0.6)'
+                textShadow: '0 0 12px rgba(255,230,0,0.6)'
               }}>
-                {stats.score.toLocaleString()} <span style={{ fontSize: '0.9rem', color: '#fff' }}>票</span>
+                {stats.score.toLocaleString()} <span style={{ fontSize: '0.8rem', color: '#fff' }}>票</span>
               </p>
             </div>
 
@@ -224,8 +205,8 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
                 border: '2px solid #ff007f',
                 color: '#fff',
                 borderRadius: '12px',
-                width: '50px',
-                height: '50px',
+                width: '44px',
+                height: '44px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -234,19 +215,19 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
                 transition: 'all 0.2s'
               }}
             >
-              <Pause size={26} />
+              <Pause size={22} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* BOTTOM / MOBILE DUAL CONTROLS */}
+      {/* BOTTOM MOBILE TOUCH CONTROLS (適配手機橫屏滿版觸控) */}
       <div style={{
         pointerEvents: 'auto',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        gap: '1.5rem',
+        gap: '1rem',
         width: '100%'
       }}>
         {/* Air Touch Button (Left: D/F) */}
@@ -255,25 +236,25 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           onTouchStart={handleAirTouch}
           style={{
             flex: 1,
-            height: '115px',
-            background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 119, 182, 0.5) 100%)',
-            border: '2.5px solid #00f0ff',
-            borderRadius: '24px',
+            height: '85px',
+            background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(0, 119, 182, 0.55) 100%)',
+            border: '2px solid #00f0ff',
+            borderRadius: '18px',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
+            boxShadow: '0 0 20px rgba(0, 240, 255, 0.5)',
             color: '#fff',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             fontWeight: 900,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1rem',
+            gap: '0.8rem',
             touchAction: 'manipulation'
           }}
         >
-          上軌 (空中投紙/閃避) <span style={{ fontSize: '1rem', opacity: 0.8 }}>(D / F)</span>
+          上軌 (空中投紙/閃避) <span style={{ fontSize: '0.85rem', opacity: 0.85 }}>(D / F)</span>
         </button>
 
         {/* Ground Touch Button (Right: J/K) */}
@@ -282,25 +263,25 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           onTouchStart={handleGroundTouch}
           style={{
             flex: 1,
-            height: '115px',
-            background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.3) 0%, rgba(216, 0, 104, 0.5) 100%)',
-            border: '2.5px solid #ff007f',
-            borderRadius: '24px',
+            height: '85px',
+            background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.35) 0%, rgba(216, 0, 104, 0.55) 100%)',
+            border: '2px solid #ff007f',
+            borderRadius: '18px',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 25px rgba(255, 0, 127, 0.5)',
+            boxShadow: '0 0 20px rgba(255, 0, 127, 0.5)',
             color: '#fff',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             fontWeight: 900,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1rem',
+            gap: '0.8rem',
             touchAction: 'manipulation'
           }}
         >
-          下軌 (地面發紙/閃避) <span style={{ fontSize: '1rem', opacity: 0.8 }}>(J / K)</span>
+          下軌 (地面發紙/閃避) <span style={{ fontSize: '0.85rem', opacity: 0.85 }}>(J / K)</span>
         </button>
       </div>
     </div>

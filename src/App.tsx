@@ -11,6 +11,7 @@ import { BeatmapEditor } from './components/BeatmapEditor';
 import { HUDOverlay } from './components/HUDOverlay';
 import { PauseModal } from './components/PauseModal';
 import { ResultScreen } from './components/ResultScreen';
+import { LandscapePrompt } from './components/LandscapePrompt';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
@@ -120,6 +121,9 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {/* Mobile Landscape Orientation Prompt */}
+      <LandscapePrompt />
+
       {/* 1. START SCREEN */}
       {gameState === 'menu' && (
         <StartScreen
