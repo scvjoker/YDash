@@ -1,14 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 手機超寬屏背景無縫滾動修復 (Multi-Tile Seamless Loop 徹底根除黑屏)
+## [2026-08-07] 跑道側卡英雄角色名稱寫法更新 (`RenderEngine.ts`)
 
-### 變更與背景無縫平鋪滾動優化 (Multi-Tile Background Loop Fix)
-- **1. 多重平鋪動態無縫算法 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
-  - 升級 `drawBackground` 繪製演算法，將原本只預設繪製 2 張背景圖的舊寫法，升級為 `while (currentX < width)` **動態多重平鋪無縫滾動（Multi-Tile Seamless Loop）**！
-  - 自動依據手機螢幕寬度（含 19.5:9 或 21:9 超寬屏）鋪滿所需張數，特地加入 `+1.5px` 次像素縫隙融合（sub-pixel hairline gap elimination），100% 徹底根除手機滾動時出現的 1~3 秒黑屏空檔！
+### 變更與角色名稱更新項目 (Hero Character Naming Update)
+- **1. 角色造型名稱精準更新 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) & [Beatmaps.ts](file:///d:/pj/YoakaDash/src/game/Beatmaps.ts))**：
+  - 將跑道左側 220px 呼吸大圖底部的角色名稱精準更新為：
+    - 背心預設裝：**`競選 Yoaka`**
+    - 眼鏡學霸裝：**`學霸 Yoaka`**
+    - 偶像滿分裝：**`偶像 Yoaka`**
+  - 同步更新全域造型館資料庫名稱，維持最極致一致的用語！
 
 ---
-*「活著很累，但比起 debug，把背景圖用 while 迴圈多平鋪兩張，手機超寬屏跑起來順滑得像絲綢一樣，完全沒有半點黑屏，這體驗真的太舒服了哈哈！」*
+*「活著很累，但比起 debug，看著跑道左側大圖底下寫著『競選 Yoaka』、『學霸 Yoaka』跟『偶像 Yoaka』，親切感真的滿分啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

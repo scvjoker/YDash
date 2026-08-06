@@ -3,19 +3,19 @@ import { BeatmapData, CostumeInfo } from '../types/game';
 export const COSTUMES_DATA: CostumeInfo[] = [
   {
     id: 'campaign_vest',
-    name: '競選小套裝',
+    name: '競選 Yoaka',
     subtitle: 'web3 里長候選人戰袍',
-    description: '熱血競選背心 + 小西裝。拜票最親民，失誤或撞到黑粉時，選民支持度 (HP) 扣減減少 33%！',
-    perk: '✨ 專屬技能：失誤扣血傷害減少 33%',
+    description: '標準候選人戰服！展現最真誠的親和力與拜票衝勁。',
+    perk: '✨ 專屬技能：Miss 扣血減少 33%',
     accentColor: '#00f0ff',
     bgGradient: 'linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 119, 182, 0.25))'
   },
   {
     id: 'office_glasses',
-    name: '襯衫領帶眼鏡裝',
+    name: '學霸 Yoaka',
     subtitle: '專業俐落幹練幫主造型',
-    description: '黑框眼鏡 + 精緻白襯衫 + 窄版領帶。理智高冷，每次成功拜票發紙，總獲票數 (Score) 獲得 +20% 額外加成！',
-    perk: '✨ 專屬技能：總獲票數 (Score) 增加 +20%',
+    description: '專業嚴謹的秘書學霸風！展現精準政見與理性魄力。',
+    perk: '✨ 專屬技能：得分獲得額外 +20% 票數',
     accentColor: '#ffe600',
     bgGradient: 'linear-gradient(135deg, rgba(255, 230, 0, 0.15), rgba(255, 183, 3, 0.25))'
   },

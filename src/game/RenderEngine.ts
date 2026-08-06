@@ -402,16 +402,16 @@ export class RenderEngine {
     const cardH = baseH * breathScale;
 
     let accentColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
-    let costumeName = '👑 背心裝';
+    let costumeName = '競選 Yoaka';
     let targetImg = this.yoakaDefaultImage || this.yoakaMainImage;
 
     if (costume === 'office_glasses') {
       accentColor = '#ffe600';
-      costumeName = '👓 秘書裝';
+      costumeName = '學霸 Yoaka';
       targetImg = this.yoakaOfficeImage || this.yoakaMainImage;
     } else if (costume === 'kpop_idol') {
       accentColor = '#ff007f';
-      costumeName = '✨ 偶像裝';
+      costumeName = '偶像 Yoaka';
       targetImg = this.yoakaKpopImage || this.yoakaMainImage;
     }
 
