@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Wand2, Play, Music, Sparkles, AlertCircle } from 'lucide-react';
+import { X, Upload, Wand2, Play, Music, AlertCircle } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
 
@@ -35,7 +35,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       const decodedBuf = await tempCtx.decodeAudioData(arrayBuffer);
       setAudioBuffer(decodedBuf);
 
-      // Pass the uploaded audio buffer to AudioEngine so trial gameplay plays user's exact song!
+      // Pass custom audio buffer to AudioEngine for 100% custom song playback!
       audioEngine.setCustomAudioBuffer(decodedBuf);
 
       // Auto capture notes
@@ -52,7 +52,6 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     if (!audioBuffer) return;
     setIsAnalyzing(true);
     setTimeout(() => {
-      // Re-set custom audio buffer to be 100% sure
       audioEngine.setCustomAudioBuffer(audioBuffer);
       const notes = audioEngine.detectBeatsFromBuffer(audioBuffer, difficulty);
       setGeneratedNotes(notes);
@@ -63,7 +62,6 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
   const handleStartPlay = () => {
     if (generatedNotes.length === 0) return;
 
-    // Ensure AudioEngine holds user's custom song buffer!
     if (audioBuffer) {
       audioEngine.setCustomAudioBuffer(audioBuffer);
     }
@@ -88,18 +86,20 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.9)',
+      backgroundColor: 'rgba(7, 8, 20, 0.94)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '2rem'
+      padding: '0.8rem'
     }}>
       <div className="cyber-panel" style={{
         width: '820px',
-        maxWidth: '95vw',
-        padding: '2.2rem',
+        maxWidth: '96vw',
+        maxHeight: '96vh',
+        overflowY: 'auto',
+        padding: '1rem 1.4rem',
         position: 'relative',
         border: '2px solid #ffe600',
         boxShadow: '0 0 35px rgba(255, 230, 0, 0.4)'
@@ -107,55 +107,55 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
         {/* Close Button */}
         <button
           onClick={() => {
-            // Clear custom audio on close if user returns to main
             audioEngine.clearCustomAudioBuffer();
             onClose();
           }}
           style={{
             position: 'absolute',
-            top: '1.2rem',
-            right: '1.2rem',
+            top: '0.6rem',
+            right: '0.6rem',
             background: 'rgba(255, 0, 127, 0.2)',
             border: '1.5px solid #ff007f',
             color: '#fff',
             borderRadius: '50%',
-            width: '40px',
-            height: '40px',
+            width: '34px',
+            height: '34px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 0 15px rgba(255, 0, 127, 0.5)'
+            boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)',
+            zIndex: 10
           }}
         >
-          <X size={22} />
+          <X size={18} />
         </button>
 
         <h2 style={{
-          fontSize: '2.2rem',
+          fontSize: '1.6rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
           color: '#ffe600',
-          marginBottom: '0.4rem',
-          textShadow: '0 0 15px rgba(255,230,0,0.6)'
+          marginBottom: '0.2rem',
+          textShadow: '0 0 12px rgba(255,230,0,0.6)'
         }}>
           ⚡ A+B 智慧譜面創作者 (BEAT PRODUCER)
         </h2>
-        <p style={{ color: '#aaa', fontSize: '1rem', marginBottom: '1.8rem' }}>
+        <p style={{ color: '#aaa', fontSize: '0.82rem', marginBottom: '1rem' }}>
           上傳您最喜愛的 MP3 歌曲，AI 演算法自動抓拍並生成專屬音遊譜面！
         </p>
 
-        {/* Upload Audio File Area */}
+        {/* Upload Audio File Area (Compact for Mobile) */}
         <div
           onClick={() => fileInputRef.current?.click()}
           style={{
             border: '2px dashed #00f0ff',
-            borderRadius: '16px',
-            padding: '2rem',
+            borderRadius: '14px',
+            padding: '1rem 1.2rem',
             textAlign: 'center',
             cursor: 'pointer',
             backgroundColor: 'rgba(0, 240, 255, 0.05)',
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             transition: 'all 0.25s'
           }}
         >
@@ -167,23 +167,23 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             style={{ display: 'none' }}
           />
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <Upload size={38} color="#00f0ff" />
-            <p style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <Upload size={28} color="#00f0ff" />
+            <p style={{ fontSize: '0.95rem', fontWeight: 900, color: '#fff' }}>
               {audioFile ? `已選擇音樂: ${audioFile.name}` : '點擊或拖曳上傳 MP3 / WAV 歌曲檔'}
             </p>
-            <p style={{ fontSize: '0.85rem', color: '#888' }}>
-              支援所有主流音訊格式，系統將自動解析節奏並配對選民音符
+            <p style={{ fontSize: '0.75rem', color: '#888' }}>
+              支援主流音訊格式，自動解析節奏並配對選民音符
             </p>
           </div>
         </div>
 
-        {/* Song Info & Difficulty Settings */}
+        {/* Song Info & Difficulty Settings (Mobile Adaptive Layout) */}
         {audioBuffer && (
-          <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '1.2rem', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span style={{ color: '#ffe600', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Music size={18} /> 歌曲名稱 (TITLE):
+          <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '12px', padding: '0.8rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Music size={15} /> 歌曲名稱 (TITLE):
               </span>
               <input
                 type="text"
@@ -192,37 +192,37 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                 style={{
                   background: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '8px',
+                  borderRadius: '6px',
                   color: '#fff',
-                  padding: '4px 12px',
-                  fontSize: '0.95rem',
+                  padding: '3px 10px',
+                  fontSize: '0.85rem',
                   fontWeight: 800,
-                  width: '280px',
+                  width: '220px',
                   textAlign: 'right'
                 }}
               />
             </div>
 
             {/* Difficulty Pills Switch */}
-            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-              <span style={{ color: '#aaa', fontWeight: 800, fontSize: '0.9rem' }}>抓拍密度 (DIFFICULTY):</span>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ color: '#aaa', fontWeight: 800, fontSize: '0.8rem' }}>抓拍密度:</span>
               {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
                 <button
                   key={diff}
                   onClick={() => setDifficulty(diff)}
                   style={{
                     flex: 1,
-                    padding: '0.55rem',
+                    padding: '0.4rem',
                     background: difficulty === diff ? '#00f0ff' : 'rgba(255,255,255,0.05)',
                     color: difficulty === diff ? '#000' : '#fff',
-                    border: difficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: '8px',
+                    border: difficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '6px',
                     fontWeight: 900,
-                    fontSize: '0.9rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer'
                   }}
                 >
-                  {diff} Mode
+                  {diff}
                 </button>
               ))}
 
@@ -233,17 +233,17 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                   background: 'rgba(255, 0, 127, 0.3)',
                   border: '1px solid #ff007f',
                   color: '#fff',
-                  borderRadius: '8px',
-                  padding: '0.55rem 1rem',
+                  borderRadius: '6px',
+                  padding: '0.4rem 0.8rem',
                   fontWeight: 900,
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '4px'
                 }}
               >
-                <Wand2 size={16} /> 重新抓拍
+                <Wand2 size={14} /> 重新抓拍
               </button>
             </div>
           </div>
@@ -255,21 +255,21 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             <div style={{
               background: 'rgba(0, 240, 255, 0.1)',
               border: '1px solid rgba(0, 240, 255, 0.3)',
-              borderRadius: '12px',
-              padding: '0.8rem',
-              marginBottom: '1.5rem',
+              borderRadius: '10px',
+              padding: '0.5rem',
+              marginBottom: '1rem',
               display: 'flex',
               justifyContent: 'space-around',
               alignItems: 'center'
             }}>
               <div>
-                <span style={{ fontSize: '0.85rem', color: '#aaa' }}>抓拍音符總數: </span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffe600' }}>{generatedNotes.length} 個 Note</span>
+                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>抓拍音符: </span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffe600' }}>{generatedNotes.length} 個 Note</span>
               </div>
 
               <div>
-                <span style={{ fontSize: '0.85rem', color: '#aaa' }}>音訊時長: </span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#00f0ff' }}>
+                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>音訊時長: </span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#00f0ff' }}>
                   {audioBuffer ? `${Math.floor(audioBuffer.duration)} 秒` : '--'}
                 </span>
               </div>
@@ -278,17 +278,17 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             <button
               className="muse-btn"
               onClick={handleStartPlay}
-              style={{ width: '100%', fontSize: '1.5rem', padding: '1.1rem' }}
+              style={{ width: '100%', fontSize: '1.2rem', padding: '0.8rem' }}
             >
-              <span><Play fill="#fff" size={26} /> ▶ 試玩自製譜面 (PLAY MAP - 使用上傳曲目)</span>
+              <span><Play fill="#fff" size={20} /> ▶ 試玩自製譜面 (PLAY MAP - 使用上傳曲目)</span>
             </button>
           </div>
         )}
 
         {/* Info Hint */}
         {!audioBuffer && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', color: '#888', fontSize: '0.9rem', marginTop: '1rem' }}>
-            <AlertCircle size={16} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', color: '#888', fontSize: '0.8rem', marginTop: '0.6rem' }}>
+            <AlertCircle size={14} />
             <span>請上傳音樂檔案解鎖 ▶ 試玩自製譜面功能</span>
           </div>
         )}
