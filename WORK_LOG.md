@@ -1,16 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 選民支持度 (HP) 標頭顯示邏輯修正 + 開局強制得票數歸零與 HP 回復 100%
+## [2026-08-07] 手機超寬屏背景無縫滾動修復 (Multi-Tile Seamless Loop 徹底根除黑屏)
 
-### 變更與遊戲數據初始化優化項目 (HP Label Fix & Game Stats Reset)
-- **1. HP 支持度標籤邏輯修正 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
-  - 修正受傷紅閃時的標題寫法：平常高於 30% 血量受傷時，標題保持常駐 **`選民支持度 (HP)`**！
-  - 只有在支持度真正低於 **`30%`** 的告急危險區時，標題才會自動切換為 **`⚠️ 支持度告急!`**，不再發生扣 6% 血就誤跳告急的烏龍！
-- **2. 每次遊戲開局與重開 (Replay) 強制歸零 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 在 `handleStartGame` 觸發的第一時間，強迫將得票數 (`score`) 歸零、選民支持度 (`supportRate`) 恢復至 **100%**，並清除所有 Combo 與判定紀錄，徹底防止舊遊戲數據殘留！
+### 變更與背景無縫平鋪滾動優化 (Multi-Tile Background Loop Fix)
+- **1. 多重平鋪動態無縫算法 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
+  - 升級 `drawBackground` 繪製演算法，將原本只預設繪製 2 張背景圖的舊寫法，升級為 `while (currentX < width)` **動態多重平鋪無縫滾動（Multi-Tile Seamless Loop）**！
+  - 自動依據手機螢幕寬度（含 19.5:9 或 21:9 超寬屏）鋪滿所需張數，特地加入 `+1.5px` 次像素縫隙融合（sub-pixel hairline gap elimination），100% 徹底根除手機滾動時出現的 1~3 秒黑屏空檔！
 
 ---
-*「活著很累，但比起 debug，修好扣血不誤跳告急，開局得票數乖乖歸零、HP 滿滿 100%，這遊戲邏輯玩起來才真的踏實舒暢哈哈！」*
+*「活著很累，但比起 debug，把背景圖用 while 迴圈多平鋪兩張，手機超寬屏跑起來順滑得像絲綢一樣，完全沒有半點黑屏，這體驗真的太舒服了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

@@ -109,7 +109,7 @@ export class RenderEngine {
 
     ctx.clearRect(0, 0, width, height);
 
-    // 1. Draw Parallax Background
+    // 1. Draw Seamless Parallax Background Loop (Multi-Tile Seamless for Ultra-wide Mobile)
     this.drawBackground(ctx, width, height, currentTime, stats.isFeverActive);
 
     // Dynamic Responsive Positions
@@ -216,7 +216,7 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    // 9. DRAW COMBO COUNT AT SAME Y-ROW (height * 0.24), RIGHT-ALIGNED (width * 0.85)!
+    // 9. DRAW COMBO COUNT AT SAME Y-ROW (height * 0.24), RIGHT-ALIGNED (width * 0.88)!
     if (stats.combo > 1) {
       ctx.save();
       ctx.textAlign = 'right';
@@ -253,12 +253,22 @@ export class RenderEngine {
     isFever: boolean
   ): void {
     if (this.bgImage && this.bgImage.complete && this.bgImage.naturalWidth !== 0) {
-      const speed = 80;
-      const bgW = this.bgImage.width * (height / this.bgImage.height);
+      const speed = 85;
+      const naturalW = this.bgImage.naturalWidth || this.bgImage.width;
+      const naturalH = this.bgImage.naturalHeight || this.bgImage.height;
+
+      // Aspect-ratio scaled background width
+      const bgW = Math.max(10, naturalW * (height / naturalH));
+      
+      // Continuous modulo offset
       const scrollX = (time * speed) % bgW;
 
-      ctx.drawImage(this.bgImage, -scrollX, 0, bgW, height);
-      ctx.drawImage(this.bgImage, bgW - scrollX, 0, bgW, height);
+      // Tile images dynamically until full screen width + buffer is filled (100% Seamless Loop!)
+      let currentX = -scrollX;
+      while (currentX < width) {
+        ctx.drawImage(this.bgImage, currentX, 0, bgW + 1.5, height); // +1.5px eliminates subpixel gaps on mobile
+        currentX += bgW;
+      }
 
       ctx.fillStyle = isFever ? 'rgba(40, 0, 60, 0.4)' : 'rgba(5, 6, 18, 0.55)';
       ctx.fillRect(0, 0, width, height);
@@ -294,7 +304,7 @@ export class RenderEngine {
     scale: number
   ): void {
     ctx.save();
-
+    
     ctx.strokeStyle = isFever ? '#ff007f' : '#00f0ff';
     ctx.lineWidth = Math.max(2.5, 4.5 * scale);
     ctx.shadowColor = ctx.strokeStyle;
@@ -392,16 +402,16 @@ export class RenderEngine {
     const cardH = baseH * breathScale;
 
     let accentColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
-    let costumeName = '競選Yoaka';
+    let costumeName = '👑 背心裝';
     let targetImg = this.yoakaDefaultImage || this.yoakaMainImage;
 
     if (costume === 'office_glasses') {
       accentColor = '#ffe600';
-      costumeName = '學霸Yoaka';
+      costumeName = '👓 秘書裝';
       targetImg = this.yoakaOfficeImage || this.yoakaMainImage;
     } else if (costume === 'kpop_idol') {
       accentColor = '#ff007f';
-      costumeName = 'KPOP Yoaka';
+      costumeName = '✨ 偶像裝';
       targetImg = this.yoakaKpopImage || this.yoakaMainImage;
     }
 
