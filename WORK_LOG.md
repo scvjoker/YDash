@@ -1,16 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] BeatProducer (A+B 創作者) 右上角實裝全螢幕 (Fullscreen) 按鈕 + 上下滑動提示標籤
+## [2026-08-07] 倒數秒數與 Resume 緩衝黃色文字 Y 軸位置調降 (`height * 0.24` 防 HUD 遮擋)
 
-### 變更與 BeatProducer 手機 UX 優化項目 (BeatProducer Fullscreen & Scroll Hint)
-- **1. BeatProducer 右上角新增全螢幕 (Fullscreen) 按鈕 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
-  - 在 A+B 創作者彈窗右上角關閉鈕旁，實裝亮金霓虹 **` Maximize 全螢幕`** 按鈕。
-  - 當手機玩家選取 MP3 檔案被瀏覽器自動退回非全螢幕時，可隨時點擊一鍵恢復 100% 全螢幕體驗！
-- **2. 頂端新增 `↕️ 上下滑動檢視` 提示標籤**：
-  - 在面板標題旁加入醒目的極光提示標籤 `↕️ 上下滑動檢視`，指引手機玩家滑動頁面點擊 **`▶ 試玩自製譜面 (PLAY MAP)`**！
+### 變更與倒數繪製位置優化項目 (Countdown Text Y-Position Adjustment)
+- **1. 倒數秒數繪製位置優化 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) & [GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 將開局與點擊 Resume 暫停解除時的 `⚡ 準備拜票！倒數 5...4...3...2...1 秒 ⚡` 黃色醒目文字 Y 軸繪製高度由原本的 `height * 0.18` 調降至最空曠的 **`height * 0.24`**！
+  - 完美的介於頂端單行 HUD 面板與上軌 (`height * 0.35`) 之間的黃金黃區，100% 絕不被進度條或 HP 欄位遮擋，手機與電腦雙平台皆看得清清楚楚！
 
 ---
-*「活著很累，但比起 debug，選完檔案按一下右上角的全螢幕按鈕立馬滿版，還有上下滑動提示，這手機操作感太流暢便利了哈哈！」*
+*「活著很累，但比起 debug，把倒數黃字往下降到黃金位，畫面看得清清楚楚完全不擋，這細節改完真的太舒暢了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

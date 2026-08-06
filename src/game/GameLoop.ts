@@ -83,7 +83,6 @@ export class GameLoop {
   public resume(): void {
     if (!this.isPausedState) return;
 
-    // Trigger 5.0s Unpause Lead-In Buffer Countdown
     this.resumeCountdown = 5;
     if (this.resumeTimerId) clearInterval(this.resumeTimerId);
 
@@ -185,7 +184,7 @@ export class GameLoop {
       }
 
       const hitX = this.renderEngine['canvas'].width * 0.22;
-      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
+      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
       const hitText = closestNote.isDual ? `⚡ DUAL! +${scoreAdd} 票` : `+${scoreAdd} 票`;
       this.renderEngine.triggerHitEffect(hitX, hitY, hitText, judgement);
 
@@ -211,7 +210,7 @@ export class GameLoop {
 
     const currentTime = audioEngine.getHardwareTime();
 
-    // Render 5.0s Lead-In / Unpause Countdown Text over canvas
+    // Render 5.0s Lead-In / Unpause Countdown Text (Adjusted Y to h * 0.24)
     if (this.resumeCountdown > 0) {
       this.renderEngine.render(
         currentTime,
@@ -226,17 +225,18 @@ export class GameLoop {
       const ctx = this.renderEngine['ctx'];
       const w = this.renderEngine['canvas'].width;
       const h = this.renderEngine['canvas'].height;
+      const scale = Math.min(1.25, Math.max(0.45, h / 720));
 
       ctx.save();
       ctx.fillStyle = 'rgba(7, 8, 20, 0.65)';
       ctx.fillRect(0, 0, w, h);
 
-      ctx.font = '900 64px "Chakra Petch", sans-serif';
+      ctx.font = `900 ${Math.floor(34 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 35;
-      ctx.fillText(`⚡ 準備續走拜票！倒數 ${this.resumeCountdown} 秒 ⚡`, w / 2, h * 0.5);
+      ctx.shadowBlur = 20 * scale;
+      ctx.fillText(`⚡ 準備續走拜票！倒數 ${this.resumeCountdown} 秒 ⚡`, w / 2, h * 0.24);
       ctx.restore();
 
       this.animFrameId = requestAnimationFrame(this.loop);
@@ -256,7 +256,7 @@ export class GameLoop {
             audioEngine.playSFX('error');
 
             const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
             this.renderEngine.triggerHitEffect(hitX, hitY, `❌ HIT!`, 'damage');
 
             if (this.stats.supportRate <= 0) {
@@ -266,7 +266,7 @@ export class GameLoop {
             }
           } else {
             const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
             this.renderEngine.triggerHitEffect(hitX, hitY, `✨ DODGE!`, 'dodge');
           }
           if (this.onStatsChange) this.onStatsChange({ ...this.stats });
@@ -284,7 +284,6 @@ export class GameLoop {
         this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
         audioEngine.playSFX('error');
 
-        // Trigger Red Alarm Vignette Flash!
         this.renderEngine.triggerDamageEffect();
 
         if (this.stats.supportRate <= 0) {

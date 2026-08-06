@@ -142,7 +142,7 @@ export class RenderEngine {
     // 2. Draw Dual Tracks
     this.drawTracks(ctx, width, height, airY, groundY, currentTime, stats.isFeverActive, scale);
 
-    // 3. Draw Clean Target Hit Zones (Scaled for Mobile)
+    // 3. Draw Clean Target Hit Zones
     this.drawHitZone(ctx, hitX, airY, inputState.airActive, '#00f0ff', scale);
     this.drawHitZone(ctx, hitX, groundY, inputState.groundActive, '#ff007f', scale);
 
@@ -151,7 +151,7 @@ export class RenderEngine {
       this.drawGoldenLaserBeam(ctx, hitX, airY, groundY, scale);
     }
 
-    // 4. Draw Active Notes & Dual Beams (Scaled for Mobile)
+    // 4. Draw Active Notes & Dual Beams
     const activeDualNotes: { [time: number]: { airX?: number; groundX?: number } } = {};
 
     for (const note of notes) {
@@ -179,11 +179,11 @@ export class RenderEngine {
       }
     });
 
-    // 5. Draw Borderless Hero Side Standee with Breathing Pulse (Scaled for Mobile)
+    // 5. Draw Borderless Hero Side Standee with Breathing Pulse
     const sideCardX = Math.max(65 * scale, hitX - 160 * scale);
     this.drawHeroSideCard2X(ctx, sideCardX, this.yoakaCurrentY, costume, currentTime, activeTrack, scale);
 
-    // 6. Draw Hero Runner Stage (Scaled for Mobile)
+    // 6. Draw Hero Runner Stage
     this.drawYoaka(ctx, hitX, this.yoakaCurrentY, costume, currentTime, inputState.airActive || inputState.groundActive, stats.isFeverActive, activeTrack, scale);
 
     // 7. Screen Flash Overlays
@@ -203,16 +203,16 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    // 8. Start & Unpause Buffer Countdown Text
+    // 8. Start & Unpause Buffer Countdown Text (Adjusted Y to height * 0.24 to prevent HUD overlap!)
     if (currentTime < 4.8) {
       const countdown = Math.ceil(5.0 - currentTime);
       ctx.save();
-      ctx.font = `900 ${Math.floor(40 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(34 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 25 * scale;
-      ctx.fillText(`⚡ 準備拜票！音符將在 ${countdown} 秒後抵達 ⚡`, width / 2, height * 0.18);
+      ctx.shadowBlur = 20 * scale;
+      ctx.fillText(`⚡ 準備拜票！音符將在 ${countdown} 秒後抵達 ⚡`, width / 2, height * 0.24);
       ctx.restore();
     }
 
@@ -353,7 +353,6 @@ export class RenderEngine {
     ctx.restore();
   }
 
-  // Borderless Hero Standee with Breathing Pulse Motion (Scaled for Mobile)
   private drawHeroSideCard2X(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -423,7 +422,6 @@ export class RenderEngine {
     const isObstacle = note.type === 'obstacle' || note.entity.startsWith('hater');
 
     if (isObstacle) {
-      // Hater Obstacle Dynamically Scaled for Mobile Track
       const size = 300 * scale;
       const targetHaterImg = note.entity === 'hater_dog_board' ? this.haterDogImage : this.haterSharkImage;
 
