@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Check, Shield, Zap, Sparkles } from 'lucide-react';
 import { CostumeId } from '../types/game';
 import { COSTUMES_DATA } from '../game/Beatmaps';
 
@@ -14,22 +14,53 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
   onSelectCostume,
   onClose
 }) => {
+  const [imagesMap, setImagesMap] = useState<{ [id: string]: string }>({});
+
+  useEffect(() => {
+    COSTUMES_DATA.forEach(costume => {
+      let candidates: string[] = ['/yoaka_main.jpg'];
+      if (costume.id === 'office_glasses') {
+        candidates = ['/assets/yoaka_office.png', '/assets/yoaka_office.jpg', '/yoaka_office.png', '/yoaka_office.jpg', '/yoaka_main.jpg'];
+      } else if (costume.id === 'kpop_idol') {
+        candidates = ['/assets/yoaka_kpop.png', '/assets/yoaka_kpop.jpg', '/yoaka_kpop.png', '/yoaka_kpop.jpg', '/yoaka_main.jpg'];
+      } else {
+        candidates = ['/assets/yoaka_default.png', '/assets/yoaka_default.jpg', '/yoaka_default.png', '/yoaka_default.jpg', '/yoaka_main.jpg'];
+      }
+
+      let index = 0;
+      const testNext = () => {
+        if (index < candidates.length) {
+          const url = candidates[index++];
+          const img = new Image();
+          img.onload = () => {
+            setImagesMap(prev => ({ ...prev, [costume.id]: url }));
+          };
+          img.onerror = () => testNext();
+          img.src = url;
+        }
+      };
+      testNext();
+    });
+  }, []);
+
   return (
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.88)',
+      backgroundColor: 'rgba(7, 8, 20, 0.92)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '2rem'
+      padding: '1rem'
     }}>
       <div className="cyber-panel" style={{
         width: '900px',
-        maxWidth: '95vw',
-        padding: '2.2rem',
+        maxWidth: '96vw',
+        maxHeight: '94vh',
+        overflowY: 'auto',
+        padding: '1.2rem 1.6rem',
         position: 'relative',
         border: '2px solid #00f0ff',
         boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
@@ -39,137 +70,173 @@ export const CostumeModal: React.FC<CostumeModalProps> = ({
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '1.2rem',
-            right: '1.2rem',
+            top: '0.8rem',
+            right: '0.8rem',
             background: 'rgba(255, 0, 127, 0.2)',
             border: '1.5px solid #ff007f',
             color: '#fff',
             borderRadius: '50%',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            boxShadow: '0 0 15px rgba(255, 0, 127, 0.5)'
+            boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)',
+            zIndex: 10
           }}
         >
-          <X size={22} />
+          <X size={18} />
         </button>
 
         <h2 style={{
-          fontSize: '2.4rem',
+          fontSize: '1.8rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
           color: '#00f0ff',
-          marginBottom: '0.4rem',
-          textShadow: '0 0 15px rgba(0,240,255,0.6)'
+          marginBottom: '0.2rem',
+          textShadow: '0 0 15px rgba(0,240,255,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          👗 YOAKA 競選換裝試衣間
+          <Sparkles size={24} color="#ffe600" /> 選民拜票換裝館 (COSTUME WARDROBE)
         </h2>
-        <p style={{ color: '#aaa', fontSize: '1.05rem', marginBottom: '2rem' }}>
-          選擇不同拜票造型，獲得專屬得票與選民支持度技能加成！
+        <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '1rem' }}>
+          每款換裝皆擁有真實戰力加成效果，選擇最適合您競選風格的戰服！
         </p>
 
-        {/* Costume Cards Grid */}
+        {/* Costume Cards Grid (Responsive Grid for Mobile Landscape) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '1rem',
+          marginBottom: '1rem'
         }}>
           {COSTUMES_DATA.map(costume => {
             const isSelected = selectedCostume === costume.id;
-
-            let iconSymbol = '🎽';
-            if (costume.id === 'office_glasses') iconSymbol = '👔';
-            if (costume.id === 'kpop_idol') iconSymbol = '✨';
+            const imgSrc = imagesMap[costume.id] || '/yoaka_main.jpg';
 
             return (
               <div
                 key={costume.id}
                 onClick={() => onSelectCostume(costume.id)}
                 style={{
-                  background: isSelected ? costume.bgGradient : 'rgba(255, 255, 255, 0.03)',
-                  border: isSelected ? `2.5px solid ${costume.accentColor}` : '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '20px',
-                  padding: '1.8rem 1.4rem',
+                  background: isSelected ? 'rgba(10, 20, 45, 0.95)' : 'rgba(15, 18, 38, 0.65)',
+                  border: isSelected ? `2.5px solid ${costume.accentColor}` : '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s',
+                  boxShadow: isSelected ? `0 0 25px ${costume.accentColor}` : 'none',
+                  position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  transition: 'all 0.25s',
-                  boxShadow: isSelected ? `0 0 25px ${costume.accentColor}` : 'none'
+                  justifyContent: 'space-between'
                 }}
               >
+                {/* Active Check Badge */}
                 {isSelected && (
                   <div style={{
                     position: 'absolute',
-                    top: '12px',
-                    right: '12px',
+                    top: '10px',
+                    right: '10px',
                     background: costume.accentColor,
                     color: '#000',
                     borderRadius: '50%',
-                    width: '28px',
-                    height: '28px',
+                    width: '24px',
+                    height: '24px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 0 10px currentColor'
+                    boxShadow: `0 0 10px ${costume.accentColor}`
                   }}>
-                    <Check size={18} strokeWidth={3} />
+                    <Check size={16} strokeWidth={3} />
                   </div>
                 )}
 
-                <div>
-                  <div style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '1rem' }}>
-                    {iconSymbol}
-                  </div>
+                {/* Costume Character Standee Image */}
+                <div style={{
+                  width: '100%',
+                  height: '135px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  marginBottom: '0.6rem',
+                  background: '#07091e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <img
+                    src={imgSrc}
+                    alt={costume.name}
+                    style={{
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </div>
 
+                <div>
                   <h3 style={{
-                    fontSize: '1.45rem',
+                    fontSize: '1.2rem',
                     fontWeight: 900,
-                    color: '#fff',
-                    textAlign: 'center',
-                    marginBottom: '0.3rem'
+                    color: costume.accentColor,
+                    marginBottom: '0.2rem'
                   }}>
                     {costume.name}
                   </h3>
 
                   <p style={{
-                    fontSize: '0.85rem',
-                    color: costume.accentColor,
-                    fontWeight: 800,
-                    textAlign: 'center',
-                    marginBottom: '1rem'
-                  }}>
-                    {costume.subtitle}
-                  </p>
-
-                  <p style={{
-                    fontSize: '0.9rem',
+                    fontSize: '0.78rem',
                     color: '#ccc',
-                    lineHeight: 1.5,
-                    marginBottom: '1.2rem'
+                    lineHeight: 1.35,
+                    marginBottom: '0.6rem',
+                    height: '36px',
+                    overflow: 'hidden'
                   }}>
                     {costume.description}
                   </p>
+
+                  {/* Skill Tag Badge */}
+                  <div style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    borderRadius: '8px',
+                    padding: '5px 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    border: `1px solid ${costume.accentColor}55`
+                  }}>
+                    <Shield size={14} color={costume.accentColor} />
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: costume.accentColor
+                    }}>
+                      技能: {costume.perk}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Perk Badge Tag */}
-                <div style={{
-                  background: isSelected ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.3)',
-                  border: `1.5px solid ${costume.accentColor}`,
-                  borderRadius: '12px',
-                  padding: '0.65rem 0.8rem',
-                  textAlign: 'center',
-                  color: '#ffe600',
-                  fontWeight: 900,
-                  fontSize: '0.88rem',
-                  boxShadow: isSelected ? '0 0 12px rgba(255,230,0,0.4)' : 'none'
-                }}>
-                  {costume.perk}
-                </div>
+                <button
+                  className={isSelected ? 'muse-btn' : 'muse-btn muse-btn-cyan'}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onSelectCostume(costume.id);
+                  }}
+                  style={{
+                    marginTop: '0.8rem',
+                    width: '100%',
+                    fontSize: '0.85rem',
+                    padding: '0.5rem',
+                    background: isSelected ? costume.accentColor : undefined,
+                    color: isSelected ? '#000' : undefined
+                  }}
+                >
+                  <span>{isSelected ? '✓ 當前穿著中' : '選擇此造型裝備'}</span>
+                </button>
               </div>
             );
           })}

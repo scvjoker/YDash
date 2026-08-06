@@ -86,7 +86,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           position: 'absolute',
           left: `${45 + Math.random() * 45}%`,
           top: '20%',
-          fontSize: '2.2rem',
+          fontSize: '2rem',
           animation: 'tissueRain 2.5s ease-out forwards',
           pointerEvents: 'none',
           zIndex: 5
@@ -100,42 +100,42 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         onClick={handleFullscreen}
         style={{
           position: 'absolute',
-          top: '1.2rem',
-          right: '1.5rem',
+          top: '0.8rem',
+          right: '1rem',
           zIndex: 10,
           background: 'rgba(255, 230, 0, 0.15)',
           border: '1.5px solid #ffe600',
           color: '#ffe600',
-          borderRadius: '20px',
-          padding: '6px 16px',
+          borderRadius: '16px',
+          padding: '4px 12px',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
-          fontSize: '0.88rem',
+          fontSize: '0.78rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '5px',
           cursor: 'pointer',
-          boxShadow: '0 0 15px rgba(255,230,0,0.4)'
+          boxShadow: '0 0 12px rgba(255,230,0,0.4)'
         }}
       >
-        <Maximize size={16} /> 全螢幕 (FULLSCREEN)
+        <Maximize size={14} /> 全螢幕
       </button>
 
       {/* LEFT HALF (50vw): Borderless Clean Hero Character Artwork Showcase */}
       <div style={{
-        width: '50vw',
+        width: '45vw',
         height: '100vh',
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '1rem',
+        padding: '0.5rem',
         zIndex: 2
       }}>
         <div className="float-animation" style={{
           position: 'relative',
           width: '100%',
-          height: '90vh',
+          height: '88vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -144,32 +144,32 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             src={imgSrc}
             alt="Yoaka Hero Character Artwork"
             style={{
-              maxHeight: '86vh',
-              maxWidth: '45vw',
+              maxHeight: '82vh',
+              maxWidth: '42vw',
               objectFit: 'contain',
-              borderRadius: '24px',
-              filter: `drop-shadow(0 0 30px ${costumeObj.accentColor}) contrast(1.06) brightness(1.05)`
+              borderRadius: '20px',
+              filter: `drop-shadow(0 0 25px ${costumeObj.accentColor}) contrast(1.05) brightness(1.05)`
             }}
           />
 
           <div style={{
             position: 'absolute',
-            bottom: '15px',
+            bottom: '10px',
             background: 'rgba(10, 12, 28, 0.85)',
             backdropFilter: 'blur(10px)',
             border: `1.5px solid ${costumeObj.accentColor}`,
-            borderRadius: '20px',
-            padding: '6px 20px',
+            borderRadius: '18px',
+            padding: '4px 16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            boxShadow: `0 0 20px ${costumeObj.accentColor}`
+            gap: '8px',
+            boxShadow: `0 0 15px ${costumeObj.accentColor}`
           }}>
             <span style={{
               color: costumeObj.accentColor,
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
-              fontSize: '1rem'
+              fontSize: '0.9rem'
             }}>
               👑 {costumeObj.name}
             </span>
@@ -177,9 +177,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               background: costumeObj.accentColor,
               color: '#000',
               fontWeight: 900,
-              padding: '3px 12px',
-              borderRadius: '14px',
-              fontSize: '0.75rem'
+              padding: '2px 10px',
+              borderRadius: '12px',
+              fontSize: '0.7rem'
             }}>
               ACTIVE
             </span>
@@ -187,31 +187,31 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
       </div>
 
-      {/* RIGHT HALF (50vw): Mobile-Adaptive Auto-Fitting Scrollable Container */}
+      {/* RIGHT HALF (55vw): Mobile-Adaptive Auto-Fitting Compact Menu Container */}
       <div style={{
-        width: '50vw',
-        maxHeight: '96vh',
+        width: '55vw',
+        maxHeight: '98vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '0.5rem 3vw 0.5rem 1vw',
+        padding: '0.4rem 2.5vw 0.4rem 0.5vw',
         zIndex: 2,
-        gap: '0.8rem',
+        gap: '0.5rem',
         overflowY: 'auto'
       }}>
         {/* Top Campaign Badge Pill */}
         <div style={{
           alignSelf: 'flex-start',
           background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: '4px 18px',
-          borderRadius: '30px',
-          boxShadow: '0 0 20px rgba(0, 240, 255, 0.6)',
+          padding: '3px 14px',
+          borderRadius: '24px',
+          boxShadow: '0 0 15px rgba(0, 240, 255, 0.5)',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px'
+          gap: '5px'
         }}>
-          <Flame size={16} color="#ffe600" />
-          <span style={{ fontSize: '0.88rem', fontWeight: 900, color: '#000', letterSpacing: '1.5px' }}>
+          <Flame size={14} color="#ffe600" />
+          <span style={{ fontSize: '0.78rem', fontWeight: 900, color: '#000', letterSpacing: '1px' }}>
             WEB3 小島區里長熱血大選！
           </span>
         </div>
@@ -220,15 +220,15 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <div>
           <h1 style={{
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '3.8rem',
+            fontSize: 'calc(1.8rem + 1.8vh)',
             fontWeight: 900,
             fontStyle: 'italic',
             background: 'linear-gradient(180deg, #ffffff 0%, #ffe600 45%, #ff007f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 18px rgba(255, 0, 127, 0.9)) drop-shadow(0 0 30px rgba(0, 240, 255, 0.6))',
+            filter: 'drop-shadow(0 0 15px rgba(255, 0, 127, 0.9))',
             lineHeight: 1.0,
-            marginBottom: '0.2rem',
+            marginBottom: '0.1rem',
             letterSpacing: '-1px'
           }}>
             YOAKA DASH!
@@ -237,72 +237,70 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            fontSize: '1rem',
+            fontSize: '0.82rem',
             color: '#00f0ff',
             fontWeight: 900,
             background: 'rgba(0, 240, 255, 0.12)',
-            padding: '0.3rem 1.2rem',
-            borderRadius: '30px',
-            border: '1.5px solid rgba(0, 240, 255, 0.5)'
+            padding: '0.2rem 1rem',
+            borderRadius: '24px',
+            border: '1px solid rgba(0, 240, 255, 0.5)'
           }}>
             <span>「家人們，幫主包個忙！」</span>
           </div>
         </div>
 
         {/* Track Selection Card with Difficulty & Speed Switch */}
-        <div className="cyber-panel" style={{ padding: '1.1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-            <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Disc size={16} /> 專屬競選拜票戰歌
+        <div className="cyber-panel" style={{ padding: '0.7rem 0.9rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+            <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Disc size={14} /> 競選拜票戰歌
             </span>
             <span style={{
               background: selectedDifficulty === 'Hard' ? '#ff007f' : selectedDifficulty === 'Normal' ? '#00f0ff' : '#ffe600',
               color: '#000',
               fontWeight: 900,
-              padding: '2px 12px',
-              borderRadius: '16px',
-              fontSize: '0.78rem'
+              padding: '1px 10px',
+              borderRadius: '12px',
+              fontSize: '0.72rem'
             }}>
               {selectedDifficulty} Mode
             </span>
           </div>
 
-          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '0.1rem', color: '#fff', textShadow: '0 0 12px rgba(255,230,0,0.5)' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.1rem', color: '#fff', textShadow: '0 0 10px rgba(255,230,0,0.5)' }}>
             yoaka競選之旅
           </h3>
 
           {/* Difficulty Switch Pills */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.6rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.4rem' }}>
             {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
                 style={{
                   flex: 1,
-                  padding: '0.45rem',
+                  padding: '0.35rem',
                   background: selectedDifficulty === diff ? (diff === 'Hard' ? 'linear-gradient(135deg, #ff007f, #d80068)' : diff === 'Normal' ? 'linear-gradient(135deg, #00f0ff, #0077b6)' : 'linear-gradient(135deg, #ffe600, #ffb703)') : 'rgba(255,255,255,0.05)',
-                  border: selectedDifficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '8px',
+                  border: selectedDifficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '6px',
                   color: selectedDifficulty === diff && diff === 'Normal' ? '#000' : selectedDifficulty === diff && diff === 'Easy' ? '#000' : '#fff',
                   cursor: 'pointer',
                   fontWeight: 900,
-                  fontSize: '0.82rem',
+                  fontSize: '0.75rem',
                   transition: 'all 0.2s'
                 }}
               >
-                {diff === 'Easy' && '🌱 Easy'}
-                {diff === 'Normal' && '🔥 Normal'}
-                {diff === 'Hard' && '⚡ Hard'}
+                {diff}
               </button>
             ))}
           </div>
 
           {/* Note Speed Multiplier Selection Bar */}
-          <div style={{ marginTop: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: '0.4rem 0.7rem', borderRadius: '8px' }}>
-            <span style={{ fontSize: '0.78rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Gauge size={14} color="#ffe600" /> 流速 (SPEED):
+          <div style={{ marginTop: '0.4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: '0.3rem 0.6rem', borderRadius: '6px' }}>
+            <span style={{ fontSize: '0.72rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <Gauge size={12} color="#ffe600" /> 流速:
             </span>
-            <div style={{ display: 'flex', gap: '4px' }}>
+            <div style={{ display: 'flex', gap: '3px' }}>
               {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(speed => (
                 <button
                   key={speed}
@@ -310,15 +308,15 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                   style={{
                     background: selectedNoteSpeed === speed ? (speed < 1.0 ? '#00f0ff' : '#ffe600') : 'rgba(255,255,255,0.08)',
                     color: selectedNoteSpeed === speed ? '#000' : '#fff',
-                    border: selectedNoteSpeed === speed ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '6px',
-                    padding: '2px 6px',
+                    border: selectedNoteSpeed === speed ? '1px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '5px',
+                    padding: '1px 5px',
                     fontWeight: 900,
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     cursor: 'pointer'
                   }}
                 >
-                  {speed < 1.0 ? `🐢${speed.toFixed(2)}x` : `${speed.toFixed(2)}x`}
+                  {speed.toFixed(2)}x
                 </button>
               ))}
             </div>
@@ -329,40 +327,36 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <button
           className="muse-btn"
           onClick={() => onStartGame(selectedMap, selectedDifficulty, selectedNoteSpeed)}
-          style={{ width: '100%', fontSize: '1.3rem', padding: '0.85rem' }}
+          style={{ width: '100%', fontSize: '1.15rem', padding: '0.65rem' }}
         >
-          <span><Play fill="#fff" size={22} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
+          <span><Play fill="#fff" size={18} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
         </button>
 
         {/* Sub Option Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: '0.9rem', padding: '0.65rem' }}>
-            <span><Sparkles size={16} /> 造型: {costumeObj.name}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+            <span><Sparkles size={14} /> 造型: {costumeObj.name}</span>
           </button>
 
-          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: '0.9rem', padding: '0.65rem' }}>
-            <span><Wand2 size={16} /> A+B 譜面創作者</span>
+          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: '0.8rem', padding: '0.5rem' }}>
+            <span><Wand2 size={14} /> A+B 創作者</span>
           </button>
         </div>
 
         {/* Key Guide Box */}
-        <div className="cyber-panel" style={{ padding: '0.6rem 1rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+        <div className="cyber-panel" style={{ padding: '0.4rem 0.8rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '0.75rem', color: '#00f0ff', fontWeight: 800, marginBottom: '2px' }}>上軌 (空中投紙)</p>
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-              <span className="key-badge">D</span>
-              <span className="key-badge">F</span>
-            </div>
+            <span style={{ fontSize: '0.7rem', color: '#00f0ff', fontWeight: 800, marginRight: '6px' }}>上軌:</span>
+            <span className="key-badge" style={{ fontSize: '0.7rem', padding: '1px 6px' }}>D</span>
+            <span className="key-badge" style={{ fontSize: '0.7rem', padding: '1px 6px', marginLeft: '3px' }}>F</span>
           </div>
 
-          <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.15)' }} />
 
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '0.75rem', color: '#ff007f', fontWeight: 800, marginBottom: '2px' }}>下軌 (地面發紙)</p>
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-              <span className="key-badge">J</span>
-              <span className="key-badge">K</span>
-            </div>
+            <span style={{ fontSize: '0.7rem', color: '#ff007f', fontWeight: 800, marginRight: '6px' }}>下軌:</span>
+            <span className="key-badge" style={{ fontSize: '0.7rem', padding: '1px 6px' }}>J</span>
+            <span className="key-badge" style={{ fontSize: '0.7rem', padding: '1px 6px', marginLeft: '3px' }}>K</span>
           </div>
         </div>
       </div>
