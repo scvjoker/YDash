@@ -23,8 +23,6 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
   const [totalDuration, setTotalDuration] = useState<number>(40);
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
-  const isLowSupport = stats.supportRate <= 30;
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
@@ -80,6 +78,34 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
 
   const songProgressPct = Math.min(100, Math.max(0, (currentTime / totalDuration) * 100));
 
+  // 3-Tier HP Dynamic Threshold Theme (🟢綠 -> 🟡黃 -> 🔴紅)
+  const getHpTheme = (hp: number) => {
+    if (hp > 60) {
+      return {
+        gradient: 'linear-gradient(90deg, #00ff87 0%, #60efff 100%)',
+        color: '#00ff87',
+        glow: '#00ff87',
+        label: '選民支持度 (HP)'
+      };
+    } else if (hp > 30) {
+      return {
+        gradient: 'linear-gradient(90deg, #ffe600 0%, #ff9900 100%)',
+        color: '#ffe600',
+        glow: '#ffe600',
+        label: '選民支持度 (HP)'
+      };
+    } else {
+      return {
+        gradient: 'linear-gradient(90deg, #ff0055 0%, #ff007f 100%)',
+        color: '#ff0055',
+        glow: '#ff0055',
+        label: '⚠️ 支持度告急!'
+      };
+    }
+  };
+
+  const hpTheme = getHpTheme(stats.supportRate);
+
   return (
     <div style={{
       position: 'absolute',
@@ -91,9 +117,9 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
       padding: isMobileScreen ? '0.5rem 1.2rem' : '1.2rem 2.2rem',
       zIndex: 10
     }}>
-      {/* TOP HEADER: Unified Single-Line Bar (HP + Progress Bar in SAME Row! Desktop Enlarged 2X) */}
+      {/* TOP HEADER: Unified Single-Line Bar (HP + Progress Bar in SAME Row!) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.2rem' }}>
-        {/* Left: Support Rate (HP) & Integrated Song Progress Bar (同一層) */}
+        {/* Left: Support Rate (HP) & Integrated Song Progress Bar (3-Tier Color Gradient: 🟢 -> 🟡 -> 🔴) */}
         <div 
           className="cyber-panel" 
           style={{ 
@@ -103,16 +129,16 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: isMobileScreen ? '12px' : '20px',
-            border: isHpFlashing ? '2.5px solid #ff0055' : isLowSupport ? '2.5px solid #ff0055' : '1.5px solid rgba(0,240,255,0.4)',
-            boxShadow: isHpFlashing ? '0 0 30px #ff0055, inset 0 0 15px #ff0055' : '0 0 20px rgba(0,240,255,0.3)',
+            border: isHpFlashing ? '2.5px solid #ff0055' : `1.5px solid ${hpTheme.color}66`,
+            boxShadow: isHpFlashing ? '0 0 30px #ff0055, inset 0 0 15px #ff0055' : `0 0 20px ${hpTheme.glow}44`,
             backgroundColor: isHpFlashing ? 'rgba(255, 0, 85, 0.35)' : 'rgba(10, 12, 28, 0.85)',
-            transition: 'all 0.15s ease-out'
+            transition: 'all 0.25s ease-out'
           }}
         >
           {/* HP Label & Bar */}
           <div style={{ minWidth: isMobileScreen ? '110px' : '165px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.72rem' : '0.95rem', fontWeight: 900, color: isLowSupport || isHpFlashing ? '#ff0055' : '#00f0ff', marginBottom: '4px' }}>
-              <span>{isHpFlashing ? '⚠️ 支持度告急!' : '選民支持度 (HP)'}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.72rem' : '0.95rem', fontWeight: 900, color: isHpFlashing ? '#ff0055' : hpTheme.color, marginBottom: '4px', transition: 'color 0.25s' }}>
+              <span>{isHpFlashing ? '⚠️ 支持度告急!' : hpTheme.label}</span>
               <span>{stats.supportRate.toFixed(0)}%</span>
             </div>
             <div style={{
@@ -126,8 +152,9 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
               <div style={{
                 width: `${stats.supportRate}%`,
                 height: '100%',
-                background: isLowSupport || isHpFlashing ? 'linear-gradient(90deg, #ff0055 0%, #ff4d00 100%)' : 'linear-gradient(90deg, #00f0ff 0%, #0077b6 100%)',
-                transition: 'width 0.2s ease-out'
+                background: isHpFlashing ? 'linear-gradient(90deg, #ff0055 0%, #ff4d00 100%)' : hpTheme.gradient,
+                boxShadow: `0 0 10px ${hpTheme.glow}`,
+                transition: 'width 0.2s ease-out, background 0.3s ease'
               }} />
             </div>
           </div>

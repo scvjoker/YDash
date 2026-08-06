@@ -1,19 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 電腦大螢幕 UI 大器豪邁全數還原 (HUD Panel 放大一倍 + 4.5rem 標題選單 + 造型館大卡片)
+## [2026-08-07] 選民支持度 (HP) 血條動態三分段色彩視覺表現 (🟢 亮綠 ➔ 🟡 亮黃 ➔ 🔴 告急血紅)
 
-### 變更與電腦大螢幕豪邁還原項目 (Desktop Scale Restoration & Dual Adaptation)
-- **1. 音遊頂端 HUD Panel 電腦版放大一倍 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
-  - 在電腦大螢幕上（`isMobileScreen === false`），將「選民支持度 HP Panel + 音樂時間進度條 + 得票數 (Score) + 暫停按鈕」尺寸與字體**全面放大一倍**（Panel 寬度可達 `760px`，得票數 `2.2rem`，Pause 鈕 `52px`）！
-- **2. 主畫面右側選單電腦版 4.5rem 大標題與豪邁按鈕還原 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
-  - 還原主標題 `YOAKA DASH!` 為 **`4.5rem`** 豪邁霸氣字體！
-  - 開啟競選拜票 (START) 按鈕還原至 `fontSize: 1.45rem, padding: 1rem` 大尺寸！
-- **3. 造型換裝館 (CostumeModal) 電腦版大卡片還原 ([CostumeModal.tsx](file:///d:/pj/YoakaDash/src/components/CostumeModal.tsx))**：
-  - 在電腦大螢幕上還原 3 大造型卡片的豪邁尺寸：立繪圖片高度還原至 **`165px`**，卡片 Padding `1.2rem`！
-  - 完美達成「桌面大屏霸氣豪邁、手機橫屏緊湊精適」的雙平台 PERFECT 平衡！
+### 變更與 HP 支持度血條視覺表現升級 (3-Tier HP Color Threshold System)
+- **1. HP 支持度三分段動態主題變色 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
+  - **🟢 安全高血區 (`HP > 60%`)**：呈現亮翠綠賽博漸層 (`#00ff87`) 與 Glow 綠光，標註標準支持度！
+  - **🟡 警告中血區 (`30% < HP <= 60%`)**：呈現亮金黃黃橘漸層 (`#ffe600`) 與 Glow 黃光！
+  - **🔴 危險低血區 (`HP <= 30%`)**：呈現血紅爆發漸層 (`#ff0055`) 與 Flash 警報紅閃，標註 `⚠️ 支持度告急!` 標籤！
+- **2. 音遊扣血打擊感全面爆棚**：
+  - 在受傷撞擊 Hater 或漏 Note 扣血時，HP 血條會根據支持度百分比動態平滑過渡變色，臨場告急氛圍極致張力滿分！
 
 ---
-*「活著很累，但比起 debug，電腦版選單、造型館跟頂端 HUD 放大一倍還原霸氣，手機板保持精細緊湊，這雙平台適配簡直無懈可擊哈哈！」*
+*「活著很累，但比起 debug，看著 HP 血條從綠變黃、再變血紅告急閃爍，這音遊扣血的緊張感真的太過癮太生動了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
