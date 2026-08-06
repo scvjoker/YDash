@@ -1,14 +1,13 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 實裝一鍵全螢幕模式 (Fullscreen Toggle) + 手機橫屏右側選單動態邊界彈性防遮擋適配
+## [2026-08-07] 音符軌道全視覺元素動態螢幕比例縮放 (Dynamic Scale Factor: `scale = height / 720`)
 
-### 變更與邊界體驗修復項目 (Fullscreen API & Auto-Fit Bounds)
-- **1. 全螢幕模式 (Fullscreen Mode Trigger)**：
-  - 在主選單右上角與橫屏提醒視窗上新增 **` Maximize (全螢幕)`** 金黃霓虹按鈕！
-  - 點擊可一鍵隱藏手機網址列與系統工具列，讓手機滿版享受 100% 音遊畫質與極致雙手打擊空間！
-- **2. 手機橫屏右側選單動態邊界自動適應 (Auto-Fit Scrollable Bounds)**：
-  - 更新 [StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx) 右側欄位為彈性自動適應與可滾動容器 (`maxHeight: 96vh`, `overflowY: auto`)。
-  - 在高度受限的手機橫屏上，內距 Padding 與按鈕尺寸會自動動態壓縮，徹底解決以往右下角按鈕超出畫面無法點擊的 Bug！
+### 變更與音符軌道等比例縮放修復項目 (Dynamic Scaling Engine)
+- **1. Canvas 視覺元素全面動態等比例縮放演算法**：
+  - 在 [RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) 中引入 **`scale = height / 720`** 動態比例縮放因子。
+  - 當遊戲在高度較短的手機橫屏視窗（如 `360px` ~ `420px` 高度）執行時，**音符圓圈、Hit Zone 靶心、Hater 360px 巨型障礙、主角頭像、左側角色大圖與粒子特效文字通通會 100% 精確的動態等比例縮小**！
+- **2. 手機軌道打擊視野最佳化**：
+  - 障礙物與音符在手機螢幕上自動等比例縮小至約 `180px` 高度，恰好完美符合手機軌道長度，畫面不再擁擠撞在一起，視野極致清爽開闊！
 
 ---
-*「活著很累，但比起 debug，按一下全螢幕把手機網址列隱藏掉，右下角的按鈕通通看得清清楚楚隨點隨動，這適配真的太貼心了哈哈！」*
+*「活著很累，但比起 debug，音符跟障礙物隨手機螢幕大小自動等比例縮放，在手機畫面上看起來精緻又清晰，打擊視野真的太棒了哈哈！」*

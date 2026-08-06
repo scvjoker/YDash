@@ -104,18 +104,21 @@ export class RenderEngine {
     const height = this.canvas.height;
     const ctx = this.ctx;
 
+    // Dynamic Scale Factor for Mobile Responsive Aspect Ratio (Baseline Height = 720px)
+    const scale = Math.min(1.25, Math.max(0.45, height / 720));
+
     ctx.clearRect(0, 0, width, height);
 
     // 1. Draw Parallax Background
     this.drawBackground(ctx, width, height, currentTime, stats.isFeverActive);
 
-    // Tracks Positions
-    const airY = height * 0.38;
-    const groundY = height * 0.72;
-    const hitX = width * 0.22;
+    // Dynamic Responsive Positions
+    const airY = height * 0.35;
+    const groundY = height * 0.70;
+    const hitX = Math.max(140 * scale, width * 0.22);
     const noteSpeed = width * 0.45 * speedMultiplier;
 
-    // Smooth Yoaka Track Switch Animation & Extended High-Vis Trail Tracking
+    // Smooth Yoaka Track Switch Animation & Extended Trail Tracking
     const targetYoakaY = activeTrack === 'air' ? airY : groundY;
     if (this.yoakaCurrentY === 0) {
       this.yoakaCurrentY = groundY;
@@ -123,7 +126,6 @@ export class RenderEngine {
 
     const moveDiffY = targetYoakaY - this.yoakaCurrentY;
     if (Math.abs(moveDiffY) > 1.5) {
-      // Record Extended 14-Step Trail History
       this.yoakaTrailHistory.unshift({ y: this.yoakaCurrentY, alpha: 0.85, scale: 1.0 });
       if (this.yoakaTrailHistory.length > 14) {
         this.yoakaTrailHistory.pop();
@@ -131,7 +133,6 @@ export class RenderEngine {
     }
     this.yoakaCurrentY += moveDiffY * 0.22;
 
-    // Update Trail History slow decay
     this.yoakaTrailHistory.forEach((trail, idx) => {
       trail.alpha -= 0.045;
       trail.scale = Math.max(0.6, 1.0 - idx * 0.03);
@@ -139,18 +140,18 @@ export class RenderEngine {
     this.yoakaTrailHistory = this.yoakaTrailHistory.filter(t => t.alpha > 0);
 
     // 2. Draw Dual Tracks
-    this.drawTracks(ctx, width, height, airY, groundY, currentTime, stats.isFeverActive);
+    this.drawTracks(ctx, width, height, airY, groundY, currentTime, stats.isFeverActive, scale);
 
-    // 3. Draw Clean Target Hit Zones
-    this.drawHitZone(ctx, hitX, airY, inputState.airActive, '#00f0ff');
-    this.drawHitZone(ctx, hitX, groundY, inputState.groundActive, '#ff007f');
+    // 3. Draw Clean Target Hit Zones (Scaled for Mobile)
+    this.drawHitZone(ctx, hitX, airY, inputState.airActive, '#00f0ff', scale);
+    this.drawHitZone(ctx, hitX, groundY, inputState.groundActive, '#ff007f', scale);
 
     // Dual Press: Golden Beam Connection Line
     if (inputState.airActive && inputState.groundActive) {
-      this.drawGoldenLaserBeam(ctx, hitX, airY, groundY);
+      this.drawGoldenLaserBeam(ctx, hitX, airY, groundY, scale);
     }
 
-    // 4. Draw Active Notes & Dual Beams
+    // 4. Draw Active Notes & Dual Beams (Scaled for Mobile)
     const activeDualNotes: { [time: number]: { airX?: number; groundX?: number } } = {};
 
     for (const note of notes) {
@@ -167,22 +168,23 @@ export class RenderEngine {
           if (note.track === 'ground') activeDualNotes[note.time].groundX = noteX;
         }
 
-        this.drawCleanVectorNote(ctx, note, noteX, noteY, currentTime);
+        this.drawCleanVectorNote(ctx, note, noteX, noteY, currentTime, scale);
       }
     }
 
     // Draw Golden Dual Beams for Dual Notes
     Object.values(activeDualNotes).forEach(dual => {
       if (dual.airX !== undefined && dual.groundX !== undefined) {
-        this.drawGoldenLaserBeam(ctx, dual.airX, airY, groundY);
+        this.drawGoldenLaserBeam(ctx, dual.airX, airY, groundY, scale);
       }
     });
 
-    // 5. Draw Borderless Hero Side Standee with Breathing Pulse Motion!
-    this.drawHeroSideCard2X(ctx, hitX - 220, this.yoakaCurrentY, costume, currentTime, activeTrack);
+    // 5. Draw Borderless Hero Side Standee with Breathing Pulse (Scaled for Mobile)
+    const sideCardX = Math.max(65 * scale, hitX - 160 * scale);
+    this.drawHeroSideCard2X(ctx, sideCardX, this.yoakaCurrentY, costume, currentTime, activeTrack, scale);
 
-    // 6. Draw Hero Runner Stage (Elongated Trail Afterimages)
-    this.drawYoaka(ctx, hitX, this.yoakaCurrentY, costume, currentTime, inputState.airActive || inputState.groundActive, stats.isFeverActive, activeTrack);
+    // 6. Draw Hero Runner Stage (Scaled for Mobile)
+    this.drawYoaka(ctx, hitX, this.yoakaCurrentY, costume, currentTime, inputState.airActive || inputState.groundActive, stats.isFeverActive, activeTrack, scale);
 
     // 7. Screen Flash Overlays
     if (this.damageFlashAlpha > 0) {
@@ -205,22 +207,22 @@ export class RenderEngine {
     if (currentTime < 4.8) {
       const countdown = Math.ceil(5.0 - currentTime);
       ctx.save();
-      ctx.font = '900 48px "Chakra Petch", sans-serif';
+      ctx.font = `900 ${Math.floor(40 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 25;
-      ctx.fillText(`⚡ 準備拜票！音符將在 ${countdown} 秒後抵達 ⚡`, width / 2, height * 0.2);
+      ctx.shadowBlur = 25 * scale;
+      ctx.fillText(`⚡ 準備拜票！音符將在 ${countdown} 秒後抵達 ⚡`, width / 2, height * 0.18);
       ctx.restore();
     }
 
     // 9. Draw Fever Effects
     if (stats.isFeverActive) {
-      this.drawFeverEffects(ctx, width, height, currentTime);
+      this.drawFeverEffects(ctx, width, height, currentTime, scale);
     }
 
     // 10. Update & Draw Particles & Shockwaves
-    this.updateAndDrawParticles(ctx);
+    this.updateAndDrawParticles(ctx, scale);
   }
 
   private drawBackground(
@@ -268,14 +270,15 @@ export class RenderEngine {
     airY: number,
     groundY: number,
     time: number,
-    isFever: boolean
+    isFever: boolean,
+    scale: number
   ): void {
     ctx.save();
     
     ctx.strokeStyle = isFever ? '#ff007f' : '#00f0ff';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = Math.max(2, 4 * scale);
     ctx.shadowColor = ctx.strokeStyle;
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = 14 * scale;
     ctx.beginPath();
     ctx.moveTo(0, airY);
     ctx.lineTo(width, airY);
@@ -296,16 +299,17 @@ export class RenderEngine {
     x: number,
     y: number,
     isActive: boolean,
-    color: string
+    color: string,
+    scale: number
   ): void {
     ctx.save();
     ctx.translate(x, y);
 
-    const radius = isActive ? 52 : 42;
+    const radius = (isActive ? 52 : 42) * scale;
     ctx.strokeStyle = color;
-    ctx.lineWidth = isActive ? 6 : 4;
+    ctx.lineWidth = (isActive ? 6 : 4) * scale;
     ctx.shadowColor = color;
-    ctx.shadowBlur = isActive ? 30 : 15;
+    ctx.shadowBlur = (isActive ? 30 : 15) * scale;
 
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -323,14 +327,15 @@ export class RenderEngine {
     ctx: CanvasRenderingContext2D,
     x: number,
     airY: number,
-    groundY: number
+    groundY: number,
+    scale: number
   ): void {
     ctx.save();
 
     ctx.strokeStyle = '#ffe600';
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 10 * scale;
     ctx.shadowColor = '#ffe600';
-    ctx.shadowBlur = 35;
+    ctx.shadowBlur = 35 * scale;
 
     ctx.beginPath();
     ctx.moveTo(x, airY);
@@ -338,7 +343,7 @@ export class RenderEngine {
     ctx.stroke();
 
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 4 * scale;
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.moveTo(x, airY);
@@ -348,60 +353,57 @@ export class RenderEngine {
     ctx.restore();
   }
 
-  // Borderless Hero Standee with Breathing Pulse Motion (No Black Box & No Frame Artifacts!)
+  // Borderless Hero Standee with Breathing Pulse Motion (Scaled for Mobile)
   private drawHeroSideCard2X(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
     costume: CostumeId,
     time: number,
-    activeTrack: 'air' | 'ground'
+    activeTrack: 'air' | 'ground',
+    scale: number
   ): void {
     ctx.save();
     ctx.translate(x, y);
 
-    // Breathing Pulse Sine Wave (Scale 0.96x ~ 1.04x)
     const breathScale = 1.0 + Math.sin(time * 3.5) * 0.04;
-    const baseW = 310;
-    const baseH = 310;
+    const baseW = 220 * scale;
+    const baseH = 220 * scale;
     const cardW = baseW * breathScale;
     const cardH = baseH * breathScale;
 
     let accentColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
-    let costumeName = '👑 預設競選背心裝';
+    let costumeName = '👑 背心裝';
     let targetImg = this.yoakaDefaultImage || this.yoakaMainImage;
 
     if (costume === 'office_glasses') {
       accentColor = '#ffe600';
-      costumeName = '👓 襯衫領帶眼鏡裝';
+      costumeName = '👓 秘書裝';
       targetImg = this.yoakaOfficeImage || this.yoakaMainImage;
     } else if (costume === 'kpop_idol') {
       accentColor = '#ff007f';
-      costumeName = '✨ K-Pop 閃耀偶像裝';
+      costumeName = '✨ 偶像裝';
       targetImg = this.yoakaKpopImage || this.yoakaMainImage;
     }
 
-    // Borderless Dynamic Neon Glow Effect (No Black Box background or border lines!)
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 45;
+    ctx.shadowBlur = 35 * scale;
 
     if (targetImg && targetImg.complete && targetImg.naturalWidth !== 0) {
       ctx.save();
-      // Rounded image clip for soft edges without black background
       ctx.beginPath();
-      ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 24);
+      ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 18 * scale);
       ctx.clip();
       ctx.drawImage(targetImg, -cardW / 2, -cardH / 2, cardW, cardH);
       ctx.restore();
     }
 
-    // Clean Floating Costume Label Pill
-    ctx.font = '900 15px "Chakra Petch", sans-serif';
+    ctx.font = `900 ${Math.floor(13 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = accentColor;
     ctx.textAlign = 'center';
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 18;
-    ctx.fillText(costumeName, 0, cardH / 2 + 22);
+    ctx.shadowBlur = 15 * scale;
+    ctx.fillText(costumeName, 0, cardH / 2 + 18 * scale);
 
     ctx.restore();
   }
@@ -411,20 +413,22 @@ export class RenderEngine {
     note: Note,
     x: number,
     y: number,
-    time: number
+    time: number,
+    scale: number
   ): void {
     ctx.save();
     ctx.translate(x, y);
 
-    const bounce = Math.sin(time * 14) * 4;
+    const bounce = Math.sin(time * 14) * 4 * scale;
     const isObstacle = note.type === 'obstacle' || note.entity.startsWith('hater');
 
     if (isObstacle) {
-      const size = 360;
+      // Hater Obstacle Dynamically Scaled for Mobile Track
+      const size = 300 * scale;
       const targetHaterImg = note.entity === 'hater_dog_board' ? this.haterDogImage : this.haterSharkImage;
 
       ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 100;
+      ctx.shadowBlur = 80 * scale;
 
       if (targetHaterImg && targetHaterImg.complete && targetHaterImg.naturalWidth !== 0) {
         ctx.drawImage(targetHaterImg, -size / 2, bounce - size / 2, size, size);
@@ -435,23 +439,23 @@ export class RenderEngine {
         ctx.fill();
       }
 
-      ctx.font = '900 20px "Chakra Petch", sans-serif';
+      ctx.font = `900 ${Math.floor(16 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ff0055';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 24;
-      ctx.fillText('⚠️ DODGE 閃避!', 0, bounce + size / 2 + 20);
+      ctx.shadowBlur = 20 * scale;
+      ctx.fillText('⚠️ DODGE 閃避!', 0, bounce + size / 2 + 16 * scale);
 
     } else {
       const isAir = note.track === 'air';
       const mainColor = note.isDual ? '#ffe600' : isAir ? '#00f0ff' : '#ff007f';
-      const radius = 38;
+      const radius = 34 * scale;
 
       ctx.fillStyle = mainColor;
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3.5 * scale;
       ctx.shadowColor = mainColor;
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 18 * scale;
 
       ctx.beginPath();
       ctx.arc(0, bounce, radius, 0, Math.PI * 2);
@@ -463,10 +467,10 @@ export class RenderEngine {
       ctx.arc(0, bounce, radius * 0.4, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.font = '900 13px "Chakra Petch", sans-serif';
+      ctx.font = `900 ${Math.floor(11 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = mainColor;
       ctx.textAlign = 'center';
-      ctx.fillText(note.isDual ? '⚡ DUAL' : isAir ? 'AIR VOTER' : 'GND VOTER', 0, bounce + 50);
+      ctx.fillText(note.isDual ? '⚡ DUAL' : isAir ? 'AIR VOTER' : 'GND VOTER', 0, bounce + 42 * scale);
     }
 
     ctx.restore();
@@ -480,7 +484,8 @@ export class RenderEngine {
     time: number,
     isStriking: boolean,
     isFever: boolean,
-    activeTrack: 'air' | 'ground'
+    activeTrack: 'air' | 'ground',
+    scale: number
   ): void {
     ctx.save();
 
@@ -490,11 +495,11 @@ export class RenderEngine {
       ctx.globalAlpha = trail.alpha;
       const trailColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
       ctx.strokeStyle = trailColor;
-      ctx.lineWidth = 6 * trail.scale;
+      ctx.lineWidth = 5 * scale * trail.scale;
       ctx.shadowColor = trailColor;
-      ctx.shadowBlur = 30;
+      ctx.shadowBlur = 25 * scale;
 
-      const r = 44 * trail.scale;
+      const r = 38 * scale * trail.scale;
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.stroke();
@@ -510,53 +515,54 @@ export class RenderEngine {
 
     ctx.translate(x, y);
 
-    const runCycle = Math.sin(time * 20) * 6;
+    const runCycle = Math.sin(time * 20) * 5 * scale;
     const bodyY = runCycle;
 
     let mainColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
     if (costume === 'office_glasses') mainColor = '#ffe600';
 
     ctx.shadowColor = isFever ? '#ffe600' : mainColor;
-    ctx.shadowBlur = isStriking ? 40 : 20;
+    ctx.shadowBlur = isStriking ? 35 * scale : 18 * scale;
 
+    const r = 38 * scale;
     ctx.strokeStyle = mainColor;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 4 * scale;
     ctx.beginPath();
-    ctx.arc(0, bodyY, 44, 0, Math.PI * 2);
+    ctx.arc(0, bodyY, r, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.font = '900 12px "Chakra Petch", sans-serif';
+    ctx.font = `900 ${Math.floor(10 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = mainColor;
     ctx.textAlign = 'center';
-    ctx.fillText(activeTrack === 'air' ? '☁️ AIR (上軌閃避/發紙)' : '🏃 GND (地面軌奔跑)', 0, bodyY - 54);
+    ctx.fillText(activeTrack === 'air' ? '☁️ AIR' : '🏃 GND', 0, bodyY - 45 * scale);
 
     if (this.tissuePackImage && this.tissuePackImage.complete && this.tissuePackImage.naturalWidth !== 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.arc(0, bodyY, 41, 0, Math.PI * 2);
+      ctx.arc(0, bodyY, r * 0.92, 0, Math.PI * 2);
       ctx.clip();
-      ctx.drawImage(this.tissuePackImage, -41, bodyY - 41, 82, 82);
+      ctx.drawImage(this.tissuePackImage, -r * 0.92, bodyY - r * 0.92, r * 1.84, r * 1.84);
       ctx.restore();
     } else {
       ctx.fillStyle = mainColor;
       ctx.beginPath();
-      ctx.arc(0, bodyY, 41, 0, Math.PI * 2);
+      ctx.arc(0, bodyY, r * 0.92, 0, Math.PI * 2);
       ctx.fill();
     }
 
     if (isStriking) {
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 5 * scale;
       ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 30;
+      ctx.shadowBlur = 25 * scale;
       ctx.beginPath();
-      ctx.moveTo(20, bodyY);
-      ctx.lineTo(85, bodyY - 12);
+      ctx.moveTo(18 * scale, bodyY);
+      ctx.lineTo(75 * scale, bodyY - 10 * scale);
       ctx.stroke();
 
-      ctx.font = '900 18px "Chakra Petch", sans-serif';
+      ctx.font = `900 ${Math.floor(15 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
-      ctx.fillText('V-TISSUES!', 100, bodyY - 12);
+      ctx.fillText('V-TISSUES!', 88 * scale, bodyY - 10 * scale);
     }
 
     ctx.restore();
@@ -660,11 +666,11 @@ export class RenderEngine {
     }
   }
 
-  private updateAndDrawParticles(ctx: CanvasRenderingContext2D): void {
+  private updateAndDrawParticles(ctx: CanvasRenderingContext2D, scale: number): void {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
+      p.x += p.vx * scale;
+      p.y += p.vy * scale;
       p.life -= 0.025;
 
       if (p.life <= 0) {
@@ -676,29 +682,30 @@ export class RenderEngine {
       ctx.globalAlpha = p.life / p.maxLife;
 
       if (p.size !== undefined) {
-        const currentRadius = p.size + (1 - p.life / p.maxLife) * 100;
+        const currentRadius = (p.size + (1 - p.life / p.maxLife) * 100) * scale;
         ctx.strokeStyle = p.color;
-        ctx.lineWidth = 5 * (p.life / p.maxLife);
+        ctx.lineWidth = 5 * scale * (p.life / p.maxLife);
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 24;
+        ctx.shadowBlur = 24 * scale;
         ctx.beginPath();
         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
         ctx.stroke();
       } else if (p.text) {
         const isDamage = p.type === 'damage';
         const isDual = p.type === 'dual_strike';
-        ctx.font = isDamage || isDual ? '900 34px "Chakra Petch", sans-serif' : p.isWink ? '900 28px "Chakra Petch", sans-serif' : '700 22px "Chakra Petch", sans-serif';
+        const fontSize = Math.floor((isDamage || isDual ? 32 : p.isWink ? 26 : 20) * scale);
+        ctx.font = `900 ${fontSize}px "Chakra Petch", sans-serif`;
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 25 * scale;
         ctx.textAlign = 'center';
         ctx.fillText(p.text, p.x, p.y);
       } else {
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 12 * scale;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 5 * scale, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -710,16 +717,17 @@ export class RenderEngine {
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
-    time: number
+    time: number,
+    scale: number
   ): void {
     ctx.save();
 
-    ctx.font = '900 38px "Chakra Petch", sans-serif';
+    ctx.font = `900 ${Math.floor(32 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = '#ffe600';
     ctx.textAlign = 'center';
     ctx.shadowColor = '#ff007f';
-    ctx.shadowBlur = 30;
-    ctx.fillText('🔥 FEVER MODE!! 雙倍票數熱血爆發 🔥', width / 2, 50);
+    ctx.shadowBlur = 30 * scale;
+    ctx.fillText('🔥 FEVER MODE!! 雙倍票數熱血爆發 🔥', width / 2, 45 * scale);
 
     ctx.restore();
   }
