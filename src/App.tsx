@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, BeatmapData, CostumeId, GameStats } from './types/game';
-import { DEFAULT_BEATMAPS, COSTUMES_DATA } from './game/Beatmaps';
+import { DEFAULT_BEATMAPS } from './game/Beatmaps';
 import { RenderEngine } from './game/RenderEngine';
 import { GameLoop } from './game/GameLoop';
 import { audioEngine } from './game/AudioEngine';
@@ -17,6 +17,7 @@ export const App: React.FC = () => {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [currentBeatmap, setCurrentBeatmap] = useState<BeatmapData>(DEFAULT_BEATMAPS[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
+  const [currentNoteSpeed, setCurrentNoteSpeed] = useState<number>(1.0);
   const [selectedCostume, setSelectedCostume] = useState<CostumeId>('campaign_vest');
 
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -28,7 +29,8 @@ export const App: React.FC = () => {
     greatCount: 0,
     missCount: 0,
     feverGauge: 0,
-    isFeverActive: false
+    isFeverActive: false,
+    totalNotesCount: 0
   });
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -50,9 +52,14 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleStartGame = (beatmap: BeatmapData, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal') => {
+  const handleStartGame = (
+    beatmap: BeatmapData,
+    difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
+    noteSpeed: number = 1.0
+  ) => {
     setCurrentBeatmap(beatmap);
     setCurrentDifficulty(difficulty);
+    setCurrentNoteSpeed(noteSpeed);
     setIsPaused(false);
     setGameState('playing');
 
@@ -66,6 +73,7 @@ export const App: React.FC = () => {
           beatmap,
           selectedCostume,
           difficulty,
+          noteSpeed,
           stats => setGameStats(stats),
           finalStats => {
             setGameStats(finalStats);
@@ -110,17 +118,15 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  const selectedCostumeName = COSTUMES_DATA.find(c => c.id === selectedCostume)?.name || '預設競選背心裝';
-
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {/* 1. START SCREEN */}
       {gameState === 'menu' && (
         <StartScreen
-          onStartGame={(map, diff) => handleStartGame(map, diff)}
+          onStartGame={(map, diff, speed) => handleStartGame(map, diff, speed)}
           onOpenCostumes={() => setGameState('costumes')}
           onOpenEditor={() => setGameState('editor')}
-          selectedCostumeName={selectedCostumeName}
+          selectedCostume={selectedCostume}
         />
       )}
 
@@ -137,7 +143,7 @@ export const App: React.FC = () => {
       {gameState === 'editor' && (
         <BeatmapEditor
           onClose={() => setGameState('menu')}
-          onPlayCustomMap={customMap => handleStartGame(customMap, 'Normal')}
+          onPlayCustomMap={customMap => handleStartGame(customMap, 'Normal', 1.0)}
         />
       )}
 
@@ -145,7 +151,7 @@ export const App: React.FC = () => {
       <canvas
         ref={canvasRef}
         style={{
-          display: gameState === 'playing' ? 'block' : 'none',
+          display: gameState === 'playing' || gameState === 'result' ? 'block' : 'none',
           width: '100%',
           height: '100%'
         }}
@@ -168,7 +174,7 @@ export const App: React.FC = () => {
           stats={gameStats}
           beatmapTitle={`${currentBeatmap.metadata.title} (${currentDifficulty})`}
           onResume={handleTogglePause}
-          onRestart={() => handleStartGame(currentBeatmap, currentDifficulty)}
+          onRestart={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setIsPaused(false);
@@ -182,7 +188,7 @@ export const App: React.FC = () => {
         <ResultScreen
           stats={gameStats}
           beatmapTitle={`${currentBeatmap.metadata.title} (${currentDifficulty})`}
-          onReplay={() => handleStartGame(currentBeatmap, currentDifficulty)}
+          onReplay={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setGameState('menu');

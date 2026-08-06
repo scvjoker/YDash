@@ -7,10 +7,13 @@ export class GameLoop {
   private currentBeatmap: BeatmapData;
   private costume: CostumeId;
   private difficulty: 'Easy' | 'Normal' | 'Hard';
+  private speedMultiplier: number;
   private animFrameId: number | null = null;
   private isPausedState: boolean = false;
 
   private activeTrack: 'air' | 'ground' = 'ground';
+  private resumeCountdown: number = 0;
+  private resumeTimerId: ReturnType<typeof setInterval> | null = null;
 
   private stats: GameStats = {
     score: 0,
@@ -21,7 +24,8 @@ export class GameLoop {
     greatCount: 0,
     missCount: 0,
     feverGauge: 0,
-    isFeverActive: false
+    isFeverActive: false,
+    totalNotesCount: 0
   };
 
   private notes: Note[] = [];
@@ -35,6 +39,7 @@ export class GameLoop {
     beatmap: BeatmapData,
     costume: CostumeId,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
+    speedMultiplier: number = 1.0,
     onStatsChange?: (stats: GameStats) => void,
     onGameOver?: (stats: GameStats) => void
   ) {
@@ -42,10 +47,12 @@ export class GameLoop {
     this.currentBeatmap = beatmap;
     this.costume = costume;
     this.difficulty = difficulty;
+    this.speedMultiplier = speedMultiplier;
     this.onStatsChange = onStatsChange;
     this.onGameOver = onGameOver;
 
     this.notes = JSON.parse(JSON.stringify(beatmap.notes));
+    this.stats.totalNotesCount = this.notes.filter(n => n.type !== 'obstacle').length;
   }
 
   public async start(): Promise<void> {
@@ -55,6 +62,7 @@ export class GameLoop {
       const detected = audioEngine.detectBeatsFromBuffer(bgmBuf, this.difficulty);
       if (detected.length > 0) {
         this.notes = detected;
+        this.stats.totalNotesCount = this.notes.filter(n => n.type !== 'obstacle').length;
       }
     }
 
@@ -65,17 +73,39 @@ export class GameLoop {
 
   public pause(): void {
     this.isPausedState = true;
+    if (this.resumeTimerId) {
+      clearInterval(this.resumeTimerId);
+      this.resumeTimerId = null;
+    }
     audioEngine.pauseBGM();
   }
 
   public resume(): void {
     if (!this.isPausedState) return;
-    this.isPausedState = false;
-    const offset = audioEngine.getHardwareTime();
-    audioEngine.playBGM(offset);
+
+    // Trigger 5.0s Unpause Lead-In Buffer Countdown
+    this.resumeCountdown = 5;
+    if (this.resumeTimerId) clearInterval(this.resumeTimerId);
+
+    this.resumeTimerId = setInterval(() => {
+      this.resumeCountdown -= 1;
+      if (this.resumeCountdown <= 0) {
+        if (this.resumeTimerId) {
+          clearInterval(this.resumeTimerId);
+          this.resumeTimerId = null;
+        }
+        this.isPausedState = false;
+        const offset = audioEngine.getHardwareTime();
+        audioEngine.playBGM(offset);
+      }
+    }, 1000);
   }
 
   public stop(): void {
+    if (this.resumeTimerId) {
+      clearInterval(this.resumeTimerId);
+      this.resumeTimerId = null;
+    }
     if (this.animFrameId !== null) {
       cancelAnimationFrame(this.animFrameId);
       this.animFrameId = null;
@@ -84,10 +114,9 @@ export class GameLoop {
   }
 
   public triggerKeyInput(track: 'air' | 'ground'): void {
-    if (this.isPausedState) return;
+    if (this.isPausedState || this.resumeCountdown > 0) return;
     const currentTime = audioEngine.getHardwareTime();
 
-    // Switch Hero Runway Track Position (Air vs Ground)
     this.activeTrack = track;
 
     if (track === 'air') this.inputState.airActive = true;
@@ -103,16 +132,7 @@ export class GameLoop {
     let minDiff = Infinity;
 
     for (const note of this.notes) {
-      if (note.hit || note.track !== track) continue;
-
-      if (note.isMash) {
-        const diff = Math.abs(note.time - currentTime);
-        if (diff <= 0.45) {
-          closestNote = note;
-          minDiff = diff;
-          break;
-        }
-      }
+      if (note.hit || note.track !== track || note.type === 'obstacle') continue;
 
       const diff = Math.abs(note.time - currentTime);
       if (diff <= windowSec && diff < minDiff) {
@@ -122,20 +142,6 @@ export class GameLoop {
     }
 
     if (closestNote) {
-      if (closestNote.isMash) {
-        const scoreAdd = this.stats.isFeverActive ? 160 : 80;
-        this.stats.score += scoreAdd;
-        this.stats.combo += 1;
-        if (this.stats.combo > this.stats.maxCombo) this.stats.maxCombo = this.stats.combo;
-
-        audioEngine.playSFX('perfect');
-        const hitX = this.renderEngine['canvas'].width * 0.22;
-        const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
-        this.renderEngine.triggerHitEffect(hitX, hitY, `🔥 MASH! +${scoreAdd}`, true);
-        if (this.onStatsChange) this.onStatsChange({ ...this.stats });
-        return;
-      }
-
       closestNote.hit = true;
       let judgement: 'perfect' | 'great' = 'great';
       let scoreAdd = 60;
@@ -181,7 +187,7 @@ export class GameLoop {
       const hitX = this.renderEngine['canvas'].width * 0.22;
       const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
       const hitText = closestNote.isDual ? `⚡ DUAL! +${scoreAdd} 票` : `+${scoreAdd} 票`;
-      this.renderEngine.triggerHitEffect(hitX, hitY, hitText, judgement === 'perfect');
+      this.renderEngine.triggerHitEffect(hitX, hitY, hitText, judgement);
 
       if (this.onStatsChange) this.onStatsChange({ ...this.stats });
     }
@@ -198,15 +204,77 @@ export class GameLoop {
   }
 
   private loop = (): void => {
-    if (this.isPausedState) {
+    if (this.isPausedState && this.resumeCountdown <= 0) {
       this.animFrameId = requestAnimationFrame(this.loop);
       return;
     }
 
     const currentTime = audioEngine.getHardwareTime();
 
+    // Render 5.0s Lead-In / Unpause Countdown Text over canvas
+    if (this.resumeCountdown > 0) {
+      this.renderEngine.render(
+        currentTime,
+        this.notes,
+        this.costume,
+        this.stats,
+        this.inputState,
+        this.activeTrack,
+        this.speedMultiplier
+      );
+
+      const ctx = this.renderEngine['ctx'];
+      const w = this.renderEngine['canvas'].width;
+      const h = this.renderEngine['canvas'].height;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(7, 8, 20, 0.65)';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.font = '900 64px "Chakra Petch", sans-serif';
+      ctx.fillStyle = '#ffe600';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = '#ff007f';
+      ctx.shadowBlur = 35;
+      ctx.fillText(`⚡ 準備續走拜票！倒數 ${this.resumeCountdown} 秒 ⚡`, w / 2, h * 0.5);
+      ctx.restore();
+
+      this.animFrameId = requestAnimationFrame(this.loop);
+      return;
+    }
+
+    // 1. Process Hater Obstacles
     for (const note of this.notes) {
-      if (!note.hit && (currentTime - note.time) > 0.21) {
+      if (!note.hit && note.type === 'obstacle') {
+        if (currentTime >= note.time) {
+          note.hit = true;
+          if (this.activeTrack === note.track) {
+            this.stats.missCount++;
+            this.stats.combo = 0;
+            const missPen = this.costume === 'campaign_vest' ? 4 : 6;
+            this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
+            audioEngine.playSFX('error');
+
+            const hitX = this.renderEngine['canvas'].width * 0.22;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
+            this.renderEngine.triggerHitEffect(hitX, hitY, `❌ HIT!`, 'damage');
+
+            if (this.stats.supportRate <= 0) {
+              this.stop();
+              if (this.onGameOver) this.onGameOver({ ...this.stats });
+              return;
+            }
+          } else {
+            const hitX = this.renderEngine['canvas'].width * 0.22;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.38 : this.renderEngine['canvas'].height * 0.72;
+            this.renderEngine.triggerHitEffect(hitX, hitY, `✨ DODGE!`, 'dodge');
+          }
+          if (this.onStatsChange) this.onStatsChange({ ...this.stats });
+        }
+      }
+      
+      // 2. Process Missed Voter Notes
+      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.21) {
         note.hit = true;
         note.judgement = 'miss';
         this.stats.missCount++;
@@ -215,6 +283,9 @@ export class GameLoop {
         const missPen = this.costume === 'campaign_vest' ? 4 : 6;
         this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
         audioEngine.playSFX('error');
+
+        // Trigger Red Alarm Vignette Flash!
+        this.renderEngine.triggerDamageEffect();
 
         if (this.stats.supportRate <= 0) {
           this.stop();
@@ -232,7 +303,8 @@ export class GameLoop {
       this.costume,
       this.stats,
       this.inputState,
-      this.activeTrack
+      this.activeTrack,
+      this.speedMultiplier
     );
 
     const lastNote = this.notes[this.notes.length - 1];

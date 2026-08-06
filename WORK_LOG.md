@@ -1,15 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-06] Note 巨型化 150%、長條連打帶與主角上下軌動態躍動奔跑動畫
+## [2026-08-07] 跑道左側角色大圖去黑底硬框 (零黑色殘影) + 動態呼吸律動動畫 (Breathing Pulse Motion)
 
-### 變更與升級項目 (Visual & Mechanics Overhaul)
-- **1. Note 尺寸再放大 150% (115px ~ 125px Super Giant Notes)**：
-  - 音符與障礙物繪製直徑從 76px 擴大 150% 到 **118px 超大打擊圖示**！街機音遊打擊衝擊感爆棚！
-- **2. 長條連打區塊 (Long Mash Ribbon Bar)**：
-  - Muse Dash 經典連打障礙改為**斜紋流光長條帶 (Long Ribbon Bar)**，標註「🔥 MASH連打區塊 瘋狂拍擊! 🔥」，長條通過打擊點時雙手瘋狂拍擊！
-- **3. 主角 yoaka 上下軌平滑躍動/閃避跑動動畫 (Air / Ground Track Runner)**：
-  - 按下 `D/F` (Air) 時，主角 yoaka 帶有光彩軌跡平滑躍升至上軌 (`☁️ AIR RUNNER`)；按 `J/K` 時流暢降至地面軌 (`🏃 GROUND RUNNER`)。
-  - 當遇到黑粉立牌與鯊魚障礙物時，主角的閃避與躍起奔跑動作**極度清晰醒目**！
+### 變更與視覺優化項目 (Borderless Hero Side Card & Breathing Animation)
+- **1. 拆除矩形黑底與硬邊框 (No Black Box & No Border Artifacts)**：
+  - 徹底移除跑道左側角色立繪原本繪製的黑色方塊底色 (`#07091e`) 與硬質 stroke 邊框。
+  - 大圖改為極致通透的去框立繪形態，在跟隨上下軌升降跳躍時，完全不會留下任何黑色方塊殘影！
+- **2. 角色大立繪動態呼吸律動 (Breathing Pulse Motion)**：
+  - 加入動態呼吸波形（`Math.sin(time * 3.5)`）。
+  - 大立繪圖片會隨音樂節奏以 `0.96x ~ 1.04x` 的動態比例**微幅微動伸縮與霓虹 Glow 散色律動**，宛如 Live2D 般栩栩如生！
 
 ---
-*「活著很累，但比起 debug，Note 放大到 118px，主角在上下軌躍升閃避障礙，打起音遊簡直像大型街機一樣過癮哈哈！」*
+*「活著很累，但比起 debug，把黑底硬框拆掉之後完全沒有殘影，而且左邊大圖還會像心跳一樣呼吸律動，畫面真的太生動太高奢了哈哈！」*

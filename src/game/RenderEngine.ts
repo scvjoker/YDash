@@ -11,6 +11,7 @@ export interface HitParticle {
   size?: number;
   text?: string;
   isWink?: boolean;
+  type?: 'perfect' | 'great' | 'dodge' | 'damage' | 'dual_strike';
 }
 
 export class RenderEngine {
@@ -20,15 +21,21 @@ export class RenderEngine {
 
   // Assets Images
   private bgImage: HTMLImageElement | null = null;
-  private yoakaImage: HTMLImageElement | null = null;
+  private yoakaMainImage: HTMLImageElement | null = null;
+  private yoakaDefaultImage: HTMLImageElement | null = null;
+  private yoakaOfficeImage: HTMLImageElement | null = null;
+  private yoakaKpopImage: HTMLImageElement | null = null;
+
   private voterOfficeImage: HTMLImageElement | null = null;
   private voterStudentImage: HTMLImageElement | null = null;
   private haterDogImage: HTMLImageElement | null = null;
   private haterSharkImage: HTMLImageElement | null = null;
   private tissuePackImage: HTMLImageElement | null = null;
 
-  // Yoaka Runway Smooth Y Position
   private yoakaCurrentY: number = 0;
+  private yoakaTrailHistory: { y: number; alpha: number; scale: number }[] = [];
+  private damageFlashAlpha: number = 0;
+  private goldFlashAlpha: number = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -37,18 +44,37 @@ export class RenderEngine {
   }
 
   private loadAssets(): void {
-    this.bgImage = this.createImage('/cyber_runway_bg.jpg');
-    this.yoakaImage = this.createImage('/yoaka_main.jpg');
-    this.voterOfficeImage = this.createImage('/assets/voter_office.jpg');
-    this.voterStudentImage = this.createImage('/assets/voter_student.jpg');
-    this.haterDogImage = this.createImage('/assets/hater_dog_board.jpg');
-    this.haterSharkImage = this.createImage('/assets/hater_shark.jpg');
-    this.tissuePackImage = this.createImage('/assets/tissue_pack.jpg');
+    this.bgImage = this.loadSmartImage(['/cyber_runway_bg.png', '/cyber_runway_bg.jpg', '/cyber_runway_bg.jpeg', '/cyber_runway_bg.webp']);
+    this.yoakaMainImage = this.loadSmartImage(['/yoaka_main.png', '/yoaka_main.jpg', '/yoaka_main.jpeg', '/yoaka_main.webp']);
+
+    // 3 Costume Images Dedicated Loader
+    this.yoakaDefaultImage = this.loadSmartImage(['/assets/yoaka_default.png', '/assets/yoaka_default.jpg', '/assets/yoaka_default.jpeg', '/assets/yoaka_default.webp', '/yoaka_main.jpg']);
+    this.yoakaOfficeImage = this.loadSmartImage(['/assets/yoaka_office.png', '/assets/yoaka_office.jpg', '/assets/yoaka_office.jpeg', '/assets/yoaka_office.webp', '/yoaka_office.png', '/yoaka_office.jpg', '/yoaka_main.jpg']);
+    this.yoakaKpopImage = this.loadSmartImage(['/assets/yoaka_kpop.png', '/assets/yoaka_kpop.jpg', '/assets/yoaka_kpop.jpeg', '/assets/yoaka_kpop.webp', '/yoaka_kpop.png', '/yoaka_kpop.jpg', '/yoaka_main.jpg']);
+
+    this.voterOfficeImage = this.loadSmartImage(['/assets/voter_office.png', '/assets/voter_office.jpg', '/assets/voter_office.jpeg', '/assets/voter_office.webp']);
+    this.voterStudentImage = this.loadSmartImage(['/assets/voter_student.png', '/assets/voter_student.jpg', '/assets/voter_student.jpeg', '/assets/voter_student.webp']);
+    this.haterDogImage = this.loadSmartImage(['/assets/hater_dog_board.png', '/assets/hater_dog_board.jpg', '/assets/hater_dog_board.jpeg', '/assets/hater_dog_board.webp']);
+    this.haterSharkImage = this.loadSmartImage(['/assets/hater_shark.png', '/assets/hater_shark.jpg', '/assets/hater_shark.jpeg', '/assets/hater_shark.webp']);
+    this.tissuePackImage = this.loadSmartImage(['/assets/tissue_pack.png', '/assets/tissue_pack.jpg', '/assets/tissue_pack.jpeg', '/assets/tissue_pack.webp', '/assets/tissue_target.png', '/assets/tissue_target.jpg']);
   }
 
-  private createImage(src: string): HTMLImageElement {
+  private loadSmartImage(candidateUrls: string[]): HTMLImageElement {
     const img = new Image();
-    img.src = src;
+
+    let currentIndex = 0;
+    const tryNext = () => {
+      if (currentIndex < candidateUrls.length) {
+        const url = candidateUrls[currentIndex++];
+        img.src = url;
+      }
+    };
+
+    img.onerror = () => {
+      tryNext();
+    };
+
+    tryNext();
     return img;
   }
 
@@ -57,13 +83,22 @@ export class RenderEngine {
     this.canvas.height = height;
   }
 
+  public triggerDamageEffect(): void {
+    this.damageFlashAlpha = 0.65;
+  }
+
+  public triggerGoldFlashEffect(): void {
+    this.goldFlashAlpha = 0.65;
+  }
+
   public render(
     currentTime: number,
     notes: Note[],
     costume: CostumeId,
     stats: { supportRate: number; isFeverActive: boolean; combo: number },
     inputState: { airActive: boolean; groundActive: boolean },
-    activeTrack: 'air' | 'ground' = 'ground'
+    activeTrack: 'air' | 'ground' = 'ground',
+    speedMultiplier: number = 1.0
   ): void {
     const width = this.canvas.width;
     const height = this.canvas.height;
@@ -78,21 +113,44 @@ export class RenderEngine {
     const airY = height * 0.38;
     const groundY = height * 0.72;
     const hitX = width * 0.22;
-    const noteSpeed = width * 0.45;
+    const noteSpeed = width * 0.45 * speedMultiplier;
 
-    // Smooth Yoaka Track Switch Animation
+    // Smooth Yoaka Track Switch Animation & Extended High-Vis Trail Tracking
     const targetYoakaY = activeTrack === 'air' ? airY : groundY;
-    if (this.yoakaCurrentY === 0) this.yoakaCurrentY = groundY;
-    this.yoakaCurrentY += (targetYoakaY - this.yoakaCurrentY) * 0.25;
+    if (this.yoakaCurrentY === 0) {
+      this.yoakaCurrentY = groundY;
+    }
+
+    const moveDiffY = targetYoakaY - this.yoakaCurrentY;
+    if (Math.abs(moveDiffY) > 1.5) {
+      // Record Extended 14-Step Trail History
+      this.yoakaTrailHistory.unshift({ y: this.yoakaCurrentY, alpha: 0.85, scale: 1.0 });
+      if (this.yoakaTrailHistory.length > 14) {
+        this.yoakaTrailHistory.pop();
+      }
+    }
+    this.yoakaCurrentY += moveDiffY * 0.22;
+
+    // Update Trail History slow decay
+    this.yoakaTrailHistory.forEach((trail, idx) => {
+      trail.alpha -= 0.045;
+      trail.scale = Math.max(0.6, 1.0 - idx * 0.03);
+    });
+    this.yoakaTrailHistory = this.yoakaTrailHistory.filter(t => t.alpha > 0);
 
     // 2. Draw Dual Tracks
     this.drawTracks(ctx, width, height, airY, groundY, currentTime, stats.isFeverActive);
 
-    // 3. Draw Target Hit Zones
+    // 3. Draw Clean Target Hit Zones
     this.drawHitZone(ctx, hitX, airY, inputState.airActive, '#00f0ff');
     this.drawHitZone(ctx, hitX, groundY, inputState.groundActive, '#ff007f');
 
-    // 4. Draw Active Notes & Dual Beams & Long Mash Bars
+    // Dual Press: Golden Beam Connection Line
+    if (inputState.airActive && inputState.groundActive) {
+      this.drawGoldenLaserBeam(ctx, hitX, airY, groundY);
+    }
+
+    // 4. Draw Active Notes & Dual Beams
     const activeDualNotes: { [time: number]: { airX?: number; groundX?: number } } = {};
 
     for (const note of notes) {
@@ -100,7 +158,7 @@ export class RenderEngine {
       const timeDiff = note.time - currentTime;
       const noteX = hitX + timeDiff * noteSpeed;
 
-      if (noteX >= -200 && noteX <= width + 300) {
+      if (noteX >= -180 && noteX <= width + 380) {
         const noteY = note.track === 'air' ? airY : groundY;
 
         if (note.isDual) {
@@ -109,27 +167,41 @@ export class RenderEngine {
           if (note.track === 'ground') activeDualNotes[note.time].groundX = noteX;
         }
 
-        // Draw Long Mash Bar Ribbon if isMash
-        if (note.isMash) {
-          this.drawLongMashBar(ctx, noteX, noteY, noteSpeed * (note.duration || 1.8), currentTime);
-        }
-
-        // Draw 150% Enlarged Note Entity (115px ~ 125px)
-        this.drawNoteEntity(ctx, note, noteX, noteY, currentTime);
+        this.drawCleanVectorNote(ctx, note, noteX, noteY, currentTime);
       }
     }
 
-    // Draw Dual Strike Beams
+    // Draw Golden Dual Beams for Dual Notes
     Object.values(activeDualNotes).forEach(dual => {
       if (dual.airX !== undefined && dual.groundX !== undefined) {
-        this.drawDualBeam(ctx, dual.airX, airY, groundY, currentTime);
+        this.drawGoldenLaserBeam(ctx, dual.airX, airY, groundY);
       }
     });
 
-    // 5. Draw Hero Yoaka Stage running dynamically on Air/Ground Track
+    // 5. Draw Borderless Hero Side Standee with Breathing Pulse Motion!
+    this.drawHeroSideCard2X(ctx, hitX - 220, this.yoakaCurrentY, costume, currentTime, activeTrack);
+
+    // 6. Draw Hero Runner Stage (Elongated Trail Afterimages)
     this.drawYoaka(ctx, hitX, this.yoakaCurrentY, costume, currentTime, inputState.airActive || inputState.groundActive, stats.isFeverActive, activeTrack);
 
-    // 6. Start Buffer Countdown Text
+    // 7. Screen Flash Overlays
+    if (this.damageFlashAlpha > 0) {
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 0, 85, ${this.damageFlashAlpha})`;
+      ctx.fillRect(0, 0, width, height);
+      this.damageFlashAlpha -= 0.03;
+      ctx.restore();
+    }
+
+    if (this.goldFlashAlpha > 0) {
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 230, 0, ${this.goldFlashAlpha})`;
+      ctx.fillRect(0, 0, width, height);
+      this.goldFlashAlpha -= 0.04;
+      ctx.restore();
+    }
+
+    // 8. Start & Unpause Buffer Countdown Text
     if (currentTime < 4.8) {
       const countdown = Math.ceil(5.0 - currentTime);
       ctx.save();
@@ -142,12 +214,12 @@ export class RenderEngine {
       ctx.restore();
     }
 
-    // 7. Draw Fever Effects
+    // 9. Draw Fever Effects
     if (stats.isFeverActive) {
       this.drawFeverEffects(ctx, width, height, currentTime);
     }
 
-    // 8. Update & Draw Particles & Shockwaves
+    // 10. Update & Draw Particles & Shockwaves
     this.updateAndDrawParticles(ctx);
   }
 
@@ -229,11 +301,11 @@ export class RenderEngine {
     ctx.save();
     ctx.translate(x, y);
 
-    const radius = isActive ? 58 : 46; // Enlarged hit zone
+    const radius = isActive ? 52 : 42;
     ctx.strokeStyle = color;
-    ctx.lineWidth = isActive ? 7 : 4;
+    ctx.lineWidth = isActive ? 6 : 4;
     ctx.shadowColor = color;
-    ctx.shadowBlur = isActive ? 35 : 18;
+    ctx.shadowBlur = isActive ? 30 : 15;
 
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -247,81 +319,94 @@ export class RenderEngine {
     ctx.restore();
   }
 
-  private drawDualBeam(
+  private drawGoldenLaserBeam(
     ctx: CanvasRenderingContext2D,
     x: number,
     airY: number,
-    groundY: number,
-    time: number
+    groundY: number
   ): void {
     ctx.save();
+
     ctx.strokeStyle = '#ffe600';
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 10;
     ctx.shadowColor = '#ffe600';
-    ctx.shadowBlur = 24;
+    ctx.shadowBlur = 35;
 
     ctx.beginPath();
     ctx.moveTo(x, airY);
     ctx.lineTo(x, groundY);
     ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 0;
     ctx.beginPath();
-    ctx.arc(x, (airY + groundY) / 2 + Math.sin(time * 20) * 30, 10, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(x, airY);
+    ctx.lineTo(x, groundY);
+    ctx.stroke();
 
     ctx.restore();
   }
 
-  // Draw Long Rapid Mash Ribbon / Bar
-  private drawLongMashBar(
+  // Borderless Hero Standee with Breathing Pulse Motion (No Black Box & No Frame Artifacts!)
+  private drawHeroSideCard2X(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
-    barWidth: number,
-    time: number
+    costume: CostumeId,
+    time: number,
+    activeTrack: 'air' | 'ground'
   ): void {
     ctx.save();
     ctx.translate(x, y);
 
-    const barHeight = 44;
-    const grad = ctx.createLinearGradient(0, 0, barWidth, 0);
-    grad.addColorStop(0, '#ffe600');
-    grad.addColorStop(0.5, '#ff007f');
-    grad.addColorStop(1, '#00f0ff');
+    // Breathing Pulse Sine Wave (Scale 0.96x ~ 1.04x)
+    const breathScale = 1.0 + Math.sin(time * 3.5) * 0.04;
+    const baseW = 310;
+    const baseH = 310;
+    const cardW = baseW * breathScale;
+    const cardH = baseH * breathScale;
 
-    ctx.fillStyle = grad;
-    ctx.shadowColor = '#ffe600';
-    ctx.shadowBlur = 20;
+    let accentColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
+    let costumeName = '👑 預設競選背心裝';
+    let targetImg = this.yoakaDefaultImage || this.yoakaMainImage;
 
-    // Slanted Long Bar Ribbon
-    ctx.beginPath();
-    ctx.roundRect(0, -barHeight / 2, barWidth, barHeight, 14);
-    ctx.fill();
-
-    // Stripes Pattern Inside Bar
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-    ctx.lineWidth = 4;
-    const stripeOffset = (time * 120) % 20;
-    for (let sx = -stripeOffset; sx < barWidth; sx += 20) {
-      ctx.beginPath();
-      ctx.moveTo(sx, -barHeight / 2);
-      ctx.lineTo(sx - 10, barHeight / 2);
-      ctx.stroke();
+    if (costume === 'office_glasses') {
+      accentColor = '#ffe600';
+      costumeName = '👓 襯衫領帶眼鏡裝';
+      targetImg = this.yoakaOfficeImage || this.yoakaMainImage;
+    } else if (costume === 'kpop_idol') {
+      accentColor = '#ff007f';
+      costumeName = '✨ K-Pop 閃耀偶像裝';
+      targetImg = this.yoakaKpopImage || this.yoakaMainImage;
     }
 
-    // Label Text on Bar
-    ctx.font = '900 16px "Chakra Petch", sans-serif';
-    ctx.fillStyle = '#ffffff';
+    // Borderless Dynamic Neon Glow Effect (No Black Box background or border lines!)
+    ctx.shadowColor = accentColor;
+    ctx.shadowBlur = 45;
+
+    if (targetImg && targetImg.complete && targetImg.naturalWidth !== 0) {
+      ctx.save();
+      // Rounded image clip for soft edges without black background
+      ctx.beginPath();
+      ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 24);
+      ctx.clip();
+      ctx.drawImage(targetImg, -cardW / 2, -cardH / 2, cardW, cardH);
+      ctx.restore();
+    }
+
+    // Clean Floating Costume Label Pill
+    ctx.font = '900 15px "Chakra Petch", sans-serif';
+    ctx.fillStyle = accentColor;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🔥 MASH連打區塊 瘋狂拍擊! 🔥', barWidth / 2, 0);
+    ctx.shadowColor = accentColor;
+    ctx.shadowBlur = 18;
+    ctx.fillText(costumeName, 0, cardH / 2 + 22);
 
     ctx.restore();
   }
 
-  // Draw 150% Enlarged Note Entity (115px ~ 125px)
-  private drawNoteEntity(
+  private drawCleanVectorNote(
     ctx: CanvasRenderingContext2D,
     note: Note,
     x: number,
@@ -331,85 +416,62 @@ export class RenderEngine {
     ctx.save();
     ctx.translate(x, y);
 
-    const bounce = Math.sin(time * 12) * 5;
-    const size = 118; // Enlarged +150% to ~118px!
+    const bounce = Math.sin(time * 14) * 4;
+    const isObstacle = note.type === 'obstacle' || note.entity.startsWith('hater');
 
-    let targetImg: HTMLImageElement | null = null;
-    let label = 'VOTER';
-    let borderColor = note.isDual ? '#ffe600' : '#00f0ff';
+    if (isObstacle) {
+      const size = 360;
+      const targetHaterImg = note.entity === 'hater_dog_board' ? this.haterDogImage : this.haterSharkImage;
 
-    if (note.entity === 'voter_office') {
-      targetImg = this.voterOfficeImage;
-      label = 'VOTER';
-    } else if (note.entity === 'voter_student' || note.entity === 'voter_cloud') {
-      targetImg = this.voterStudentImage;
-      label = 'STUDENT';
-    } else if (note.entity === 'hater_dog_board') {
-      targetImg = this.haterDogImage;
-      label = 'HATER';
-      borderColor = '#ff0055';
-    } else if (note.entity === 'hater_shark_rose') {
-      targetImg = this.haterSharkImage;
-      label = 'SHARK';
-      borderColor = '#ff007f';
-    } else if (note.entity === 'tissue_bonus') {
-      targetImg = this.tissuePackImage;
-      label = 'TISSUE';
-      borderColor = '#ffe600';
-    }
+      ctx.shadowColor = '#ff0055';
+      ctx.shadowBlur = 100;
 
-    if (note.isMash) {
-      label = 'MASH!';
-      borderColor = '#ffe600';
-    }
+      if (targetHaterImg && targetHaterImg.complete && targetHaterImg.naturalWidth !== 0) {
+        ctx.drawImage(targetHaterImg, -size / 2, bounce - size / 2, size, size);
+      } else {
+        ctx.fillStyle = '#ff0055';
+        ctx.beginPath();
+        ctx.arc(0, bounce, size / 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
-    if (targetImg && targetImg.complete && targetImg.naturalWidth !== 0) {
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = note.isDual ? 6 : 4;
-      ctx.shadowColor = borderColor;
-      ctx.shadowBlur = 25;
+      ctx.font = '900 20px "Chakra Petch", sans-serif';
+      ctx.fillStyle = '#ff0055';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = '#ff0055';
+      ctx.shadowBlur = 24;
+      ctx.fillText('⚠️ DODGE 閃避!', 0, bounce + size / 2 + 20);
 
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(0, bounce, size / 2, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.clip();
-      ctx.drawImage(targetImg, -size / 2, bounce - size / 2, size, size);
-      ctx.restore();
     } else {
-      ctx.fillStyle = borderColor;
-      ctx.shadowColor = borderColor;
-      ctx.shadowBlur = 25;
+      const isAir = note.track === 'air';
+      const mainColor = note.isDual ? '#ffe600' : isAir ? '#00f0ff' : '#ff007f';
+      const radius = 38;
+
+      ctx.fillStyle = mainColor;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = mainColor;
+      ctx.shadowBlur = 20;
+
       ctx.beginPath();
-      ctx.arc(0, bounce, size / 2, 0, Math.PI * 2);
+      ctx.arc(0, bounce, radius, 0, Math.PI * 2);
       ctx.fill();
-    }
+      ctx.stroke();
 
-    if (note.isDual) {
-      ctx.font = '900 14px "Chakra Petch", sans-serif';
-      ctx.fillStyle = '#ffe600';
-      ctx.textAlign = 'center';
-      ctx.shadowColor = '#ffe600';
-      ctx.shadowBlur = 12;
-      ctx.fillText('⚡ DUAL!', 0, bounce - 68);
-    } else if (note.isMash) {
-      ctx.font = '900 14px "Chakra Petch", sans-serif';
-      ctx.fillStyle = '#ffe600';
-      ctx.textAlign = 'center';
-      ctx.shadowColor = '#ffe600';
-      ctx.shadowBlur = 14;
-      ctx.fillText('🔥 MASH連打!', 0, bounce - 68);
-    }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, bounce, radius * 0.4, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.font = '900 15px "Chakra Petch", sans-serif';
-    ctx.fillStyle = borderColor;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, 0, bounce + 72);
+      ctx.font = '900 13px "Chakra Petch", sans-serif';
+      ctx.fillStyle = mainColor;
+      ctx.textAlign = 'center';
+      ctx.fillText(note.isDual ? '⚡ DUAL' : isAir ? 'AIR VOTER' : 'GND VOTER', 0, bounce + 50);
+    }
 
     ctx.restore();
   }
 
-  // Draw Hero Yoaka Stage (Smoothly switches & runs on Air / Ground Track)
   private drawYoaka(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -421,6 +483,31 @@ export class RenderEngine {
     activeTrack: 'air' | 'ground'
   ): void {
     ctx.save();
+
+    this.yoakaTrailHistory.forEach((trail) => {
+      ctx.save();
+      ctx.translate(x, trail.y);
+      ctx.globalAlpha = trail.alpha;
+      const trailColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
+      ctx.strokeStyle = trailColor;
+      ctx.lineWidth = 6 * trail.scale;
+      ctx.shadowColor = trailColor;
+      ctx.shadowBlur = 30;
+
+      const r = 44 * trail.scale;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      if (this.tissuePackImage && this.tissuePackImage.complete && this.tissuePackImage.naturalWidth !== 0) {
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.9, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(this.tissuePackImage, -r * 0.9, -r * 0.9, r * 1.8, r * 1.8);
+      }
+      ctx.restore();
+    });
+
     ctx.translate(x, y);
 
     const runCycle = Math.sin(time * 20) * 6;
@@ -432,30 +519,28 @@ export class RenderEngine {
     ctx.shadowColor = isFever ? '#ffe600' : mainColor;
     ctx.shadowBlur = isStriking ? 40 : 20;
 
-    // Dynamic Motion Trail Glow Lines
     ctx.strokeStyle = mainColor;
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.arc(0, bodyY, 46, 0, Math.PI * 2);
+    ctx.arc(0, bodyY, 44, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Track Indicator Pill Tag on Hero
     ctx.font = '900 12px "Chakra Petch", sans-serif';
     ctx.fillStyle = mainColor;
     ctx.textAlign = 'center';
-    ctx.fillText(activeTrack === 'air' ? '☁️ AIR RUNNER' : '🏃 GROUND RUNNER', 0, bodyY - 56);
+    ctx.fillText(activeTrack === 'air' ? '☁️ AIR (上軌閃避/發紙)' : '🏃 GND (地面軌奔跑)', 0, bodyY - 54);
 
-    if (this.yoakaImage && this.yoakaImage.complete && this.yoakaImage.naturalWidth !== 0) {
+    if (this.tissuePackImage && this.tissuePackImage.complete && this.tissuePackImage.naturalWidth !== 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.arc(0, bodyY, 43, 0, Math.PI * 2);
+      ctx.arc(0, bodyY, 41, 0, Math.PI * 2);
       ctx.clip();
-      ctx.drawImage(this.yoakaImage, -43, bodyY - 43, 86, 86);
+      ctx.drawImage(this.tissuePackImage, -41, bodyY - 41, 82, 82);
       ctx.restore();
     } else {
       ctx.fillStyle = mainColor;
       ctx.beginPath();
-      ctx.arc(0, bodyY, 43, 0, Math.PI * 2);
+      ctx.arc(0, bodyY, 41, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -477,15 +562,69 @@ export class RenderEngine {
     ctx.restore();
   }
 
-  public triggerHitEffect(x: number, y: number, text: string, isPerfect: boolean): void {
-    const isWink = isPerfect;
+  public triggerHitEffect(x: number, y: number, text: string, type: 'perfect' | 'great' | 'dodge' | 'damage'): void {
+    if (type === 'damage') {
+      this.triggerDamageEffect();
 
+      this.particles.push({
+        x,
+        y: y - 20,
+        vx: 0,
+        vy: -2.0,
+        color: '#ff0055',
+        life: 1.2,
+        maxLife: 1.2,
+        text: `❌ HIT! -6% HP`,
+        type: 'damage'
+      });
+
+      for (let i = 0; i < 15; i++) {
+        this.particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.5) * 14,
+          color: '#ff0055',
+          life: 0.6,
+          maxLife: 0.6
+        });
+      }
+      return;
+    }
+
+    if (type === 'dodge') {
+      this.particles.push({
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        color: '#00f0ff',
+        life: 0.5,
+        maxLife: 0.5,
+        size: 50
+      });
+
+      this.particles.push({
+        x,
+        y: y - 35,
+        vx: 0,
+        vy: -3.5,
+        color: '#00f0ff',
+        life: 1.0,
+        maxLife: 1.0,
+        text: `✨ DODGE! 成功閃避`,
+        type: 'dodge'
+      });
+      return;
+    }
+
+    const isWink = type === 'perfect';
     this.particles.push({
       x,
       y,
       vx: 0,
       vy: 0,
-      color: isPerfect ? '#ffe600' : '#00f0ff',
+      color: isWink ? '#ffe600' : '#00f0ff',
       life: 0.45,
       maxLife: 0.45,
       size: 40
@@ -496,14 +635,18 @@ export class RenderEngine {
       y: y - 35,
       vx: (Math.random() - 0.5) * 2,
       vy: -4.5,
-      color: isPerfect ? '#ffe600' : '#00f0ff',
+      color: isWink ? '#ffe600' : '#00f0ff',
       life: 1.0,
       maxLife: 1.0,
       text: isWink ? `WINK! ${text}` : text,
       isWink
     });
 
-    const count = isPerfect ? 18 : 9;
+    if (text.includes('DUAL')) {
+      this.triggerGoldFlashEffect();
+    }
+
+    const count = isWink ? 18 : 9;
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x,
@@ -542,10 +685,12 @@ export class RenderEngine {
         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
         ctx.stroke();
       } else if (p.text) {
-        ctx.font = p.isWink ? '900 28px "Chakra Petch", sans-serif' : '700 22px "Chakra Petch", sans-serif';
+        const isDamage = p.type === 'damage';
+        const isDual = p.type === 'dual_strike';
+        ctx.font = isDamage || isDual ? '900 34px "Chakra Petch", sans-serif' : p.isWink ? '900 28px "Chakra Petch", sans-serif' : '700 22px "Chakra Petch", sans-serif';
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 25;
         ctx.textAlign = 'center';
         ctx.fillText(p.text, p.x, p.y);
       } else {
