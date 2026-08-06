@@ -1,14 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 倒數秒數與 Resume 緩衝黃色文字 Y 軸位置調降 (`height * 0.24` 防 HUD 遮擋)
+## [2026-08-07] 暫停介面 (PauseModal) 實裝全螢幕 (Fullscreen) 按鈕 + 畫面切換/跳出 App 自動進入暫停防坑保護
 
-### 變更與倒數繪製位置優化項目 (Countdown Text Y-Position Adjustment)
-- **1. 倒數秒數繪製位置優化 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) & [GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
-  - 將開局與點擊 Resume 暫停解除時的 `⚡ 準備拜票！倒數 5...4...3...2...1 秒 ⚡` 黃色醒目文字 Y 軸繪製高度由原本的 `height * 0.18` 調降至最空曠的 **`height * 0.24`**！
-  - 完美的介於頂端單行 HUD 面板與上軌 (`height * 0.35`) 之間的黃金黃區，100% 絕不被進度條或 HP 欄位遮擋，手機與電腦雙平台皆看得清清楚楚！
+### 變更與手機暫停體驗保護項目 (Pause Modal Fullscreen & Auto-Pause)
+- **1. 暫停介面實裝全螢幕按鈕 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 在遊戲暫停彈窗右上角新增 **` Maximize 全螢幕`** 亮金按鈕。
+  - 手機玩家按暫停時可隨時一鍵重新進入全螢幕狀態，隨後點擊「繼續拜票」享受 5 秒緩衝！
+- **2. 畫面切換與切離開 App 自動進入暫停 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 監聽 `visibilitychange`（`document.hidden`）與 `window.blur` 事件。
+  - 當手機切換至其他 App、收到訊息跳出視窗、或切換瀏覽器分頁時，遊戲會在背景**自動觸發 Pause 暫停**，切回後展示暫停選單並給予 5 秒緩衝倒數，防坑防 Lose！
 
 ---
-*「活著很累，但比起 debug，把倒數黃字往下降到黃金位，畫面看得清清楚楚完全不擋，這細節改完真的太舒暢了哈哈！」*
+*「活著很累，但比起 debug，跳出訊息或切 App 音遊自動幫我暫停，暫停視窗隨時能按全螢幕，再也不怕手滑掉 Combo 了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

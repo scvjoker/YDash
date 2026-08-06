@@ -53,6 +53,33 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
+  useEffect(() => {
+    const triggerAutoPause = () => {
+      if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
+        gameLoopRef.current.pause();
+        setIsPaused(true);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        triggerAutoPause();
+      }
+    };
+
+    const handleBlur = () => {
+      triggerAutoPause();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [gameState, isPaused]);
+
   const handleStartGame = (
     beatmap: BeatmapData,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
