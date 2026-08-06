@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCw, Smartphone } from 'lucide-react';
+import { RotateCw, Smartphone, Maximize } from 'lucide-react';
 
 export const LandscapePrompt: React.FC = () => {
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -11,13 +11,10 @@ export const LandscapePrompt: React.FC = () => {
       setIsPortrait(isMobile && portrait);
     };
 
-    // Auto attempt to lock orientation if API supported
     try {
       const orientationApi = window.screen?.orientation as unknown as { lock?: (orient: string) => Promise<void> };
       if (orientationApi && typeof orientationApi.lock === 'function') {
-        orientationApi.lock('landscape').catch(() => {
-          // Device policy may block automatic locking until user interaction
-        });
+        orientationApi.lock('landscape').catch(() => {});
       }
     } catch {
       // Ignore fallback
@@ -31,6 +28,12 @@ export const LandscapePrompt: React.FC = () => {
       window.removeEventListener('orientationchange', checkOrientation);
     };
   }, []);
+
+  const handleEnterFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  };
 
   if (!isPortrait) return null;
 
@@ -49,20 +52,20 @@ export const LandscapePrompt: React.FC = () => {
       textAlign: 'center'
     }}>
       <div className="cyber-panel float-animation" style={{
-        padding: '2.5rem',
+        padding: '2.2rem',
         borderRadius: '28px',
         border: '2px solid #00f0ff',
         boxShadow: '0 0 45px rgba(0, 240, 255, 0.6)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '1.2rem',
+        gap: '1rem',
         maxWidth: '380px'
       }}>
         <div style={{
           position: 'relative',
-          width: '80px',
-          height: '80px',
+          width: '76px',
+          height: '76px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -71,9 +74,9 @@ export const LandscapePrompt: React.FC = () => {
           border: '1.5px solid #00f0ff',
           boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)'
         }}>
-          <Smartphone size={42} color="#00f0ff" />
+          <Smartphone size={38} color="#00f0ff" />
           <RotateCw
-            size={28}
+            size={26}
             color="#ffe600"
             style={{
               position: 'absolute',
@@ -86,7 +89,7 @@ export const LandscapePrompt: React.FC = () => {
 
         <h2 style={{
           fontFamily: 'Chakra Petch, sans-serif',
-          fontSize: '1.8rem',
+          fontSize: '1.7rem',
           fontWeight: 900,
           color: '#ffe600',
           textShadow: '0 0 15px rgba(255,230,0,0.6)'
@@ -94,20 +97,27 @@ export const LandscapePrompt: React.FC = () => {
           📱 請旋轉手機為「橫向模式」
         </h2>
 
-        <p style={{ color: '#ccc', fontSize: '0.95rem', lineHeight: 1.5 }}>
-          為了獲得最極致的 Muse Dash 雙軌音遊打擊視野與雙手靈敏觸控體驗，請將手機橫向拿握！
+        <p style={{ color: '#ccc', fontSize: '0.9rem', lineHeight: 1.45 }}>
+          轉為橫向拿握並進入全螢幕，享受最廣闊的 Muse Dash 雙軌打擊體驗！
         </p>
+
+        <button
+          className="muse-btn muse-btn-yellow"
+          onClick={handleEnterFullscreen}
+          style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', gap: '6px' }}
+        >
+          <span><Maximize size={18} /> 進入全螢幕 (FULLSCREEN)</span>
+        </button>
 
         <div style={{
           background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
           color: '#000',
           fontWeight: 900,
-          padding: '8px 24px',
-          borderRadius: '20px',
-          fontSize: '0.88rem',
-          boxShadow: '0 0 15px rgba(0,240,255,0.4)'
+          padding: '6px 18px',
+          borderRadius: '16px',
+          fontSize: '0.8rem'
         }}>
-          ROTATE YOUR PHONE TO LANDSCAPE
+          ROTATE & PLAY FULLSCREEN
         </div>
       </div>
     </div>

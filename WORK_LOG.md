@@ -1,16 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 手機介面全畫面適配 + 橫向模式 (Landscape Mode) 自動引導提醒與雙手觸控優化
+## [2026-08-07] 實裝一鍵全螢幕模式 (Fullscreen Toggle) + 手機橫屏右側選單動態邊界彈性防遮擋適配
 
-### 變更與手機行動裝置適配項目 (Mobile Adaptation & Landscape Prompt)
-- **1. 全全畫面手機直屏轉橫屏主動引導 (`LandscapePrompt.tsx`)**：
-  - 當玩家使用手機或觸控裝置以直屏模式 (Portrait) 打開遊戲時，系統會自動跳出全螢幕賽博極光引導面板：
-    - **`📱 請旋轉手機為「橫向模式」`**（帶有 3D 旋轉手勢圖示與引導說明）。
-  - 同時自動呼叫 Web Screen Orientation API 嘗試將螢幕自動鎖定為橫屏（Landscape），給予玩家最完美的 Muse Dash 音遊打擊視野！
-- **2. 手機橫屏 Viewport 自適應縮放與雙手觸控適配 (Responsive Touch Controls)**：
-  - 更新 `index.css` 與 `HUDOverlay.tsx` 中的媒體查詢 (Media Query)。
-  - 在手機小螢幕上，底部的「上軌 (D/F)」與「下軌 (J/K)」雙觸控按鈕自動縮放為 `85px` 最順手高度，並滿版橫分左右兩半。
-  - 加上 `touch-action: manipulation`，消除手機雙擊縮放延遲，雙手觸控打擊反饋感極致順暢！
+### 變更與邊界體驗修復項目 (Fullscreen API & Auto-Fit Bounds)
+- **1. 全螢幕模式 (Fullscreen Mode Trigger)**：
+  - 在主選單右上角與橫屏提醒視窗上新增 **` Maximize (全螢幕)`** 金黃霓虹按鈕！
+  - 點擊可一鍵隱藏手機網址列與系統工具列，讓手機滿版享受 100% 音遊畫質與極致雙手打擊空間！
+- **2. 手機橫屏右側選單動態邊界自動適應 (Auto-Fit Scrollable Bounds)**：
+  - 更新 [StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx) 右側欄位為彈性自動適應與可滾動容器 (`maxHeight: 96vh`, `overflowY: auto`)。
+  - 在高度受限的手機橫屏上，內距 Padding 與按鈕尺寸會自動動態壓縮，徹底解決以往右下角按鈕超出畫面無法點擊的 Bug！
 
 ---
-*「活著很累，但比起 debug，直屏自動跳提醒轉橫屏，橫屏時觸控大鈕跟視角縮放得剛剛好，用手機玩真的太流暢太爽快了哈哈！」*
+*「活著很累，但比起 debug，按一下全螢幕把手機網址列隱藏掉，右下角的按鈕通通看得清清楚楚隨點隨動，這適配真的太貼心了哈哈！」*
