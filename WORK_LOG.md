@@ -1,22 +1,22 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] iOS Safari 避開工具列與無邊框沉浸全螢幕 4 大最佳實踐方案全數落地實裝
+## [2026-08-07] iOS Safari 全螢幕與導覽列避讓 4 大黃金解法全數實裝落地
 
-### 變更與 iOS Safari 專屬最佳化項目 (iOS Safari Toolbar & Fullscreen Optimization)
-- **1. 方案一 (100svh + Safe Area + viewport-fit=cover)**：
-  - 更新 [index.html](file:///d:/pj/YoakaDash/index.html) Meta: `<meta name="viewport" content="... viewport-fit=cover">`。
-  - 外層容器升級為 **`100svh` (Small Viewport Height)**，永遠以「網址列展開時」最小可見區域為基準，徹底鎖定視覺，防止 Safari 工具列收合與展開時產生抖動！
-  - 實裝 CSS 避開瀏海與動態島 Safe Area: `padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)`。
-- **2. 方案二 (引導用戶「加入主畫面」PWA Standalone)**：
-  - 植入 iOS Standalone Meta Tags (`apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`)。
-  - 新增 [IOSHomePrompt.tsx](file:///d:/pj/YoakaDash/src/components/IOSHomePrompt.tsx)！當 iOS 使用者點擊全螢幕按鈕時，彈出精美的 2 步驟 PWA「加入主畫面」沉浸解鎖指南彈窗。
-- **3. 方案三 (1px 觸控自動滾動折疊網址列黑科技)**：
-  - 在 [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx) 實裝首次 `touchstart` 事件觸發 `window.scrollTo(0, 1)`，引導 iOS Safari 自動將頂部與底部網址列向下折疊！
-- **4. 方案四 (UI Safe Zone 安全區策略)**：
-  - 核心 Canvas 與 HUD 按鈕雙重內縮 Safe Zone，確保持續避開動態島與 Safari 網址列！
+### 變更與 iOS Safari 視埠與 PWA 優化項目 (iOS Fullscreen & Safe Area Integration)
+- **1. 方案一：現代 CSS 動態視埠單位 (100svh) + Safe Area ([index.html](file:///d:/pj/YoakaDash/index.html) & [index.css](file:///d:/pj/YoakaDash/src/index.css))**：
+  - 設定 `viewport-fit=cover`, `maximum-scale=1.0`, `user-scalable=no`。
+  - 使用 `100svh` 鎖定視覺區域避免 Safari 工具列收合帶來的畫面抖動。
+  - 引入 `padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)` 避開 iPhone 瀏海與動態島。
+- **2. 方案二：引導用戶「加入主畫面」(PWA Standalone) ([IOSInstallPrompt.tsx](file:///d:/pj/YoakaDash/src/components/IOSInstallPrompt.tsx))**：
+  - 實裝 `apple-mobile-web-app-capable` 與 `apple-mobile-web-app-status-bar-style` 標籤。
+  - 建立 `IOSInstallPrompt` 獨立引導元件，在 iOS 非 Standalone 模式時溫馨引導玩家「分享 ➔ 加入主畫面」解鎖 100% 獨立無邊框全螢幕。
+- **3. 方案三：網址列動態折疊技巧 (Touch Nudge Scroll) ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 監聽玩家首次 `touchstart` 觸摸，自動觸發 `window.scrollTo(0, 1)` 自動觸發 Safari 網址列收合。
+- **4. 方案四：動態自適應畫布與安全區設計 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 在 `PauseModal` 中對 iOS 裝置提供專屬沉浸體驗提示，避免原生日誌報錯。
 
 ---
-*「活著很累，但比起 debug，把 100svh、Safe Area、iOS 1px 觸控隱藏網址列跟『加入主畫面』PWA 指南一次搞定，這 iOS 體驗品質簡直封神啦哈哈！」*
+*「活著很累，但比起 debug，把 iOS 4 大全螢幕方案一口氣實裝完成，iOS 上玩起來完全不被 Safari 工具列騷擾，這適配細節真的太講究啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

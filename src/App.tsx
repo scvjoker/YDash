@@ -15,17 +15,13 @@ import { ResultScreen } from './components/ResultScreen';
 import { LandscapePrompt } from './components/LandscapePrompt';
 import { SongSelectModal } from './components/SongSelectModal';
 import { TutorialOverlay } from './components/TutorialOverlay';
-import { IOSHomePrompt } from './components/IOSHomePrompt';
+import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [showSongSelect, setShowSongSelect] = useState<boolean>(false);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
-  const [showIOSHomePrompt, setShowIOSHomePrompt] = useState<boolean>(false);
-
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
-  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -50,10 +46,8 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     audioEngine.loadDefaultBGM();
-  }, []);
 
-  // 🚀 iOS Safari TouchStart Nudge Trick: Scroll 1px on first touch to auto-collapse Safari address bar
-  useEffect(() => {
+    // Scheme 3: iOS Nudge Trick - Trigger window.scrollTo(0, 1) on first touch to auto-collapse Safari toolbar
     const handleFirstTouch = () => {
       window.scrollTo(0, 1);
       setTimeout(() => {
@@ -65,34 +59,19 @@ export const App: React.FC = () => {
     };
 
     window.addEventListener('touchstart', handleFirstTouch, { once: true });
-    return () => {
-      window.removeEventListener('touchstart', handleFirstTouch);
-    };
+    return () => window.removeEventListener('touchstart', handleFirstTouch);
   }, []);
 
-  // Monitor Fullscreen & Screen Size for Non-Fullscreen Mobile Scaling
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
     const handleResize = () => {
-      const isMobile = window.innerWidth <= 920 || window.innerHeight <= 540;
-      setIsMobileScreen(isMobile);
-
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
       }
     };
-
     handleResize();
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
     window.addEventListener('resize', handleResize);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
@@ -221,162 +200,132 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  // Non-fullscreen Mobile Viewport Scale Protection (Using 100svh + 0.76 scale for maximum stability)
-  const isStandaloneMode = (typeof window !== 'undefined') && (
-    (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches
-  );
-  const shouldScale78Percent = isMobileScreen && !isFullscreen && !isStandaloneMode;
-
   return (
-    <div style={{
-      width: '100vw',
-      height: '100svh', // Option 1: 100svh (Small Viewport Height) - Locks minimum visible area and prevents Safari toolbars jumping!
-      position: 'relative',
-      overflow: 'hidden',
-      backgroundColor: '#050712',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'
-    }}>
-      <div style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        transform: shouldScale78Percent ? 'scale(0.76)' : 'none',
-        transformOrigin: 'center center',
-        transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
-      }}>
-        {/* Mobile Landscape Orientation Prompt */}
-        <LandscapePrompt />
+    <div style={{ width: '100vw', height: '100svh', position: 'relative', overflow: 'hidden' }}>
+      {/* Mobile Landscape Orientation Prompt */}
+      <LandscapePrompt />
 
-        {/* 1. START SCREEN */}
-        {gameState === 'menu' && (
-          <StartScreen
-            currentSong={currentSong}
-            selectedCostume={selectedCostume}
-            onStartGame={(song, diff, speed) => handleStartGame(song, diff, speed)}
-            onOpenSongSelect={() => setShowSongSelect(true)}
-            onOpenTutorial={() => setShowTutorial(true)}
-            onOpenCostumes={() => setGameState('costumes')}
-            onOpenEditor={() => setGameState('editor')}
-          />
-        )}
+      {/* iOS Safari Add to Home Screen PWA Install Prompt */}
+      <IOSInstallPrompt />
 
-        {/* 2. SONG SELECTION HALL MODAL */}
-        {showSongSelect && (
-          <SongSelectModal
-            currentSongId={currentSong.id}
-            currentDifficulty={currentDifficulty}
-            currentSpeed={currentNoteSpeed}
-            onSelectSong={(song, diff, speed) => {
-              setCurrentSong(song);
-              setCurrentDifficulty(diff);
-              setCurrentNoteSpeed(speed);
-              setShowSongSelect(false);
-            }}
-            onClose={() => setShowSongSelect(false)}
-          />
-        )}
+      {/* 1. START SCREEN */}
+      {gameState === 'menu' && (
+        <StartScreen
+          currentSong={currentSong}
+          selectedCostume={selectedCostume}
+          onStartGame={(song, diff, speed) => handleStartGame(song, diff, speed)}
+          onOpenSongSelect={() => setShowSongSelect(true)}
+          onOpenTutorial={() => setShowTutorial(true)}
+          onOpenCostumes={() => setGameState('costumes')}
+          onOpenEditor={() => setGameState('editor')}
+        />
+      )}
 
-        {/* 3. TUTORIAL OVERLAY MODAL */}
-        {showTutorial && (
-          <TutorialOverlay
-            onClose={() => setShowTutorial(false)}
-          />
-        )}
+      {/* 2. SONG SELECTION HALL MODAL */}
+      {showSongSelect && (
+        <SongSelectModal
+          currentSongId={currentSong.id}
+          currentDifficulty={currentDifficulty}
+          currentSpeed={currentNoteSpeed}
+          onSelectSong={(song, diff, speed) => {
+            setCurrentSong(song);
+            setCurrentDifficulty(diff);
+            setCurrentNoteSpeed(speed);
+            setShowSongSelect(false);
+          }}
+          onClose={() => setShowSongSelect(false)}
+        />
+      )}
 
-        {/* 4. COSTUME MODAL */}
-        {gameState === 'costumes' && (
-          <CostumeModal
-            selectedCostume={selectedCostume}
-            onSelectCostume={id => setSelectedCostume(id)}
-            onClose={() => setGameState('menu')}
-          />
-        )}
+      {/* 3. TUTORIAL OVERLAY MODAL */}
+      {showTutorial && (
+        <TutorialOverlay
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
 
-        {/* 5. BEATMAP EDITOR MODAL */}
-        {gameState === 'editor' && (
-          <BeatmapEditor
-            onClose={() => setGameState('menu')}
-            onPlayCustomMap={customMap => {
-              const customSong: SongData = {
-                id: 'custom',
-                title: customMap.metadata.title,
-                subtitle: '玩家自製 A+B 譜面',
-                artist: customMap.metadata.artist,
-                bpm: customMap.metadata.bpm,
-                duration: 180,
-                cover: '/assets/yoaka_kpop.png',
-                bg: '/cyber_runway_bg.png',
-                audio: '/assets/audio/street_campaign_vocal.mp3',
-                storyStage: '合',
-                isRhapsody: true,
-                storyContext: '【A+B 自製譜面】玩家上傳音檔與 AI 自動抓拍譜面！',
-                difficultyRating: { Easy: 3, Normal: 4, Hard: 5 }
-              };
-              handleStartGame(customSong, 'Normal', 1.0);
-            }}
-          />
-        )}
+      {/* 4. COSTUME MODAL */}
+      {gameState === 'costumes' && (
+        <CostumeModal
+          selectedCostume={selectedCostume}
+          onSelectCostume={id => setSelectedCostume(id)}
+          onClose={() => setGameState('menu')}
+        />
+      )}
 
-        {/* 6. CANVAS RHYTHM GAMEPLAY */}
-        <canvas
-          ref={canvasRef}
-          style={{
-            display: gameState === 'playing' || gameState === 'result' ? 'block' : 'none',
-            width: '100%',
-            height: '100%'
+      {/* 5. BEATMAP EDITOR MODAL */}
+      {gameState === 'editor' && (
+        <BeatmapEditor
+          onClose={() => setGameState('menu')}
+          onPlayCustomMap={customMap => {
+            const customSong: SongData = {
+              id: 'custom',
+              title: customMap.metadata.title,
+              subtitle: '玩家自製 A+B 譜面',
+              artist: customMap.metadata.artist,
+              bpm: customMap.metadata.bpm,
+              duration: 180,
+              cover: '/assets/yoaka_kpop.png',
+              bg: '/cyber_runway_bg.png',
+              audio: '/assets/audio/street_campaign_vocal.mp3',
+              storyStage: '合',
+              isRhapsody: true,
+              storyContext: '【A+B 自製譜面】玩家上傳音檔與 AI 自動抓拍譜面！',
+              difficultyRating: { Easy: 3, Normal: 4, Hard: 5 }
+            };
+            handleStartGame(customSong, 'Normal', 1.0);
           }}
         />
+      )}
 
-        {/* 7. HUD OVERLAY */}
-        {gameState === 'playing' && (
-          <HUDOverlay
-            stats={gameStats}
-            costume={selectedCostume}
-            onAirPress={() => gameLoopRef.current?.triggerKeyInput('air')}
-            onGroundPress={() => gameLoopRef.current?.triggerKeyInput('ground')}
-            onPause={handleTogglePause}
-          />
-        )}
+      {/* 6. CANVAS RHYTHM GAMEPLAY */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          display: gameState === 'playing' || gameState === 'result' ? 'block' : 'none',
+          width: '100%',
+          height: '100%'
+        }}
+      />
 
-        {/* 8. PAUSE MODAL */}
-        {isPaused && (
-          <PauseModal
-            stats={gameStats}
-            beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
-            onResume={handleTogglePause}
-            onRestart={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
-            onHome={() => {
-              if (gameLoopRef.current) gameLoopRef.current.stop();
-              setIsPaused(false);
-              setGameState('menu');
-            }}
-            onShowIOSPrompt={() => setShowIOSHomePrompt(true)}
-          />
-        )}
+      {/* 7. HUD OVERLAY */}
+      {gameState === 'playing' && (
+        <HUDOverlay
+          stats={gameStats}
+          costume={selectedCostume}
+          onAirPress={() => gameLoopRef.current?.triggerKeyInput('air')}
+          onGroundPress={() => gameLoopRef.current?.triggerKeyInput('ground')}
+          onPause={handleTogglePause}
+        />
+      )}
 
-        {/* 9. RESULT SCREEN */}
-        {gameState === 'result' && (
-          <ResultScreen
-            stats={gameStats}
-            beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
-            onReplay={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
-            onHome={() => {
-              if (gameLoopRef.current) gameLoopRef.current.stop();
-              setGameState('menu');
-            }}
-          />
-        )}
+      {/* 8. PAUSE MODAL */}
+      {isPaused && (
+        <PauseModal
+          stats={gameStats}
+          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
+          onResume={handleTogglePause}
+          onRestart={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
+          onHome={() => {
+            if (gameLoopRef.current) gameLoopRef.current.stop();
+            setIsPaused(false);
+            setGameState('menu');
+          }}
+        />
+      )}
 
-        {/* 10. iOS PWA ADD TO HOME SCREEN PROMPT */}
-        {showIOSHomePrompt && (
-          <IOSHomePrompt
-            onClose={() => setShowIOSHomePrompt(false)}
-          />
-        )}
-      </div>
+      {/* 9. RESULT SCREEN */}
+      {gameState === 'result' && (
+        <ResultScreen
+          stats={gameStats}
+          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
+          onReplay={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
+          onHome={() => {
+            if (gameLoopRef.current) gameLoopRef.current.stop();
+            setGameState('menu');
+          }}
+        />
+      )}
     </div>
   );
 };
