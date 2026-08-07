@@ -2,6 +2,7 @@ import { Note, BeatmapData, GameStats, CostumeId } from '../types/game';
 import { SONG_REGISTRY, SongData } from './SongRegistry';
 import { audioEngine } from './AudioEngine';
 import { RenderEngine } from './RenderEngine';
+import { GamepadController } from './GamepadController';
 
 export class GameLoop {
   private renderEngine: RenderEngine;
@@ -17,6 +18,7 @@ export class GameLoop {
   private activeTrack: 'air' | 'ground' = 'ground';
   private resumeCountdown: number = 0;
   private resumeTimerId: ReturnType<typeof setInterval> | null = null;
+  private gamepadController: GamepadController;
 
   private stats: GameStats = {
     score: 0,
@@ -58,6 +60,13 @@ export class GameLoop {
 
     this.notes = JSON.parse(JSON.stringify(beatmap.notes));
     this.stats.totalNotesCount = this.notes.filter(n => n.type !== 'obstacle').length;
+
+    // Native Gamepad Controller Setup
+    this.gamepadController = new GamepadController(
+      () => this.triggerKeyInput('air'),
+      () => this.triggerKeyInput('ground'),
+      () => this.pause()
+    );
   }
 
   public async start(): Promise<void> {
@@ -100,66 +109,87 @@ export class GameLoop {
           clearInterval(this.resumeTimerId);
           this.resumeTimerId = null;
         }
+        audioEngine.playBGM(audioEngine.getHardwareTime());
         this.isPausedState = false;
-        const offset = audioEngine.getHardwareTime();
-        audioEngine.playBGM(offset);
+        this.loop();
       }
     }, 1000);
   }
 
   public stop(): void {
-    if (this.resumeTimerId) {
-      clearInterval(this.resumeTimerId);
-      this.resumeTimerId = null;
-    }
     if (this.animFrameId !== null) {
       cancelAnimationFrame(this.animFrameId);
       this.animFrameId = null;
+    }
+    if (this.resumeTimerId) {
+      clearInterval(this.resumeTimerId);
+      this.resumeTimerId = null;
     }
     audioEngine.stopBGM();
   }
 
   public triggerKeyInput(track: 'air' | 'ground'): void {
-    if (this.isPausedState || this.resumeCountdown > 0) return;
-    const currentTime = audioEngine.getHardwareTime();
-
+    if (this.isPausedState) return;
     this.activeTrack = track;
+    if (track === 'air') {
+      this.inputState.airActive = true;
+      setTimeout(() => { this.inputState.airActive = false; }, 120);
+    } else {
+      this.inputState.groundActive = true;
+      setTimeout(() => { this.inputState.groundActive = false; }, 120);
+    }
 
-    if (track === 'air') this.inputState.airActive = true;
-    if (track === 'ground') this.inputState.groundActive = true;
+    audioEngine.playSFX('swish');
+    this.checkHitJudgement(track);
+  }
 
-    setTimeout(() => {
-      if (track === 'air') this.inputState.airActive = false;
-      if (track === 'ground') this.inputState.groundActive = false;
-    }, 120);
+  private checkHitJudgement(track: 'air' | 'ground'): void {
+    const currentTime = audioEngine.getHardwareTime();
+    const activeNotes = this.notes.filter(n => !n.hit);
 
-    // 🎯 Calibrated Precision Hit Window (0.14s to prevent double misclicks)
-    const windowSec = 0.14;
     let closestNote: Note | null = null;
     let minDiff = Infinity;
 
-    for (const note of this.notes) {
-      if (note.hit || note.track !== track || note.type === 'obstacle') continue;
-
-      const diff = Math.abs(note.time - currentTime);
-      if (diff <= windowSec && diff < minDiff) {
-        minDiff = diff;
-        closestNote = note;
+    for (const note of activeNotes) {
+      if (note.track === track || note.type === 'obstacle') {
+        const diff = Math.abs(note.time - currentTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestNote = note;
+        }
       }
     }
 
-    if (closestNote) {
+    if (!closestNote) return;
+
+    // Calibrated Hit Window Tolerances (Hit Precision = ±0.14s)
+    if (minDiff <= 0.14) {
       closestNote.hit = true;
+
+      if (closestNote.type === 'obstacle' || closestNote.entity.startsWith('hater')) {
+        const hitX = Math.max(150, this.renderEngine['canvas'].width * 0.20);
+        const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
+        
+        this.stats.supportRate = Math.max(0, this.stats.supportRate - 6);
+        this.stats.combo = 0;
+        this.stats.missCount += 1;
+        
+        audioEngine.playSFX('error');
+        audioEngine.triggerHapticVibration('damage');
+        this.renderEngine.triggerHitEffect(hitX, hitY, '❌ HATER HIT!', 'damage');
+        this.notifyStatsChange();
+        return;
+      }
+
       let judgement: 'perfect' | 'great' = 'great';
-      let scoreAdd = 60;
+      let scoreAdd = 100;
 
       if (minDiff <= 0.055) {
         judgement = 'perfect';
-        scoreAdd = 100;
-      }
-
-      if (closestNote.isDual) {
         scoreAdd = 200;
+        this.stats.perfectCount += 1;
+      } else {
+        this.stats.greatCount += 1;
       }
 
       if (this.costume === 'office_glasses') {
@@ -170,21 +200,13 @@ export class GameLoop {
         scoreAdd *= 2;
       }
 
-      closestNote.judgement = judgement;
       this.stats.score += scoreAdd;
       this.stats.combo += 1;
       if (this.stats.combo > this.stats.maxCombo) {
         this.stats.maxCombo = this.stats.combo;
       }
 
-      // Trigger Drum SFX & Mobile Haptic Vibration
-      if (judgement === 'perfect') {
-        this.stats.perfectCount++;
-        audioEngine.playSFX(closestNote.isDual ? 'cheer' : 'perfect');
-      } else {
-        this.stats.greatCount++;
-        audioEngine.playSFX('swish');
-      }
+      audioEngine.playSFX(judgement === 'perfect' ? 'perfect' : 'cheer');
       audioEngine.triggerHapticVibration(closestNote.isDual ? 'dual' : 'hit');
 
       const feverInc = this.costume === 'kpop_idol' ? 12 : 6;
@@ -193,12 +215,12 @@ export class GameLoop {
         this.activateFever();
       }
 
-      const hitX = this.renderEngine['canvas'].width * 0.22;
-      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
+      const hitX = Math.max(150, this.renderEngine['canvas'].width * 0.20);
+      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
       const hitText = closestNote.isDual ? `⚡ DUAL! +${scoreAdd} 票` : `+${scoreAdd} 票`;
       this.renderEngine.triggerHitEffect(hitX, hitY, hitText, judgement);
 
-      if (this.onStatsChange) this.onStatsChange({ ...this.stats });
+      this.notifyStatsChange();
     }
   }
 
@@ -206,109 +228,44 @@ export class GameLoop {
     this.stats.isFeverActive = true;
     audioEngine.playSFX('cheer');
     audioEngine.triggerHapticVibration('dual');
+
     setTimeout(() => {
       this.stats.isFeverActive = false;
       this.stats.feverGauge = 0;
-      if (this.onStatsChange) this.onStatsChange({ ...this.stats });
+      this.notifyStatsChange();
     }, 6000);
   }
 
   private loop = (): void => {
-    if (this.isPausedState && this.resumeCountdown <= 0) {
-      this.animFrameId = requestAnimationFrame(this.loop);
-      return;
-    }
+    if (this.isPausedState) return;
 
     const currentTime = audioEngine.getHardwareTime();
 
-    // Render 5.0s Lead-In / Unpause Countdown Text (Adjusted Y to h * 0.24)
-    if (this.resumeCountdown > 0) {
-      this.renderEngine.render(
-        currentTime,
-        this.notes,
-        this.costume,
-        this.stats,
-        this.inputState,
-        this.activeTrack,
-        this.speedMultiplier
-      );
+    // Poll Gamepad Input State Every Frame
+    this.gamepadController.update();
 
-      const ctx = this.renderEngine['ctx'];
-      const w = this.renderEngine['canvas'].width;
-      const h = this.renderEngine['canvas'].height;
-      const scale = Math.min(1.25, Math.max(0.45, h / 720));
-
-      ctx.save();
-      ctx.fillStyle = 'rgba(7, 8, 20, 0.65)';
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.font = `900 ${Math.floor(34 * scale)}px "Chakra Petch", sans-serif`;
-      ctx.fillStyle = '#ffe600';
-      ctx.textAlign = 'center';
-      ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 20 * scale;
-      ctx.fillText(`⚡ 準備續走拜票！倒數 ${this.resumeCountdown} 秒 ⚡`, w / 2, h * 0.24);
-      ctx.restore();
-
-      this.animFrameId = requestAnimationFrame(this.loop);
-      return;
-    }
-
-    // 1. Process Hater Obstacles
+    // Check Auto Miss Notes
     for (const note of this.notes) {
-      if (!note.hit && note.type === 'obstacle') {
-        if (currentTime >= note.time) {
-          note.hit = true;
-          if (this.activeTrack === note.track) {
-            this.stats.missCount++;
-            this.stats.combo = 0;
-            const missPen = this.costume === 'campaign_vest' ? 4 : 6;
-            this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
-            audioEngine.playSFX('error');
-            audioEngine.triggerHapticVibration('damage');
-
-            const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
-            this.renderEngine.triggerHitEffect(hitX, hitY, `❌ HIT!`, 'damage');
-
-            if (this.stats.supportRate <= 0) {
-              this.stop();
-              if (this.onGameOver) this.onGameOver({ ...this.stats });
-              return;
-            }
-          } else {
-            const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
-            this.renderEngine.triggerHitEffect(hitX, hitY, `✨ DODGE!`, 'dodge');
-          }
-          if (this.onStatsChange) this.onStatsChange({ ...this.stats });
-        }
-      }
-      
-      // 2. Process Missed Voter Notes (0.14s window)
-      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.14) {
+      if (!note.hit && note.time < currentTime - 0.18) {
         note.hit = true;
-        note.judgement = 'miss';
-        this.stats.missCount++;
-        this.stats.combo = 0;
+        
+        if (note.type !== 'obstacle') {
+          this.stats.combo = 0;
+          this.stats.missCount += 1;
+          
+          if (this.costume === 'office_glasses') {
+            this.stats.supportRate = Math.max(0, this.stats.supportRate - 4);
+          } else {
+            this.stats.supportRate = Math.max(0, this.stats.supportRate - 6);
+          }
 
-        const missPen = this.costume === 'campaign_vest' ? 4 : 6;
-        this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
-        audioEngine.playSFX('error');
-        audioEngine.triggerHapticVibration('damage');
-
-        this.renderEngine.triggerDamageEffect();
-
-        if (this.stats.supportRate <= 0) {
-          this.stop();
-          if (this.onGameOver) this.onGameOver({ ...this.stats });
-          return;
+          audioEngine.playSFX('error');
+          this.notifyStatsChange();
         }
-
-        if (this.onStatsChange) this.onStatsChange({ ...this.stats });
       }
     }
 
+    // Render Stage Frame
     this.renderEngine.render(
       currentTime,
       this.notes,
@@ -319,17 +276,21 @@ export class GameLoop {
       this.speedMultiplier
     );
 
-    // End Game condition: Wait until both last note is passed AND total audio duration is reached!
-    const lastNote = this.notes[this.notes.length - 1];
-    const isNotesFinished = !lastNote || currentTime > lastNote.time + 2.0;
-    const isAudioFinished = currentTime >= this.totalAudioDuration - 0.5;
-
-    if (isNotesFinished && isAudioFinished) {
+    // Game End Trigger (All notes finished or time reached)
+    if (currentTime >= this.totalAudioDuration - 0.5 || this.stats.supportRate <= 0) {
       this.stop();
-      if (this.onGameOver) this.onGameOver({ ...this.stats });
+      if (this.onGameOver) {
+        this.onGameOver(this.stats);
+      }
       return;
     }
 
     this.animFrameId = requestAnimationFrame(this.loop);
   };
+
+  private notifyStatsChange(): void {
+    if (this.onStatsChange) {
+      this.onStatsChange({ ...this.stats });
+    }
+  }
 }

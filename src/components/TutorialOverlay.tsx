@@ -28,7 +28,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       stepTitle: '第 1 課：Note 一般音符與投遞面紙',
       badge: '📘 音符基礎概念',
       content: (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobileScreen ? 'auto 1fr' : 'auto 1fr', gap: isMobileScreen ? '0.7rem' : '1.4rem', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: isMobileScreen ? '0.7rem' : '1.4rem', alignItems: 'center', width: '100%' }}>
           {/* Left Hero Image */}
           <div style={{ textAlign: 'center' }}>
             <img
@@ -57,10 +57,10 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
                   ☁️ 空中選民音符
                 </div>
                 <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.8rem', color: '#ddd', marginBottom: '4px' }}>
-                  按下 <strong style={{ color: '#ffe600' }}>[D] / [F]</strong> 躍起投遞面紙拉票！
+                  按下 [D] / [F] 躍起投遞面紙拉票！
                 </p>
                 <div style={{ background: '#00f0ff', color: '#000', fontWeight: 900, padding: '2px', borderRadius: '5px', fontSize: isMobileScreen ? '0.65rem' : '0.75rem' }}>
-                  左半屏：空中按鈕 (AIR)
+                  🎮 手把: D-Pad / LB / LT / X / Y
                 </div>
               </div>
 
@@ -70,17 +70,17 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
                   🏃 地面選民音符
                 </div>
                 <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.8rem', color: '#ddd', marginBottom: '4px' }}>
-                  按下 <strong style={{ color: '#ffe600' }}>[J] / [K]</strong> 地面奔跑親切發面紙！
+                  按下 [J] / [K] 地面奔跑親切發面紙！
                 </p>
                 <div style={{ background: '#ff007f', color: '#fff', fontWeight: 900, padding: '2px', borderRadius: '5px', fontSize: isMobileScreen ? '0.65rem' : '0.75rem' }}>
-                  右半屏：地面按鈕 (GROUND)
+                  🎮 手把: A / B / RB / RT
                 </div>
               </div>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.5)', padding: isMobileScreen ? '0.35rem 0.6rem' : '0.55rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)', textAlign: 'center' }}>
               <p style={{ fontSize: isMobileScreen ? '0.70rem' : '0.82rem', color: '#ffe600', fontWeight: 800 }}>
-                💡 抓準音符抵達 Hit Zone 的瞬間（Perfect 聲勢），獲得最高選民支持！
+                🎮 手把與藍牙搖桿支援：原生支援 Xbox / PS / Switch / 手機藍牙手把！隨插即玩！
               </p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
               ⚡ 金黃連線雙音符 (DUAL STRIKE)
             </h4>
             <p style={{ fontSize: isMobileScreen ? '0.72rem' : '0.88rem', color: '#fff', lineHeight: 1.4, marginBottom: '6px' }}>
-              當出現金黃色雷射連接的上下軌音符，同時按下 <strong style={{ color: '#00f0ff' }}>空中[D/F]</strong> 與 <strong style={{ color: '#ff007f' }}>地面[J/K]</strong>！
+              當出現金黃色雷射連接的上下軌音符，同時按下空中 [D/F/LB] 與地面 [J/K/RB]！
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: isMobileScreen ? '0.5rem' : '1rem' }}>
@@ -125,7 +125,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
                 得票加爆：+200 票數！
               </span>
               <span style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 800, padding: isMobileScreen ? '3px 8px' : '5px 14px', borderRadius: '6px', fontSize: isMobileScreen ? '0.70rem' : '0.85rem' }}>
-                手機：左右雙手同時按壓！
+                手把：LB + RB / 方向鍵 + A 鍵！
               </span>
             </div>
           </div>

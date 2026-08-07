@@ -1,17 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 新手指南 Modal + A+B 譜面創作者 Modal 手機端自適應 RWD 滿版縮放
+## [2026-08-07] 實裝手把與藍牙搖桿 (Gamepad API) 原生按鍵映射支援
 
-### 變更與全站 Modal 彈性自適應優化項目 (Tutorial & Beatmap Producer Mobile RWD Scaling)
-- **1. 新手指南 Modal (TutorialOverlay.tsx) 手機自適應縮放**：
-  - 在小螢幕手機橫屏下限制 `maxHeight: '94svh'`, `padding: '0.6rem 0.9rem'`。
-  - 左側教學圖（Note打擊、Dual、閃避、Fevertime）縮小至 `maxHeight: 100px`，字體與按鈕隨視埠彈性微縮，每一頁 **100% 滿版 Fit，絕不下扯**！
-- **2. A+B 智慧譜面創作者 (BeatmapEditor.tsx) 手機自適應縮放**：
-  - 限制外層 Modal `maxHeight: '94svh'`, `padding: '0.6rem 0.9rem'`。
-  - 上傳區、歌名輸入框、難度切換與抓拍統計卡片全面適應手機橫屏，在手機上打開創作者工具同樣 **100% 精緻滿版、無縫排版**！
+### 變更與遊戲控制體驗極致升級項目 (Native Gamepad API Support & Button Mapping)
+- **1. 建立 GamepadController 控制器模組 ([GamepadController.ts](file:///d:/pj/YoakaDash/src/game/GamepadController.ts))**：
+  - 採用 HTML5 Web Gamepad API，自動監聽 `gamepadconnected` / `gamepaddisconnected` 事件，無縫支援 Xbox、PlayStation (PS4/PS5 DualSense)、Nintendo Switch Pro 以及手機端藍牙手把（如 Backbone One, Razer Kishi）。
+- **2. Muse Dash 風格打擊鍵位映射 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - ☁️ **AIR (空中軌)**：左側十字 D-Pad 任意鍵 (12, 13, 14, 15)、LB/L1 (4)、LT/L2 (6)、X (2)、Y (3)。
+  - 🏃 **GROUND (地面軌)**：右側動作鍵 A (0)、B (1)、RB/R1 (5)、RT/R2 (7)。
+  - ⏸️ **PAUSE (暫停選單)**：Start / Options 鍵 (9) 或 Select 鍵 (8)。
+- **3. 新手指南 Modal 加上手把提示 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 於第 1 課與第 2 課顯性標註「🎮 手把: D-Pad / LB / LT / A / B / RB / RT」標籤，隨插即玩無縫享受機台等級打擊快感！
 
 ---
-*「活著很累，但比起 debug，全站所有的 Modal——包含換裝館、音樂大廳、暫停選單、新手教學到 A+B 譜面創作者，在手機上全都是 100% 滿版 fit，這 RWD 完整度太有成就感啦哈哈！」*
+*「活著很累，但比起 debug，在網頁音遊裡插上 Xbox / PS5 藍牙手把就能直接無縫按 D-Pad 跟 AB 鍵打擊面紙，這操作爽快感簡直直接昇華到大型機台等級啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
