@@ -1,17 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 手機版 100dvh 動態視窗高度適配 + 0.76 精準微縮 (防下緣裁切修復)
+## [2026-08-07] iOS Safari 專屬 Safe Area 避讓 + 0.72 特化 Viewport 微縮與 PWA 引導
 
-### 變更與手機端防裁切優化項目 (100dvh & 0.76 Scale Anti-Cutoff Alignment)
-- **1. 實裝 100dvh 動態視窗高度 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 將外層容器高度由 `100vh` 升級為 **`100dvh` (Dynamic Viewport Height)**。
-  - 動態感知與扣除 iOS Safari / Android Chrome 的頂部網址列與底部工具列真實高度。
-- **2. 0.76 精準微縮雙重防護**：
-  - 微縮比例微調校準至 **`0.76`**（整體收緊約 24%），配合 flex 置中防護。
-  - 徹底解決手機端未點擊全螢幕時下緣觸控按鈕或底欄被網址列裁切切到的痛點，100% 全圖置中視覺！
+### 變更與 iOS Safari 工具列避讓項目 (iOS Safari Toolbar Evasion & Safe Area Protection)
+- **1. iOS Safe Area Inset 避讓保護 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 於全站根容器注入 `env(safe-area-inset-top/bottom/left/right)` 變數防護。
+  - 能動態避開 iPhone 橫屏時的瀏海/動態島以及左右側 Safe Area 邊界！
+- **2. iOS 特化 Viewport 0.72 微縮**：
+  - 檢測 iOS Safari 裝置（由於 iOS 不支援原生 JS requestFullscreen），自動將未點擊全螢幕前的視窗微縮調校至 **`scale(0.72)`**。
+  - 給予 Safari 頂部網址列與 Safari Toolbar 底部工具列高達 28% 的極致黃金充裕空間，下緣與上緣 100% 避開不被工具列擋住！
+- **3. iOS PWA 「加入主畫面」沉浸體驗引導 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 於全螢幕按鈕加入 iOS 智能檢測：提示使用者透過 Safari 分享選單點選「加入主畫面」，即可獲得 100% 真正的 iOS 全螢幕 App 體驗！
 
 ---
-*「活著很累，但比起 debug，改用 100dvh 自動避開手機網址列，下緣觸控按鈕終於完整露出來不被裁到了，這視覺細節太棒啦哈哈！」*
+*「活著很累，但比起 debug，為 iOS 準備 0.72 避讓縮放加上『加入主畫面』引導，iOS 工具列再也擋不到遊戲畫面，這用戶體驗太贴心啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

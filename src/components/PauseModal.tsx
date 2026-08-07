@@ -19,8 +19,18 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(audioEngine.isSfxEnabled);
   const [vibrationEnabled, setVibrationEnabled] = useState<boolean>(audioEngine.isVibrationEnabled);
+  const [iosTip, setIosTip] = useState<string | null>(null);
 
   const toggleFullscreen = () => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      setIosTip('📱 iOS 專屬提示：點擊 Safari「分享」按鈕 ➔ 選擇「加入主畫面」，即可開啟全螢幕 App 沉浸體驗！');
+      setTimeout(() => setIosTip(null), 5000);
+      return;
+    }
+
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
@@ -63,14 +73,14 @@ export const PauseModal: React.FC<PauseModalProps> = ({
       <div className="cyber-panel" style={{
         width: '420px',
         maxWidth: '92vw',
-        padding: '1.6rem 1.8rem',
+        padding: '1.4rem 1.6rem',
         textAlign: 'center',
         border: '2px solid #00f0ff',
         boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
       }}>
         {/* Modal Title Header */}
         <h2 style={{
-          fontSize: '2.1rem',
+          fontSize: '2.0rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
           color: '#ffe600',
@@ -79,12 +89,12 @@ export const PauseModal: React.FC<PauseModalProps> = ({
         }}>
           ⏸ 遊戲暫停 (PAUSED)
         </h2>
-        <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '1.2rem' }}>
+        <p style={{ color: '#aaa', fontSize: '0.88rem', marginBottom: '1rem' }}>
           {beatmapTitle}
         </p>
 
         {/* SFX & Vibration Settings Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '1.1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '1.0rem' }}>
           {/* Drum SFX Toggle */}
           <button
             onClick={toggleSfx}
@@ -133,7 +143,7 @@ export const PauseModal: React.FC<PauseModalProps> = ({
           onClick={toggleFullscreen}
           style={{
             width: '100%',
-            marginBottom: '1.2rem',
+            marginBottom: iosTip ? '0.5rem' : '1.1rem',
             padding: '0.65rem',
             background: 'rgba(255, 230, 0, 0.12)',
             border: '1.5px solid #ffe600',
@@ -151,28 +161,45 @@ export const PauseModal: React.FC<PauseModalProps> = ({
           {isFullscreen ? '📺 退出全螢幕 (EXIT FULLSCREEN)' : '🖥️ 切換全螢幕沉浸體驗 (FULLSCREEN)'}
         </button>
 
+        {/* iOS Smart Tip Alert */}
+        {iosTip && (
+          <div style={{
+            background: 'rgba(0, 240, 255, 0.15)',
+            border: '1px solid #00f0ff',
+            color: '#fff',
+            borderRadius: '8px',
+            padding: '0.5rem 0.8rem',
+            fontSize: '0.78rem',
+            marginBottom: '1rem',
+            lineHeight: 1.4,
+            textAlign: 'left'
+          }}>
+            {iosTip}
+          </div>
+        )}
+
         {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <button
             className="muse-btn"
             onClick={onResume}
-            style={{ width: '100%', fontSize: '1.18rem', padding: '0.8rem' }}
+            style={{ width: '100%', fontSize: '1.15rem', padding: '0.75rem' }}
           >
             <span>▶ 繼續競選 (RESUME)</span>
           </button>
 
-          <div style={{ display: 'flex', gap: '0.8rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
               onClick={onRestart}
               style={{
                 flex: 1,
-                padding: '0.75rem',
+                padding: '0.7rem',
                 background: 'rgba(0, 240, 255, 0.1)',
                 border: '1.5px solid #00f0ff',
                 color: '#00f0ff',
                 borderRadius: '10px',
                 fontWeight: 800,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
                 cursor: 'pointer'
               }}
             >
@@ -183,13 +210,13 @@ export const PauseModal: React.FC<PauseModalProps> = ({
               onClick={onHome}
               style={{
                 flex: 1,
-                padding: '0.75rem',
+                padding: '0.7rem',
                 background: 'rgba(255, 0, 85, 0.1)',
                 border: '1.5px solid #ff0055',
                 color: '#ff0055',
                 borderRadius: '10px',
                 fontWeight: 800,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
                 cursor: 'pointer'
               }}
             >

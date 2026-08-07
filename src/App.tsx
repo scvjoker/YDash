@@ -23,6 +23,7 @@ export const App: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
+  const [isIOSDevice, setIsIOSDevice] = useState<boolean>(false);
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -47,9 +48,14 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     audioEngine.loadDefaultBGM();
+
+    // Detect iOS Device (iPhone, iPad, iPod)
+    const checkIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOSDevice(checkIOS);
   }, []);
 
-  // Monitor Fullscreen & Screen Size for Non-Fullscreen Mobile Scaling
+  // Monitor Fullscreen & Screen Size for Mobile & iOS Scaling
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -111,7 +117,7 @@ export const App: React.FC = () => {
       gameLoopRef.current = null;
     }
 
-    // Force Reset Game Stats to Initial Fresh Values (Score = 0, SupportRate = 100%)
+    // Force Reset Game Stats to Initial Fresh Values
     const freshStats: GameStats = {
       score: 0,
       supportRate: 100,
@@ -147,7 +153,7 @@ export const App: React.FC = () => {
       if (canvasRef.current) {
         const renderEngine = new RenderEngine(canvasRef.current);
         renderEngine.resize(window.innerWidth, window.innerHeight);
-        renderEngine.setSongBgImage(song.bg); // Dynamic MP4 Video or Image Background!
+        renderEngine.setSongBgImage(song.bg);
 
         const loop = new GameLoop(
           renderEngine,
@@ -200,25 +206,34 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  // Non-fullscreen Mobile Viewport Scale Protection (Using 100dvh & 0.76 scale)
-  const shouldScale78Percent = isMobileScreen && !isFullscreen;
+  // iOS Safari Dedicated Scale (0.72) to fully clear Safari top/bottom toolbars
+  const getScaleFactor = () => {
+    if (!isMobileScreen || isFullscreen) return 'none';
+    return isIOSDevice ? 'scale(0.72)' : 'scale(0.76)';
+  };
 
   return (
     <div style={{
       width: '100vw',
-      height: '100dvh', // Real dynamic viewport height respecting mobile address bars!
+      height: '100dvh', // Dynamic Viewport Height for iOS Safari Toolbar evasion
       position: 'relative',
       overflow: 'hidden',
       backgroundColor: '#050712',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      // iOS Safe Area Protection
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      paddingLeft: 'env(safe-area-inset-left, 0px)',
+      paddingRight: 'env(safe-area-inset-right, 0px)',
+      boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
         position: 'relative',
-        transform: shouldScale78Percent ? 'scale(0.76)' : 'none',
+        transform: getScaleFactor(),
         transformOrigin: 'center center',
         transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
       }}>
