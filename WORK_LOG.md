@@ -1,23 +1,20 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] Note 打擊音效更換為爵士鼓打擊聲 (Drum SFX) + 手機震動回饋 (Haptic Vibration) + 暫停選單雙開關實裝
+## [2026-08-07] 鼓聲音量調柔 (0.22) + 金黃雙擊改為清亮「叮~」音效 + 主畫面首頁 (StartScreen) 雙設定開關顯眼實裝
 
-### 變更與打擊感手感強化項目 (Drum SFX, Haptic Feedback & Pause Settings)
-- **1. 爵士鼓合成打擊效果音 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 將 Note 打擊音效升級為精緻爵士鼓 (Drum Beats) 合成音效：
-    - 🥁 `Perfect`: 清脆爆發的小鼓擊拍 (Snare Drum Snap + Noise Burst)。
-    - 🥁 `Great`: 紮實深沉的低頻大鼓擊拍 (Kick / Tom Drum Hit)。
-    - ⚡ `Dual Strike`: 響亮金屬銅鈸擊拍 (Crash Cymbal Metallic Hit)。
-- **2. 手機觸覺震動回饋 (Haptic Vibration Feedback) ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
-  - 擊中 Note 時觸發手感脈衝震動：
-    - 一般音符：16ms 輕巧清脆脈衝。
-    - 金黃雙擊：雙重連續脈衝震動。
-    - 黑粉受擊：重打擊警告震動。
-- **3. 暫停選單雙設定開關 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 在暫停選單加入 **`🥁 打擊鼓聲 (ON / OFF)`** 與 **`📳 手機震動 (ON / OFF)`** 雙獨立設定按鈕，隨時隨地自由開關！
+### 變更與聽覺體驗與設定位置優化項目 (Volume Lowering, Chime Tint & Home Screen Toggles)
+- **1. 打擊聲音量微調 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 將鼓音量大幅調低至 **0.22 (小鼓)** 與 **0.25 (大鼓)**，保持柔和背景節奏感，不掩蓋音樂本體主旋律！
+- **2. Dual Strike 金黃雙擊音效大升級 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 將雙擊音效改為短促、精緻、清亮的**雙頻「叮~」音效 (High Bell Chime E6 1318.5Hz - 2637Hz)**！
+- **3. 主畫面首頁 (StartScreen) 雙設定開關放置 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
+  - 在主畫面首頁右上角列，直接顯眼擺放：
+    - **`🥁 鼓聲: [ON 啟用] / [OFF 靜音]`**
+    - **`📳 震動: [ON 啟用] / [OFF 關閉]`**
+  - 玩家免進遊戲即可在首頁隨時點擊切換！同時在遊戲暫停選單（PauseModal）也保持連動備用！
 
 ---
-*「活著很累，但比起 debug，每次打音符手裡都有爵士鼓的小鼓擊拍聲、手機跟著節奏微微震動，這手感打擊感真的太爽快啦哈哈！」*
+*「活著很累，但比起 debug，首頁右上角一眼就能看到鼓聲跟震動開關，雙擊聽到輕快的『叮~』一聲，這聽覺體驗真的舒服啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

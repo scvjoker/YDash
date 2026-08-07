@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize, HelpCircle, Music2 } from 'lucide-react';
-import { BeatmapData, CostumeId } from '../types/game';
-import { COSTUMES_DATA } from '../game/Beatmaps';
+import React, { useState } from 'react';
 import { SongData } from '../game/SongRegistry';
+import { CostumeId } from '../types/game';
+import { audioEngine } from '../game/AudioEngine';
 
 interface StartScreenProps {
   currentSong: SongData;
   selectedCostume: CostumeId;
-  onStartGame: (song: SongData, difficulty: 'Easy' | 'Normal' | 'Hard', noteSpeed: number) => void;
+  onStartGame: (song: SongData, difficulty: 'Easy' | 'Normal' | 'Hard', speed: number) => void;
   onOpenSongSelect: () => void;
   onOpenTutorial: () => void;
   onOpenCostumes: () => void;
@@ -23,389 +22,324 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   onOpenCostumes,
   onOpenEditor
 }) => {
-  const [selectedDifficulty, setSelectedDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
-  const [selectedNoteSpeed, setSelectedNoteSpeed] = useState<number>(1.0);
-  const [paperSprinkles, setPaperSprinkles] = useState<number[]>([]);
-  const [imgSrc, setImgSrc] = useState<string>('/yoaka_main.jpg');
-  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
+  const [speed, setSpeed] = useState<number>(1.0);
+  const [sfxEnabled, setSfxEnabled] = useState<boolean>(audioEngine.isSfxEnabled);
+  const [vibrationEnabled, setVibrationEnabled] = useState<boolean>(audioEngine.isVibrationEnabled);
 
-  const costumeObj = COSTUMES_DATA.find(c => c.id === selectedCostume) || COSTUMES_DATA[0];
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
+  const toggleSfx = () => {
+    audioEngine.isSfxEnabled = !sfxEnabled;
+    setSfxEnabled(!sfxEnabled);
+    if (!sfxEnabled) {
+      audioEngine.playSFX('perfect');
     }
   };
 
-  useEffect(() => {
-    let candidates: string[] = ['/yoaka_main.jpg'];
-    if (selectedCostume === 'office_glasses') {
-      candidates = ['/assets/yoaka_office.png', '/assets/yoaka_office.jpg', '/yoaka_office.png', '/yoaka_office.jpg', '/yoaka_main.jpg'];
-    } else if (selectedCostume === 'kpop_idol') {
-      candidates = ['/assets/yoaka_kpop.png', '/assets/yoaka_kpop.jpg', '/yoaka_kpop.png', '/yoaka_kpop.jpg', '/yoaka_main.jpg'];
-    } else {
-      candidates = ['/assets/yoaka_default.png', '/assets/yoaka_default.jpg', '/yoaka_default.png', '/yoaka_default.jpg', '/yoaka_main.jpg'];
+  const toggleVibration = () => {
+    audioEngine.isVibrationEnabled = !vibrationEnabled;
+    setVibrationEnabled(!vibrationEnabled);
+    if (!vibrationEnabled) {
+      audioEngine.triggerHapticVibration('dual');
     }
+  };
 
-    let index = 0;
-    const testNext = () => {
-      if (index < candidates.length) {
-        const url = candidates[index++];
-        const img = new Image();
-        img.onload = () => setImgSrc(url);
-        img.onerror = () => testNext();
-        img.src = url;
-      }
-    };
-    testNext();
-  }, [selectedCostume]);
+  const getCostumeName = (costume: CostumeId) => {
+    switch (costume) {
+      case 'campaign_vest': return '競選背心裝 (選民支持度受擊損耗 -33%)';
+      case 'office_glasses': return '眼鏡學霸裝 (得票數額外 +20% 加成)';
+      case 'kpop_idol': return '偶像滿分裝 (Fever 熱血條累積速度雙倍)';
+    }
+  };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPaperSprinkles(prev => [...prev.slice(-14), Date.now()]);
-    }, 1400);
-    return () => clearInterval(interval);
-  }, []);
+  const getCostumeBadge = (costume: CostumeId) => {
+    switch (costume) {
+      case 'campaign_vest': return { label: '競選 Yoaka', color: '#00f0ff' };
+      case 'office_glasses': return { label: '學霸 Yoaka', color: '#ffe600' };
+      case 'kpop_idol': return { label: '偶像 Yoaka', color: '#ff007f' };
+    }
+  };
+
+  const currentBadge = getCostumeBadge(selectedCostume);
 
   return (
     <div style={{
-      width: '100vw',
-      height: '100vh',
-      position: 'relative',
-      backgroundColor: '#070814',
+      position: 'absolute',
+      inset: 0,
+      background: 'linear-gradient(135deg, rgba(8, 10, 26, 0.92) 0%, rgba(20, 10, 35, 0.95) 100%), url("/cyber_runway_bg.png") center/cover no-repeat',
       display: 'flex',
-      alignItems: 'center',
-      overflow: 'hidden'
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      padding: '2rem 3rem',
+      color: '#fff',
+      zIndex: 20
     }}>
-      {/* Background Cyber Rays & Grid */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'radial-gradient(ellipse at 70% 50%, #2b0645 0%, #0d081f 55%, #05060f 100%)',
-        pointerEvents: 'none'
-      }} />
-
-      {/* Floating Tissue Paper Rain Animation */}
-      {paperSprinkles.map(id => (
-        <div key={id} style={{
-          position: 'absolute',
-          left: `${45 + Math.random() * 45}%`,
-          top: '20%',
-          fontSize: '2.2rem',
-          animation: 'tissueRain 2.5s ease-out forwards',
-          pointerEvents: 'none',
-          zIndex: 5
-        }}>
-          ✨
-        </div>
-      ))}
-
-      {/* TOP RIGHT FUNCTION BUTTONS GROUP */}
-      <div style={{
-        position: 'absolute',
-        top: '1.2rem',
-        right: '1.5rem',
-        zIndex: 10,
-        display: 'flex',
-        gap: '0.8rem'
-      }}>
-        {/* TUTORIAL BUTTON */}
-        <button
-          onClick={onOpenTutorial}
-          style={{
-            background: 'rgba(0, 240, 255, 0.15)',
-            border: '1.5px solid #00f0ff',
-            color: '#00f0ff',
-            borderRadius: '20px',
-            padding: '6px 16px',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontWeight: 900,
-            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            boxShadow: '0 0 15px rgba(0,240,255,0.4)'
-          }}
-        >
-          <HelpCircle size={16} /> ❓ 新手指南
-        </button>
-
-        {/* FULLSCREEN BUTTON */}
-        <button
-          onClick={handleFullscreen}
-          style={{
-            background: 'rgba(255, 230, 0, 0.15)',
-            border: '1.5px solid #ffe600',
-            color: '#ffe600',
-            borderRadius: '20px',
-            padding: '6px 16px',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontWeight: 900,
-            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            boxShadow: '0 0 15px rgba(255,230,0,0.4)'
-          }}
-        >
-          <Maximize size={16} /> 全螢幕 (FULLSCREEN)
-        </button>
-      </div>
-
-      {/* LEFT HALF (50vw): Borderless Clean Hero Character Artwork Showcase */}
-      <div style={{
-        width: '50vw',
-        height: '100vh',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobileScreen ? '0.5rem' : '1.5rem',
-        zIndex: 2
-      }}>
-        <div className="float-animation" style={{
-          position: 'relative',
-          width: '100%',
-          height: '90vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <img
-            src={imgSrc}
-            alt="Yoaka Hero Character Artwork"
-            style={{
-              maxHeight: isMobileScreen ? '82vh' : '88vh',
-              maxWidth: isMobileScreen ? '42vw' : '46vw',
-              objectFit: 'contain',
-              borderRadius: '24px',
-              filter: `drop-shadow(0 0 30px ${costumeObj.accentColor}) contrast(1.06) brightness(1.05)`
-            }}
-          />
-
-          <div style={{
-            position: 'absolute',
-            bottom: isMobileScreen ? '10px' : '20px',
-            background: 'rgba(10, 12, 28, 0.85)',
-            backdropFilter: 'blur(10px)',
-            border: `1.5px solid ${costumeObj.accentColor}`,
-            borderRadius: '20px',
-            padding: isMobileScreen ? '4px 16px' : '8px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            boxShadow: `0 0 20px ${costumeObj.accentColor}`
-          }}>
-            <span style={{
-              color: costumeObj.accentColor,
-              fontFamily: 'Chakra Petch, sans-serif',
-              fontWeight: 900,
-              fontSize: isMobileScreen ? '0.9rem' : '1.15rem'
-            }}>
-              👑 {costumeObj.name}
-            </span>
-            <span style={{
-              background: costumeObj.accentColor,
-              color: '#000',
-              fontWeight: 900,
-              padding: isMobileScreen ? '2px 10px' : '4px 14px',
-              borderRadius: '14px',
-              fontSize: isMobileScreen ? '0.7rem' : '0.8rem'
-            }}>
-              ACTIVE
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT HALF (50vw): Desktop Restored Grand Size Menu Container */}
-      <div style={{
-        width: '50vw',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: isMobileScreen ? '0.4rem 2.5vw 0.4rem 0.5vw' : '0 4vw 0 1vw',
-        zIndex: 2,
-        gap: isMobileScreen ? '0.5rem' : '1.1rem',
-        overflowY: 'auto'
-      }}>
-        {/* Top Campaign Badge Pill */}
-        <div style={{
-          alignSelf: 'flex-start',
-          background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: isMobileScreen ? '3px 14px' : '5px 22px',
-          borderRadius: '30px',
-          boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
-          <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
-            WEB3 小島區里長熱血大選！
-          </span>
-        </div>
-
-        {/* Main Neon Title & Slogan Catchphrase Group */}
+      {/* Top Header Bar: Logo & Navigation Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{
+            fontSize: '3.6rem',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? 'calc(1.8rem + 1.8vh)' : '4.5rem',
             fontWeight: 900,
-            fontStyle: 'italic',
-            background: 'linear-gradient(180deg, #ffffff 0%, #ffe600 45%, #ff007f 100%)',
+            letterSpacing: '2px',
+            background: 'linear-gradient(90deg, #00f0ff, #ffe600, #ff007f)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 20px rgba(255, 0, 127, 0.9)) drop-shadow(0 0 35px rgba(0, 240, 255, 0.6))',
-            lineHeight: 1.0,
-            marginBottom: '0.3rem',
-            letterSpacing: '-1px'
+            filter: 'drop-shadow(0 0 20px rgba(0, 240, 255, 0.6))',
+            margin: 0
           }}>
-            YOAKA DASH!
+            YOAKA DASH 競選冒險音遊
           </h1>
+          <p style={{ color: '#00f0ff', margin: '4px 0 0 0', fontWeight: 700, letterSpacing: '1px', fontSize: '1.05rem' }}>
+            賽博龐克跑道 • 音浪全開 • 拉票拜票衝刺高票勝選！
+          </p>
+        </div>
 
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            fontSize: isMobileScreen ? '0.85rem' : '1.15rem',
-            color: '#00f0ff',
-            fontWeight: 900,
-            background: 'rgba(0, 240, 255, 0.12)',
-            padding: isMobileScreen ? '0.2rem 1rem' : '0.35rem 1.5rem',
-            borderRadius: '40px',
-            border: '1.5px solid rgba(0, 240, 255, 0.5)',
-            boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)'
-          }}>
-            <span>「家人們，幫主包個忙！」</span>
+        {/* Top Right Action Buttons including SFX & Vibration Toggles */}
+        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+          {/* Drum SFX Toggle */}
+          <button
+            onClick={toggleSfx}
+            style={{
+              padding: '0.6rem 0.9rem',
+              background: sfxEnabled ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: sfxEnabled ? '1.5px solid #00f0ff' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: sfxEnabled ? '#00f0ff' : '#aaa',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🥁 鼓聲: <span style={{ color: sfxEnabled ? '#ffe600' : '#888', fontWeight: 900 }}>{sfxEnabled ? 'ON 啟用' : 'OFF 靜音'}</span>
+          </button>
+
+          {/* Mobile Haptic Vibration Toggle */}
+          <button
+            onClick={toggleVibration}
+            style={{
+              padding: '0.6rem 0.9rem',
+              background: vibrationEnabled ? 'rgba(255, 0, 127, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: vibrationEnabled ? '1.5px solid #ff007f' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: vibrationEnabled ? '#ff007f' : '#aaa',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📳 震動: <span style={{ color: vibrationEnabled ? '#ffe600' : '#888', fontWeight: 900 }}>{vibrationEnabled ? 'ON 啟用' : 'OFF 關閉'}</span>
+          </button>
+
+          <button
+            onClick={onOpenTutorial}
+            style={{
+              padding: '0.6rem 1.1rem',
+              background: 'rgba(255, 230, 0, 0.15)',
+              border: '1.5px solid #ffe600',
+              color: '#ffe600',
+              borderRadius: '10px',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            ❓ 新手指南
+          </button>
+
+          <button
+            onClick={onOpenCostumes}
+            style={{
+              padding: '0.6rem 1.1rem',
+              background: 'rgba(255, 0, 127, 0.15)',
+              border: '1.5px solid #ff007f',
+              color: '#ff007f',
+              borderRadius: '10px',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            👗 戰力造型館
+          </button>
+
+          <button
+            onClick={onOpenEditor}
+            style={{
+              padding: '0.6rem 1.1rem',
+              background: 'rgba(0, 240, 255, 0.12)',
+              border: '1.5px solid #00f0ff',
+              color: '#00f0ff',
+              borderRadius: '10px',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🎹 自製譜面工作室
+          </button>
+        </div>
+      </div>
+
+      {/* Center Main Control Content: Current Song Box & Game Controls */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2.5rem', alignItems: 'center' }}>
+        {/* Left Side: Yoaka Character Display Card */}
+        <div className="cyber-panel" style={{
+          padding: '1.8rem',
+          border: `2px solid ${currentBadge.color}`,
+          boxShadow: `0 0 30px ${currentBadge.color}40`,
+          display: 'flex',
+          gap: '1.8rem',
+          alignItems: 'center'
+        }}>
+          <img
+            src={
+              selectedCostume === 'office_glasses' ? '/assets/yoaka_office.png' :
+              selectedCostume === 'kpop_idol' ? '/assets/yoaka_kpop.png' :
+              '/assets/yoaka_default.png'
+            }
+            alt="Yoaka Runner"
+            style={{
+              width: '165px',
+              height: '165px',
+              objectFit: 'contain',
+              borderRadius: '16px',
+              background: '#07081a',
+              border: `2px solid ${currentBadge.color}`,
+              padding: '6px'
+            }}
+          />
+          <div>
+            <span style={{
+              background: currentBadge.color,
+              color: '#000',
+              fontWeight: 900,
+              padding: '3px 10px',
+              borderRadius: '8px',
+              fontSize: '0.85rem'
+            }}>
+              當前參選造型: {currentBadge.label}
+            </span>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', margin: '8px 0 4px 0' }}>
+              {getCostumeName(selectedCostume)}
+            </h3>
+            <p style={{ fontSize: '0.88rem', color: '#aaa', margin: 0 }}>
+              按鍵提示：使用 <b style={{ color: '#00f0ff' }}>[D/F]</b> 鍵空中投紙拉票，<b style={{ color: '#ff007f' }}>[J/K]</b> 鍵地面投紙拉票！
+            </p>
           </div>
         </div>
 
-        {/* Selected Track Display Card */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.6rem' }}>
-            <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: isMobileScreen ? '0.78rem' : '0.9rem', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Disc size={isMobileScreen ? 14 : 18} /> 當前競選戰歌 【{currentSong.storyStage}】
+        {/* Right Side: Selected Song & Speed / Difficulty Selector */}
+        <div className="cyber-panel" style={{ padding: '1.8rem', border: '2px solid #ffe600', boxShadow: '0 0 30px rgba(255, 230, 0, 0.35)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <span style={{ background: '#ffe600', color: '#000', fontWeight: 900, padding: '3px 10px', borderRadius: '8px', fontSize: '0.85rem' }}>
+              【{currentSong.storyStage}】當前競選戰歌
             </span>
-            
             <button
               onClick={onOpenSongSelect}
               style={{
-                background: 'rgba(0, 240, 255, 0.2)',
+                padding: '0.45rem 0.9rem',
+                background: 'rgba(0, 240, 255, 0.15)',
                 border: '1.5px solid #00f0ff',
                 color: '#00f0ff',
-                padding: isMobileScreen ? '2px 10px' : '4px 14px',
-                borderRadius: '16px',
+                borderRadius: '8px',
                 fontWeight: 900,
-                fontSize: isMobileScreen ? '0.75rem' : '0.85rem',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
+                boxShadow: '0 0 12px rgba(0, 240, 255, 0.3)'
               }}
             >
-              <Music2 size={14} /> 🎵 切換樂曲
+              🎵 切換樂曲 (SONG HALL)
             </button>
           </div>
 
-          <h3 style={{ fontSize: isMobileScreen ? '1.25rem' : '2rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
+          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', margin: '0 0 4px 0' }}>
             {currentSong.title}
-            {currentSong.isRhapsody && (
-              <span style={{ fontSize: '0.8rem', color: '#ffe600', marginLeft: '10px', border: '1px solid #ffe600', padding: '2px 8px', borderRadius: '8px' }}>
-                ⚡ 狂想曲 (高難/長曲)
-              </span>
-            )}
           </h3>
-          <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.78rem' : '0.9rem', marginBottom: '0.6rem' }}>
-            {currentSong.subtitle} • BPM {currentSong.bpm}
+          <p style={{ fontSize: '0.9rem', color: '#aaa', margin: '0 0 1rem 0' }}>
+            {currentSong.subtitle} • {currentSong.artist} • BPM {currentSong.bpm}
           </p>
 
-          {/* Difficulty Switch Pills */}
-          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.8rem' }}>
-            {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
-              <button
-                key={diff}
-                onClick={() => setSelectedDifficulty(diff)}
-                style={{
-                  flex: 1,
-                  padding: isMobileScreen ? '0.35rem' : '0.55rem',
-                  background: selectedDifficulty === diff ? (diff === 'Hard' ? 'linear-gradient(135deg, #ff007f, #d80068)' : diff === 'Normal' ? 'linear-gradient(135deg, #00f0ff, #0077b6)' : 'linear-gradient(135deg, #ffe600, #ffb703)') : 'rgba(255,255,255,0.05)',
-                  border: selectedDifficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '10px',
-                  color: selectedDifficulty === diff && diff === 'Normal' ? '#000' : selectedDifficulty === diff && diff === 'Easy' ? '#000' : '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 900,
-                  fontSize: isMobileScreen ? '0.75rem' : '0.9rem',
-                  transition: 'all 0.25s'
-                }}
-              >
-                {diff === 'Easy' && (isMobileScreen ? 'Easy' : '🌱 Easy')}
-                {diff === 'Normal' && (isMobileScreen ? 'Normal' : '🔥 Normal')}
-                {diff === 'Hard' && (isMobileScreen ? 'Hard' : '⚡ Hard')}
-              </button>
-            ))}
-          </div>
-
-          {/* Note Speed Multiplier Selection Bar */}
-          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.5rem 0.8rem', borderRadius: '10px' }}>
-            <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.82rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Gauge size={isMobileScreen ? 12 : 16} color="#ffe600" /> 音符流速 (SPEED):
-            </span>
-            <div style={{ display: 'flex', gap: isMobileScreen ? '3px' : '5px' }}>
-              {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(speed => (
+          {/* Difficulty Selection */}
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.82rem', color: '#aaa', fontWeight: 800, marginBottom: '6px' }}>難度模式選擇 (DIFFICULTY):</p>
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
+              {(['Easy', 'Normal', 'Hard'] as const).map(d => (
                 <button
-                  key={speed}
-                  onClick={() => setSelectedNoteSpeed(speed)}
+                  key={d}
+                  onClick={() => setDifficulty(d)}
                   style={{
-                    background: selectedNoteSpeed === speed ? (speed < 1.0 ? '#00f0ff' : '#ffe600') : 'rgba(255,255,255,0.08)',
-                    color: selectedNoteSpeed === speed ? '#000' : '#fff',
-                    border: selectedNoteSpeed === speed ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                    flex: 1,
+                    padding: '0.5rem',
+                    background: difficulty === d ? '#ffe600' : 'rgba(255,255,255,0.06)',
+                    color: difficulty === d ? '#000' : '#fff',
+                    border: difficulty === d ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                     borderRadius: '8px',
-                    padding: isMobileScreen ? '1px 5px' : '2px 8px',
                     fontWeight: 900,
-                    fontSize: isMobileScreen ? '0.7rem' : '0.8rem',
+                    fontSize: '0.85rem',
                     cursor: 'pointer'
                   }}
                 >
-                  {speed < 1.0 ? `🐢${speed.toFixed(2)}x` : `${speed.toFixed(2)}x`}
+                  {d} ({'★'.repeat(currentSong.difficultyRating[d])})
                 </button>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Start Game Button */}
-        <button
-          className="muse-btn"
-          onClick={() => onStartGame(currentSong, selectedDifficulty, selectedNoteSpeed)}
-          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.45rem', padding: isMobileScreen ? '0.65rem' : '1rem' }}
-        >
-          <span><Play fill="#fff" size={isMobileScreen ? 18 : 24} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
-        </button>
+          {/* Speed Selection */}
+          <div style={{ marginBottom: '1.4rem' }}>
+            <p style={{ fontSize: '0.82rem', color: '#aaa', fontWeight: 800, marginBottom: '6px' }}>音符流速 (SPEED):</p>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSpeed(s)}
+                  style={{
+                    flex: 1,
+                    background: speed === s ? '#00f0ff' : 'rgba(255,255,255,0.08)',
+                    color: speed === s ? '#000' : '#fff',
+                    border: speed === s ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '6px',
+                    padding: '4px 0',
+                    fontWeight: 900,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {s.toFixed(2)}x
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Sub Option Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobileScreen ? '0.4rem' : '0.8rem' }}>
-          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
-            <span><Sparkles size={isMobileScreen ? 14 : 18} /> 造型: {costumeObj.name}</span>
+          {/* Big Start Button */}
+          <button
+            className="muse-btn"
+            onClick={() => onStartGame(currentSong, difficulty, speed)}
+            style={{ width: '100%', fontSize: '1.35rem', padding: '0.95rem' }}
+          >
+            <span>🚀 開啟拜票競選狂歡 ({difficulty} - {speed.toFixed(2)}x)</span>
           </button>
-
-          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
-            <span><Wand2 size={isMobileScreen ? 14 : 18} /> A+B 譜面創作者</span>
-          </button>
         </div>
+      </div>
+
+      {/* Footer Instructions */}
+      <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#888' }}>
+        Press <b style={{ color: '#00f0ff' }}>D/F</b> (Air) or <b style={{ color: '#ff007f' }}>J/K</b> (Ground) to hit voters. Press <b style={{ color: '#ffe600' }}>ESC</b> anytime to Pause.
       </div>
     </div>
   );
