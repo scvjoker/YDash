@@ -1,23 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎓 圖文教學導入實體黑粉/道具/造型圖片 + 🎵 4 首競選一路升遷主題戰歌重塑
+## [2026-08-07] 🎓 圖文教學 Modal 排版極致淨化 (移除 Icon + 135px 放大示範圖框 + 預留 Lesson 1/2 截圖路徑)
 
-### 變更與主題歌單重塑項目 (Embedded Tutorial Images & Election Progression Tracks)
-- **1. 圖文教學 Modal 導入實體圖片資源 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 在新手引導簡報中精準嵌入遊戲實體圖片：
-    - `面紙傳單` (`/assets/tissue_pack.png`)
-    - `狗頭舉牌黑粉` (`/assets/hater_dog_board.png`)
-    - `賽博巨型鯊魚` (`/assets/hater_shark.png`)
-    - `競選/學霸/偶像 Yoaka` 3 大造型實體頭像 (`/assets/yoaka_default.png`...)
-- **2. 重新規劃 4 首「競選一路升遷」主題熱血戰歌 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - 打造從里長起步一路角逐至頂峰幫主的階梯故事歌單：
-    1. 🎵 `1. 巷弄拜票：里長起手式` (120 BPM - `public/audio/track1_chief.mp3`)
-    2. 🎵 `2. 區長爭霸：賽博政見會` (138 BPM - `public/audio/track2_district.mp3`)
-    3. 🎵 `3. 市長大選：小島電音夜` (152 BPM - `public/audio/track3_mayor.mp3`)
-    4. 👑 `4. 幫主登場：最高政壇巔峰` (168 BPM - `public/audio/track4_master.mp3`)
+### 變更與圖文教學視窗視覺優化 (Clean Layout & Enlarged Tutorial Image Boxes)
+- **1. 全面移除 Icon 與雜混圖示 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 移除了簡報標題與內文中的圖示 Emoji/Icons，排版極致大器乾淨，純文字與黑框卡片質感爆棚！
+- **2. 示範圖片區塊大化 (135px) 與預留 Lesson 1 / 2 截圖放置路徑**：
+  - **第 1 課示範圖片預留路徑**：`public/assets/tutorial_lesson1.png` (或 `.jpg`)
+  - **第 2 課示範圖片預留路徑**：`public/assets/tutorial_lesson2.png` (或 `.jpg`)
+  - **第 4 課示範圖片預留路徑**：`public/assets/tutorial_lesson4.png` (或 `.jpg`)
+  - **第 3 課 & 第 5 課**：展示大比例實體黑粉 (`hater_dog_board.png` 90px) 與 3 大 Yoaka 換裝頭像！
+  - 內建智慧 Fallback 保護：若截圖尚未上傳，自動顯示傳單與主角圖案備用，畫面質感大器！
 
 ---
-*「活著很累，但比起 debug，圖文教學有狗頭黑粉跟面紙實圖看，歌單變成一路從里長升到幫主，這故事代入感真的太過癮了哈哈！」*
+*「活著很累，但比起 debug，把 Icon 拿掉、圖片放大成 135px 專屬框，還預留好圖片檔名，這排版精緻度看起來真的太舒服了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
