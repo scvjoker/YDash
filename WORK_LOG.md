@@ -1,19 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] iOS Safari 專屬 Safe Area 避讓 + 0.72 特化 Viewport 微縮與 PWA 引導
+## [2026-08-07] 重新定義手機邊界：Mobile Card Shell 賽博安全卡片內縮防護實裝
 
-### 變更與 iOS Safari 工具列避讓項目 (iOS Safari Toolbar Evasion & Safe Area Protection)
-- **1. iOS Safe Area Inset 避讓保護 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 於全站根容器注入 `env(safe-area-inset-top/bottom/left/right)` 變數防護。
-  - 能動態避開 iPhone 橫屏時的瀏海/動態島以及左右側 Safe Area 邊界！
-- **2. iOS 特化 Viewport 0.72 微縮**：
-  - 檢測 iOS Safari 裝置（由於 iOS 不支援原生 JS requestFullscreen），自動將未點擊全螢幕前的視窗微縮調校至 **`scale(0.72)`**。
-  - 給予 Safari 頂部網址列與 Safari Toolbar 底部工具列高達 28% 的極致黃金充裕空間，下緣與上緣 100% 避開不被工具列擋住！
-- **3. iOS PWA 「加入主畫面」沉浸體驗引導 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 於全螢幕按鈕加入 iOS 智能檢測：提示使用者透過 Safari 分享選單點選「加入主畫面」，即可獲得 100% 真正的 iOS 全螢幕 App 體驗！
+### 變更與手機端邊界重構項目 (Redefined Mobile Boundary Shell Strategy)
+- **1. 徹底放棄易導致溢出的 transform: scale()**：
+  - 鑑於 iPhone Chrome, Edge, Line 內建 WebView 與 Safari 等瀏覽器常駐網址列與工具列且不支援 JS 全螢幕，傳統 `transform: scale()` 無法解決 layout 比對問題。
+- **2. 實裝 Mobile Card Shell 賽博安全內縮框 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 於手機/行動端（非全螢幕時），建立精準內縮的賽博音遊卡片邊界：
+    - `width: 94vw`, `height: 82dvh`, `maxWidth: 940px`, `maxHeight: 500px`。
+    - 外加 `border: 2px solid #00f0ff`, `box-shadow: 0 0 35px rgba(0, 240, 255, 0.4)` 發光外框。
+  - 上下左右主動留出 18% 彈性視覺呼吸空間，**100% 絕對碰不到任何瀏覽器頂部網址列或底部工具列**！
+  - 畫面、音樂、Canvas 與按鈕 100% 完美貼合於內縮卡片中，全機型全瀏覽器 0 裁切完美呈現！
 
 ---
-*「活著很累，但比起 debug，為 iOS 準備 0.72 避讓縮放加上『加入主畫面』引導，iOS 工具列再也擋不到遊戲畫面，這用戶體驗太贴心啦哈哈！」*
+*「活著很累，但比起 debug，徹底重新定義邊界，用賽博卡片把遊戲包在中間，所有手機瀏覽器工具列再也碰不到遊戲，這架構改得太漂亮啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

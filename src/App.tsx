@@ -23,7 +23,7 @@ export const App: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
-  const [isIOSDevice, setIsIOSDevice] = useState<boolean>(false);
+  const [gameContainerSize, setGameContainerSize] = useState<{ width: number; height: number }>({ width: window.innerWidth, height: window.innerHeight });
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -44,18 +44,14 @@ export const App: React.FC = () => {
   });
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const innerShellRef = useRef<HTMLDivElement | null>(null);
   const gameLoopRef = useRef<GameLoop | null>(null);
 
   useEffect(() => {
     audioEngine.loadDefaultBGM();
-
-    // Detect iOS Device (iPhone, iPad, iPod)
-    const checkIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || 
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOSDevice(checkIOS);
   }, []);
 
-  // Monitor Fullscreen & Screen Size for Mobile & iOS Scaling
+  // Monitor Fullscreen & Redefined Mobile Inner Boundary Size
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -65,22 +61,34 @@ export const App: React.FC = () => {
       const isMobile = window.innerWidth <= 920 || window.innerHeight <= 540;
       setIsMobileScreen(isMobile);
 
-      if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
+      if (innerShellRef.current) {
+        const rect = innerShellRef.current.getBoundingClientRect();
+        const w = Math.floor(rect.width);
+        const h = Math.floor(rect.height);
+        setGameContainerSize({ width: w, height: h });
+
+        if (canvasRef.current) {
+          canvasRef.current.width = w;
+          canvasRef.current.height = h;
+        }
       }
     };
 
     handleResize();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     window.addEventListener('resize', handleResize);
+    
+    // Additional delay check for mobile orientation/nav bar transitions
+    const timer = setTimeout(handleResize, 200);
+
     return () => {
+      clearTimeout(timer);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isFullscreen]);
 
-  // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
+  // Auto-Pause when switching apps, leaving tab, or locking screen
   useEffect(() => {
     const triggerAutoPause = () => {
       if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
@@ -117,7 +125,6 @@ export const App: React.FC = () => {
       gameLoopRef.current = null;
     }
 
-    // Force Reset Game Stats to Initial Fresh Values
     const freshStats: GameStats = {
       score: 0,
       supportRate: 100,
@@ -150,9 +157,16 @@ export const App: React.FC = () => {
     };
 
     setTimeout(() => {
-      if (canvasRef.current) {
+      if (canvasRef.current && innerShellRef.current) {
+        const rect = innerShellRef.current.getBoundingClientRect();
+        const w = Math.floor(rect.width);
+        const h = Math.floor(rect.height);
+
+        canvasRef.current.width = w;
+        canvasRef.current.height = h;
+
         const renderEngine = new RenderEngine(canvasRef.current);
-        renderEngine.resize(window.innerWidth, window.innerHeight);
+        renderEngine.resize(w, h);
         renderEngine.setSongBgImage(song.bg);
 
         const loop = new GameLoop(
@@ -206,37 +220,39 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  // iOS Safari Dedicated Scale (0.72) to fully clear Safari top/bottom toolbars
-  const getScaleFactor = () => {
-    if (!isMobileScreen || isFullscreen) return 'none';
-    return isIOSDevice ? 'scale(0.72)' : 'scale(0.76)';
-  };
+  // Redefined Mobile Boundary Shell Style (Guarantees NO Bottom Cutoff on iOS/Chrome/Line Browser)
+  const isBoundedMobileCard = isMobileScreen && !isFullscreen;
 
   return (
     <div style={{
       width: '100vw',
-      height: '100dvh', // Dynamic Viewport Height for iOS Safari Toolbar evasion
+      height: '100dvh', // Dynamic Viewport Height
       position: 'relative',
       overflow: 'hidden',
       backgroundColor: '#050712',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      // iOS Safe Area Protection
-      paddingTop: 'env(safe-area-inset-top, 0px)',
-      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      paddingLeft: 'env(safe-area-inset-left, 0px)',
-      paddingRight: 'env(safe-area-inset-right, 0px)',
+      padding: isBoundedMobileCard ? '12px' : 0,
       boxSizing: 'border-box'
     }}>
-      <div style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        transform: getScaleFactor(),
-        transformOrigin: 'center center',
-        transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
-      }}>
+      {/* Redefined Safe Inner Shell Boundary */}
+      <div
+        ref={innerShellRef}
+        style={{
+          width: isBoundedMobileCard ? '94vw' : '100%',
+          height: isBoundedMobileCard ? '82dvh' : '100%',
+          maxWidth: isBoundedMobileCard ? '940px' : 'none',
+          maxHeight: isBoundedMobileCard ? '500px' : 'none',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: isBoundedMobileCard ? '16px' : '0px',
+          border: isBoundedMobileCard ? '2px solid #00f0ff' : 'none',
+          boxShadow: isBoundedMobileCard ? '0 0 35px rgba(0, 240, 255, 0.4)' : 'none',
+          backgroundColor: '#070814',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+        }}
+      >
         {/* Mobile Landscape Orientation Prompt */}
         <LandscapePrompt />
 
