@@ -1,18 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 暫停選單再次微縮 + 歌曲切換大廳手機 RWD 適應 + 打擊波紋圓角化 (Radial Ripple Flash)
+## [2026-08-07] 歌曲切換 Modal 左右兩欄等高對齊 + Cyber 炫彩滾動條 + 『↕️ 可上下滑動瀏覽』提醒
 
-### 變更與 UI 精密微縮與質感波紋項目 (Pause Menu Scale Down, Song Select RWD & Rounded Radial Ripple)
-- **1. 暫停選單 (PauseModal.tsx) 手機端再次微縮**：
-  - 小螢幕下 `width: 360px`, `maxHeight: '92svh'`, `padding: '0.8rem 1.0rem'`，標題字體精簡至 `1.3rem`，在手機上顯得無比輕盈簡潔！
-- **2. 歌曲切換大廳 (SongSelectModal.tsx) 手機自適應 RWD 滿版縮放**：
-  - 8 首競選曲庫卡片、封面縮圖與右側 Preview 卡片 Padding/字體全面適應手機橫屏，94svh 限制下 **100% 滿版無縫 Fit，試聽與難度/流速選單一目瞭然**！
-- **3. 全螢幕打擊波紋圓角化 (Rounded Radial Tap Wave)** ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))：
-  - 擺脫傳統方形邊框！加入大弧度圓角 `borderRadius: 24px~36px` 與漸層橢圓內發光 (`radial-gradient`)。
-  - 當玩家點擊左/右半屏時，呈現如水滴般擴散的柔軟圓潤高質感脈衝，打擊視覺質感大升級！
+### 變更與 UI 佈局對齊與滑動體驗優化項目 (Song Select Equal Height Alignment & Scroll Enhancements)
+- **1. 左右兩欄 100% 精準等高對齊 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 設定兩欄 `alignItems: 'stretch'`, `height: '100%'`，使左側樂曲選擇清單與右側 Preview 試聽詳細卡片 **100% 垂直等高對齊**！
+- **2. 炫彩 Cyberpunk 美化滾動條 (.cyber-scrollbar)** ([index.css](file:///d:/pj/YoakaDash/src/index.css))**：
+  - 在 `index.css` 加入專屬自訂雙色微光軌道滾動條 (`#00f0ff` -> `#ff007f` 霓虹漸層 thumb)，滾動視覺感爆棚！
+- **3. 『↕️ 可上下滑動瀏覽』炫彩提示 Pill Badge**：
+  - 於左側樂曲大廳標題右方顯性加上 `↕️ 可上下滑動瀏覽` 閃爍提示徽章，讓使用者能一眼看出可上下滑動瀏覽全部 8 首競選曲目！
 
 ---
-*「活著很累，但比起 debug，暫停選單變小巧、歌曲大廳在手機上完美貼合、左右按下去是圓潤漸層的水滴脈衝波紋，這視覺質感真的太優雅啦哈哈！」*
+*「活著很累，但比起 debug，歌曲選單左右兩邊拉到完全等高、滑動條變成霓虹漸層、右上角還有專屬滑動提示，這對齊強迫症簡直被治療得太舒服啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

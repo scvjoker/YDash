@@ -45,6 +45,24 @@ canvas, .game-stage {
   display: block;
 }
 
+/* Custom Cyber Scrollbar for Scrollable Lists */
+.cyber-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.cyber-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+.cyber-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00f0ff 0%, #ff007f 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px #00f0ff;
+}
+.cyber-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffe600 0%, #ff007f 100%);
+}
+
 /* Animations */
 @keyframes tissueRain {
   0% { transform: translateY(0) rotate(0deg); opacity: 1; }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ArrowDown, Music2 } from 'lucide-react';
 import { SONG_REGISTRY, SongData } from '../game/SongRegistry';
 import { audioEngine } from '../game/AudioEngine';
 
@@ -100,10 +101,12 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
         maxWidth: '96vw',
         maxHeight: '94svh',
         overflowY: 'auto',
-        padding: isMobileScreen ? '0.6rem 0.9rem' : '1.8rem 2.2rem',
+        padding: isMobileScreen ? '0.6rem 0.9rem' : '1.6rem 2.0rem',
         position: 'relative',
         border: '2px solid #00f0ff',
-        boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
+        boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Close Button */}
         <button
@@ -120,33 +123,69 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             height: isMobileScreen ? '30px' : '40px',
             fontWeight: 900,
             fontSize: isMobileScreen ? '0.9rem' : '1.2rem',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            zIndex: 10
           }}
         >
           ✕
         </button>
 
         {/* Modal Title Header */}
-        <div style={{ marginBottom: isMobileScreen ? '0.4rem' : '1.2rem' }}>
-          <h2 style={{
-            fontSize: isMobileScreen ? '1.2rem' : '2.2rem',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontWeight: 900,
-            color: '#00f0ff',
-            textShadow: '0 0 15px rgba(0,240,255,0.6)',
-            marginBottom: '2px'
+        <div style={{ marginBottom: isMobileScreen ? '0.4rem' : '1.0rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{
+              fontSize: isMobileScreen ? '1.2rem' : '2.2rem',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              color: '#00f0ff',
+              textShadow: '0 0 15px rgba(0,240,255,0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <Music2 size={isMobileScreen ? 18 : 26} color="#ffe600" /> 競選音樂大廳 (8 首精選曲庫)
+            </h2>
+            <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.72rem' : '0.92rem', marginTop: '1px' }}>
+              點擊切換樂曲即可自動試聽！無縫切換零衝突，實時解析動態長度。
+            </p>
+          </div>
+
+          {/* SCROLL HINT BADGE */}
+          <div style={{
+            background: 'rgba(255, 230, 0, 0.12)',
+            border: '1.5px solid rgba(255, 230, 0, 0.4)',
+            color: '#ffe600',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '2px 8px' : '5px 14px',
+            fontSize: isMobileScreen ? '0.68rem' : '0.85rem',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginRight: isMobileScreen ? '34px' : '46px'
           }}>
-            🎵 競選音樂大廳 (8 首精選曲庫)
-          </h2>
-          <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.72rem' : '0.92rem' }}>
-            點擊切換樂曲即可自動試聽！無縫切換零衝突，實時解析動態長度。
-          </p>
+            <ArrowDown size={isMobileScreen ? 11 : 16} /> ↕️ 可上下滑動瀏覽
+          </div>
         </div>
 
-        {/* Main Grid: Left Track List vs Right Selected Song Preview */}
-        <div style={{ display: 'grid', gridTemplateColumns: isMobileScreen ? '1fr 1fr' : '1.25fr 1fr', gap: isMobileScreen ? '0.6rem' : '1.5rem', marginBottom: isMobileScreen ? '0.4rem' : '1.2rem' }}>
-          {/* LEFT: 8 Songs Selection Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobileScreen ? '0.35rem' : '0.75rem', maxHeight: isMobileScreen ? '65vh' : '54vh', overflowY: 'auto', paddingRight: '4px' }}>
+        {/* Main Grid: Equal Height Layout (alignItems: stretch) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobileScreen ? '1fr 1fr' : '1.25fr 1fr',
+          gap: isMobileScreen ? '0.6rem' : '1.5rem',
+          alignItems: 'stretch',
+          flex: 1
+        }}>
+          {/* LEFT: 8 Songs Selection Cards Column Equal Height to Right Panel */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isMobileScreen ? '0.35rem' : '0.65rem',
+            maxHeight: isMobileScreen ? '62vh' : '56vh',
+            height: '100%',
+            overflowY: 'auto',
+            paddingRight: '6px'
+          }} className="cyber-scrollbar">
             {SONG_REGISTRY.map(song => {
               const isSelected = selectedSong.id === song.id;
               const stageBadge = getStageBadgeColor(song.storyStage);
@@ -160,7 +199,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                     background: isSelected ? 'rgba(10, 24, 50, 0.95)' : 'rgba(15, 18, 38, 0.65)',
                     border: isSelected ? '2px solid #00f0ff' : '1px solid rgba(255,255,255,0.15)',
                     borderRadius: '10px',
-                    padding: isMobileScreen ? '0.35rem 0.6rem' : '0.85rem 1.1rem',
+                    padding: isMobileScreen ? '0.35rem 0.6rem' : '0.75rem 1.0rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     display: 'flex',
@@ -176,8 +215,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                       onError={() => setCoverErrors(prev => ({ ...prev, [song.id]: true }))}
                       alt={song.title}
                       style={{
-                        width: isMobileScreen ? '32px' : '45px',
-                        height: isMobileScreen ? '32px' : '45px',
+                        width: isMobileScreen ? '32px' : '44px',
+                        height: isMobileScreen ? '32px' : '44px',
                         borderRadius: '6px',
                         objectFit: 'contain',
                         background: '#07091e',
@@ -190,9 +229,9 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                       background: stageBadge.bg,
                       color: stageBadge.color,
                       fontWeight: 900,
-                      padding: isMobileScreen ? '2px 6px' : '4px 10px',
+                      padding: isMobileScreen ? '2px 6px' : '3px 9px',
                       borderRadius: '6px',
-                      fontSize: isMobileScreen ? '0.65rem' : '0.8rem',
+                      fontSize: isMobileScreen ? '0.65rem' : '0.78rem',
                       whiteSpace: 'nowrap'
                     }}>
                       【{song.storyStage}】
@@ -200,7 +239,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
 
                     <div>
                       <h4 style={{
-                        fontSize: isMobileScreen ? '0.82rem' : '1.1rem',
+                        fontSize: isMobileScreen ? '0.82rem' : '1.05rem',
                         fontWeight: 900,
                         color: isSelected ? '#00f0ff' : '#fff',
                         marginBottom: '1px'
@@ -226,17 +265,24 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             })}
           </div>
 
-          {/* RIGHT: Detailed Song Preview Panel */}
-          <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.6rem 0.8rem' : '1.4rem', border: '1.5px solid #ffe600', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          {/* RIGHT: Detailed Song Preview Panel Equal Height to Left */}
+          <div className="cyber-panel" style={{
+            padding: isMobileScreen ? '0.6rem 0.8rem' : '1.2rem 1.4rem',
+            border: '1.5px solid #ffe600',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: '100%'
+          }}>
             <div>
-              <div style={{ display: 'flex', gap: isMobileScreen ? '0.5rem' : '1rem', alignItems: 'center', marginBottom: isMobileScreen ? '0.4rem' : '1rem' }}>
+              <div style={{ display: 'flex', gap: isMobileScreen ? '0.5rem' : '1rem', alignItems: 'center', marginBottom: isMobileScreen ? '0.4rem' : '0.8rem' }}>
                 <img
                   src={getSmartCover(selectedSong)}
                   onError={() => setCoverErrors(prev => ({ ...prev, [selectedSong.id]: true }))}
                   alt={selectedSong.title}
                   style={{
-                    width: isMobileScreen ? '50px' : '90px',
-                    height: isMobileScreen ? '50px' : '90px',
+                    width: isMobileScreen ? '50px' : '85px',
+                    height: isMobileScreen ? '50px' : '85px',
                     objectFit: 'contain',
                     borderRadius: '10px',
                     background: '#080a1e',
@@ -248,40 +294,40 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                   <span style={{ background: '#ffe600', color: '#000', fontWeight: 900, padding: '1px 6px', borderRadius: '5px', fontSize: isMobileScreen ? '0.65rem' : '0.75rem' }}>
                     【{selectedSong.storyStage}】 (🔊 試聽中)
                   </span>
-                  <h3 style={{ fontSize: isMobileScreen ? '1.0rem' : '1.4rem', fontWeight: 900, color: '#fff', marginTop: '2px' }}>
+                  <h3 style={{ fontSize: isMobileScreen ? '1.0rem' : '1.35rem', fontWeight: 900, color: '#fff', marginTop: '2px' }}>
                     {selectedSong.title}
                   </h3>
-                  <p style={{ fontSize: isMobileScreen ? '0.70rem' : '0.85rem', color: '#aaa' }}>{selectedSong.artist}</p>
-                  <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.8rem', color: '#ffe600', fontWeight: 800, marginTop: '1px' }}>
+                  <p style={{ fontSize: isMobileScreen ? '0.70rem' : '0.82rem', color: '#aaa' }}>{selectedSong.artist}</p>
+                  <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.78rem', color: '#ffe600', fontWeight: 800, marginTop: '1px' }}>
                     BPM {selectedSong.bpm} • {Math.floor(displayDuration / 60)}分{displayDuration % 60}秒
                   </p>
                 </div>
               </div>
 
               {/* Story Context Box */}
-              <div style={{ background: 'rgba(0,0,0,0.5)', padding: isMobileScreen ? '0.4rem 0.6rem' : '0.8rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)', marginBottom: isMobileScreen ? '0.4rem' : '1rem' }}>
-                <p style={{ fontSize: isMobileScreen ? '0.70rem' : '0.85rem', color: '#ddd', lineHeight: 1.35 }}>
+              <div style={{ background: 'rgba(0,0,0,0.5)', padding: isMobileScreen ? '0.4rem 0.6rem' : '0.7rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)', marginBottom: isMobileScreen ? '0.4rem' : '0.8rem' }}>
+                <p style={{ fontSize: isMobileScreen ? '0.70rem' : '0.82rem', color: '#ddd', lineHeight: 1.35 }}>
                   {selectedSong.storyContext}
                 </p>
               </div>
 
               {/* Difficulty Selection */}
-              <div style={{ marginBottom: isMobileScreen ? '0.4rem' : '1rem' }}>
-                <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.82rem', color: '#aaa', fontWeight: 800, marginBottom: '4px' }}>難度模式 (DIFFICULTY):</p>
-                <div style={{ display: 'flex', gap: isMobileScreen ? '0.3rem' : '0.6rem' }}>
+              <div style={{ marginBottom: isMobileScreen ? '0.4rem' : '0.8rem' }}>
+                <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.80rem', color: '#aaa', fontWeight: 800, marginBottom: '4px' }}>難度模式 (DIFFICULTY):</p>
+                <div style={{ display: 'flex', gap: isMobileScreen ? '0.3rem' : '0.5rem' }}>
                   {(['Easy', 'Normal', 'Hard'] as const).map(d => (
                     <button
                       key={d}
                       onClick={() => setDifficulty(d)}
                       style={{
                         flex: 1,
-                        padding: isMobileScreen ? '0.25rem' : '0.45rem',
+                        padding: isMobileScreen ? '0.25rem' : '0.4rem',
                         background: difficulty === d ? '#ffe600' : 'rgba(255,255,255,0.06)',
                         color: difficulty === d ? '#000' : '#fff',
                         border: difficulty === d ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                         borderRadius: '6px',
                         fontWeight: 900,
-                        fontSize: isMobileScreen ? '0.68rem' : '0.85rem',
+                        fontSize: isMobileScreen ? '0.68rem' : '0.82rem',
                         cursor: 'pointer'
                       }}
                     >
@@ -293,8 +339,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
 
               {/* Speed Multiplier */}
               <div>
-                <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.82rem', color: '#aaa', fontWeight: 800, marginBottom: '4px' }}>流速 (SPEED):</p>
-                <div style={{ display: 'flex', gap: isMobileScreen ? '2px' : '5px' }}>
+                <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.80rem', color: '#aaa', fontWeight: 800, marginBottom: '4px' }}>流速 (SPEED):</p>
+                <div style={{ display: 'flex', gap: isMobileScreen ? '2px' : '4px' }}>
                   {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(s => (
                     <button
                       key={s}
@@ -305,7 +351,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                         color: speed === s ? '#000' : '#fff',
                         border: speed === s ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '5px',
-                        padding: isMobileScreen ? '1px 0' : '3px 0',
+                        padding: isMobileScreen ? '1px 0' : '2px 0',
                         fontWeight: 900,
                         fontSize: isMobileScreen ? '0.62rem' : '0.78rem',
                         cursor: 'pointer'
@@ -322,7 +368,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             <button
               className="muse-btn"
               onClick={handleConfirmPlay}
-              style={{ marginTop: isMobileScreen ? '0.5rem' : '1.2rem', width: '100%', fontSize: isMobileScreen ? '0.90rem' : '1.2rem', padding: isMobileScreen ? '0.45rem' : '0.85rem' }}
+              style={{ marginTop: isMobileScreen ? '0.5rem' : '1.0rem', width: '100%', fontSize: isMobileScreen ? '0.90rem' : '1.15rem', padding: isMobileScreen ? '0.45rem' : '0.75rem' }}
             >
               <span>▶ 播放開局 ({difficulty} - {speed.toFixed(2)}x)</span>
             </button>
