@@ -1,20 +1,23 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎓 新手競選培訓精美圖文引導 Modal + 🎵 4 首戰歌 MP3 格式與目錄結構說明
+## [2026-08-07] 🎓 圖文教學導入實體黑粉/道具/造型圖片 + 🎵 4 首競選一路升遷主題戰歌重塑
 
-### 變更與圖文教學 Modal 及音訊目錄說明 (Graphic Tutorial Modal & Audio Specs)
-- **1. 🎓 新手競選培訓改版為精美圖文簡報 Modal ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 將新手教學獨立為 5 大課堂互動圖文簡報（1.雙軌拜票與傳單發送 ➔ 2.雙擊音符與票數倍增 ➔ 3.閃避黑粉與支持度 HP ➔ 4.FEVER 熱血雙倍爆發 ➔ 5.3 大競選戰袍技能指南）。
-  - 提供左右分頁切換、進度點點與「我懂了！開始競選拜票」按鈕，讀圖讀文直觀清晰！
-- **2. 📁 4 首內建音樂檔案格式 (.mp3) 與 public/audio/ 放置位置 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - 音樂檔案格式統一為：**`.mp3`**（或 `.wav`），放置於專案根目錄下的 **`public/audio/`**：
-    1. `public/audio/tutorial_theme.mp3` ➔ 🎓 新手競選培訓主題曲
-    2. `public/audio/election_journey.mp3` ➔ 🎵 yoaka競選之旅 (主打歌)
-    3. `public/audio/cyber_night.mp3` ➔ ⚡ 賽博小島電音夜
-    4. `public/audio/secretary_speech.mp3` ➔ 👓 秘書學霸演說曲
+### 變更與主題歌單重塑項目 (Embedded Tutorial Images & Election Progression Tracks)
+- **1. 圖文教學 Modal 導入實體圖片資源 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 在新手引導簡報中精準嵌入遊戲實體圖片：
+    - `面紙傳單` (`/assets/tissue_pack.png`)
+    - `狗頭舉牌黑粉` (`/assets/hater_dog_board.png`)
+    - `賽博巨型鯊魚` (`/assets/hater_shark.png`)
+    - `競選/學霸/偶像 Yoaka` 3 大造型實體頭像 (`/assets/yoaka_default.png`...)
+- **2. 重新規劃 4 首「競選一路升遷」主題熱血戰歌 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  - 打造從里長起步一路角逐至頂峰幫主的階梯故事歌單：
+    1. 🎵 `1. 巷弄拜票：里長起手式` (120 BPM - `public/audio/track1_chief.mp3`)
+    2. 🎵 `2. 區長爭霸：賽博政見會` (138 BPM - `public/audio/track2_district.mp3`)
+    3. 🎵 `3. 市長大選：小島電音夜` (152 BPM - `public/audio/track3_mayor.mp3`)
+    4. 👑 `4. 幫主登場：最高政壇巔峰` (168 BPM - `public/audio/track4_master.mp3`)
 
 ---
-*「活著很累，但比起 debug，圖文新手教學一目了然，音樂檔直接放 public/audio/*.mp3，這設計整理得太清晰舒服了哈哈！」*
+*「活著很累，但比起 debug，圖文教學有狗頭黑粉跟面紙實圖看，歌單變成一路從里長升到幫主，這故事代入感真的太過癮了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

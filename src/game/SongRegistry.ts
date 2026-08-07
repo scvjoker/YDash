@@ -15,48 +15,47 @@ export interface SongTrackData {
 
 export const BUILTIN_SONGS: SongTrackData[] = [
   {
-    id: 'tutorial_theme',
-    title: '🎓 新手競選培訓主題曲',
-    subtitle: 'TUTORIAL THEME (44.1kHz MP3 檔)',
+    id: 'track1_chief',
+    title: '1. 巷弄拜票：里長起手式',
+    subtitle: 'ALLEY CAMPAIGN (120 BPM - 基層起跑)',
     artist: 'Yoaka Campaign Team',
-    audioUrl: '/audio/tutorial_theme.mp3',
+    audioUrl: '/audio/track1_chief.mp3',
     coverImg: '/assets/yoaka_default.png',
     bpm: 120,
-    isTutorial: true,
-    tags: ['新手引導', '基礎音遊'],
-    description: '專為首次參選助手打造的新手節奏樂曲！放置路徑: public/audio/tutorial_theme.mp3'
+    tags: ['里長參選', '基層拜票', '輕鬆熱身'],
+    description: 'Yoaka 競選的第一步！走入大街小巷發放面紙傳單，累積基層里民的最純粹支持度！'
   },
   {
-    id: 'track_election',
-    title: 'yoaka競選之旅',
-    subtitle: 'ELECTION JOURNEY (賽博里長主打歌)',
-    artist: 'Yoaka Official',
-    audioUrl: '/audio/election_journey.mp3',
-    coverImg: '/yoaka_main.jpg',
-    bpm: 132,
-    tags: ['主打歌', '賽博龐克', '熱血拜票'],
-    description: '熱血感滿滿的里長競選主打樂曲！放置路徑: public/audio/election_journey.mp3'
-  },
-  {
-    id: 'track_cyber_night',
-    title: '⚡ 賽博小島電音夜',
-    subtitle: 'CYBER ISLAND NIGHT (高速節奏狂歡)',
-    artist: 'Yoaka Beats',
-    audioUrl: '/audio/cyber_night.mp3',
-    coverImg: '/assets/yoaka_kpop.png',
-    bpm: 155,
-    tags: ['高速電音', '極限Combo', '電音狂熱'],
-    description: '155 BPM 高速節奏電音！放置路徑: public/audio/cyber_night.mp3'
-  },
-  {
-    id: 'track_secretary_speech',
-    title: '👓 秘書學霸演說曲',
-    subtitle: 'SECRETARY SPEECH (理性律動爵士)',
+    id: 'track2_district',
+    title: '2. 區長爭霸：賽博政見會',
+    subtitle: 'DISTRICT SHOWDOWN (138 BPM - 激戰選戰)',
     artist: 'Yoaka Office Lab',
-    audioUrl: '/audio/secretary_speech.mp3',
+    audioUrl: '/audio/track2_district.mp3',
     coverImg: '/assets/yoaka_office.png',
-    bpm: 118,
-    tags: ['中速律動', '學霸政見', '爵士賽博'],
-    description: '中速高雅的律動爵士節奏！放置路徑: public/audio/secretary_speech.mp3'
+    bpm: 138,
+    tags: ['區長競選', '賽博政見', '學霸加成'],
+    description: '挺進區長大選！穿上學霸秘書戰袍，在賽博政見發表會上展現精準魄力！'
+  },
+  {
+    id: 'track3_mayor',
+    title: '3. 市長大選：小島電音夜',
+    subtitle: 'MAYOR ELECTION (152 BPM - 全島狂歡)',
+    artist: 'Yoaka Beats',
+    audioUrl: '/audio/track3_mayor.mp3',
+    coverImg: '/assets/yoaka_kpop.png',
+    bpm: 152,
+    tags: ['市長大選', '賽博電音', '偶像魅力'],
+    description: '全島矚目的市長級熱血大選！搭配賽博偶像戰袍與 152 BPM 電音掀起全島熱潮！'
+  },
+  {
+    id: 'track4_master',
+    title: '4. 幫主登場：最高政壇巔峰',
+    subtitle: 'GUILD MASTER (168 BPM - 頂峰對決)',
+    artist: 'Yoaka Supreme',
+    audioUrl: '/audio/track4_master.mp3',
+    coverImg: '/yoaka_main.jpg',
+    bpm: 168,
+    tags: ['最高巔峰', '幫主登場', '極限音遊'],
+    description: '榮登 Web3 小島最高政壇幫主！168 BPM 超高速密集拍點，考驗真正的競選王者！'
   }
 ];
