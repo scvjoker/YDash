@@ -45,6 +45,10 @@ export class AudioEngine {
     this.customAudioBuffer = null;
   }
 
+  public getLoadedAudioBuffer(): AudioBuffer | null {
+    return this.customAudioBuffer || this.bgmBuffer;
+  }
+
   public async loadDefaultBGM(): Promise<AudioBuffer | null> {
     return this.loadAudioFromUrl('/assets/audio/campaign_start.mp3');
   }
@@ -121,7 +125,7 @@ export class AudioEngine {
   }
 
   /**
-   * 🎼 AI Automatic Beatmap Recognition with Balanced Tiered Difficulty & Obstacle Safety Pacing
+   * 🎼 AI Automatic Beatmap Recognition with Dual Note Pacing Buffer & Full Track Coverage
    */
   public detectBeatsFromBuffer(buffer: AudioBuffer, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'): any[] {
     const channelData = buffer.getChannelData(0);
@@ -151,12 +155,12 @@ export class AudioEngine {
       });
     }
 
-    // 🎯 Smoothed Quantized AI Difficulty Rules
+    // 🎯 Quantized AI Difficulty Rules
     let minEnergyThreshold = 0.20;
     let minTimeGap = 0.32;
     let dualChance = 0.10;
     let obstacleChance = 0.08;
-    let maxSameTrackStreak = 2; // Force alternate if same track appears more than N times
+    let maxSameTrackStreak = 2;
 
     if (difficulty === 'Easy') {
       minEnergyThreshold = 0.32;
@@ -167,8 +171,8 @@ export class AudioEngine {
     } else if (difficulty === 'Hard') {
       minEnergyThreshold = 0.15;
       minTimeGap = 0.25; // Smoothed Hard gap (4.0 notes/sec instead of 5.0)
-      dualChance = 0.15; // Smoothed dual chance
-      obstacleChance = 0.12; // Smoothed obstacle chance
+      dualChance = 0.15;
+      obstacleChance = 0.12;
       maxSameTrackStreak = 2;
     }
 
@@ -220,6 +224,7 @@ export class AudioEngine {
               entity: Math.random() > 0.5 ? 'hater_dog_board' : 'hater_shark'
             });
             lastObstacleTime = currItem.time;
+            lastNoteTime = currItem.time;
           } else if (isDual) {
             notes.push({
               time: currItem.time,
@@ -235,6 +240,8 @@ export class AudioEngine {
               entity: 'tissue_pack',
               isDual: true
             });
+            // 🛡️ Dual Note Safety Buffer: Extra cooldown after dual note to prevent crowding
+            lastNoteTime = currItem.time + minTimeGap * 0.5;
           } else {
             notes.push({
               time: currItem.time,
@@ -242,9 +249,8 @@ export class AudioEngine {
               type: 'normal',
               entity: 'tissue_pack'
             });
+            lastNoteTime = currItem.time;
           }
-
-          lastNoteTime = currItem.time;
         }
       }
     }

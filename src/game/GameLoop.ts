@@ -12,6 +12,7 @@ export class GameLoop {
   private speedMultiplier: number;
   private animFrameId: number | null = null;
   private isPausedState: boolean = false;
+  private totalAudioDuration: number = 180;
 
   private activeTrack: 'air' | 'ground' = 'ground';
   private resumeCountdown: number = 0;
@@ -64,6 +65,7 @@ export class GameLoop {
     const bgmBuf = await audioEngine.loadAudioFromUrl(audioUrl);
     
     if (bgmBuf) {
+      this.totalAudioDuration = bgmBuf.duration;
       const detected = audioEngine.detectBeatsFromBuffer(bgmBuf, this.difficulty);
       if (detected.length > 0) {
         this.notes = detected;
@@ -317,8 +319,12 @@ export class GameLoop {
       this.speedMultiplier
     );
 
+    // End Game condition: Wait until both last note is passed AND total audio duration is reached!
     const lastNote = this.notes[this.notes.length - 1];
-    if (lastNote && currentTime > lastNote.time + 2.5) {
+    const isNotesFinished = !lastNote || currentTime > lastNote.time + 2.0;
+    const isAudioFinished = currentTime >= this.totalAudioDuration - 0.5;
+
+    if (isNotesFinished && isAudioFinished) {
       this.stop();
       if (this.onGameOver) this.onGameOver({ ...this.stats });
       return;
