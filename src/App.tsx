@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, BeatmapData, CostumeId, GameStats } from './types/game';
 import { DEFAULT_BEATMAPS } from './game/Beatmaps';
+import { SongTrackData, BUILTIN_SONGS } from './game/SongRegistry';
 import { RenderEngine } from './game/RenderEngine';
 import { GameLoop } from './game/GameLoop';
 import { audioEngine } from './game/AudioEngine';
@@ -13,6 +14,9 @@ import { PauseModal } from './components/PauseModal';
 import { ResultScreen } from './components/ResultScreen';
 import { LandscapePrompt } from './components/LandscapePrompt';
 
+import { SongSelectModal } from './components/SongSelectModal';
+import { TutorialOverlay, TutorialPhaseInfo, TUTORIAL_PHASES_DATA } from './components/TutorialOverlay';
+
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -20,6 +24,21 @@ export const App: React.FC = () => {
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [currentNoteSpeed, setCurrentNoteSpeed] = useState<number>(1.0);
   const [selectedCostume, setSelectedCostume] = useState<CostumeId>('campaign_vest');
+
+  // Song Selector & Tutorial State
+  const [selectedSongTrack, setSelectedSongTrack] = useState<SongTrackData>(BUILTIN_SONGS[1]);
+  const [isSongSelectOpen, setIsSongSelectOpen] = useState<boolean>(false);
+
+  const [isTutorialMode, setIsTutorialMode] = useState<boolean>(false);
+  const [tutorialInfo, setTutorialInfo] = useState<TutorialPhaseInfo>({
+    phase: 1,
+    title: TUTORIAL_PHASES_DATA[0].title,
+    instruction: TUTORIAL_PHASES_DATA[0].instruction,
+    keyHint: TUTORIAL_PHASES_DATA[0].keyHint,
+    targetCount: TUTORIAL_PHASES_DATA[0].targetCount,
+    currentCount: 0
+  });
+  const [isTutorialCompleted, setIsTutorialCompleted] = useState<boolean>(false);
 
   const [gameStats, setGameStats] = useState<GameStats>({
     score: 0,
@@ -53,7 +72,7 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
+  // Auto-Pause when switching apps, leaving tab, or locking screen
   useEffect(() => {
     const triggerAutoPause = () => {
       if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
@@ -83,14 +102,22 @@ export const App: React.FC = () => {
   const handleStartGame = (
     beatmap: BeatmapData,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
-    noteSpeed: number = 1.0
+    noteSpeed: number = 1.0,
+    songTrack?: SongTrackData
   ) => {
     if (gameLoopRef.current) {
       gameLoopRef.current.stop();
       gameLoopRef.current = null;
     }
 
-    // Force Reset Game Stats to Initial Fresh Values (Score = 0, SupportRate = 100%)
+    if (songTrack) {
+      setSelectedSongTrack(songTrack);
+    }
+
+    setIsTutorialMode(false);
+    setIsTutorialCompleted(false);
+
+    // Force Reset Game Stats to Initial Values
     const freshStats: GameStats = {
       score: 0,
       supportRate: 100,
@@ -126,6 +153,60 @@ export const App: React.FC = () => {
           finalStats => {
             setGameStats({ ...finalStats });
             setGameState('result');
+          },
+          false
+        );
+        gameLoopRef.current = loop;
+        loop.start();
+      }
+    }, 100);
+  };
+
+  // Start Tutorial Stage Mode (5-Phase Interactive Guide with Phase Repeat Audio)
+  const handleStartTutorial = () => {
+    if (gameLoopRef.current) {
+      gameLoopRef.current.stop();
+      gameLoopRef.current = null;
+    }
+
+    setIsTutorialMode(true);
+    setIsTutorialCompleted(false);
+    setIsPaused(false);
+
+    setGameStats({
+      score: 0,
+      supportRate: 100,
+      combo: 0,
+      maxCombo: 0,
+      perfectCount: 0,
+      greatCount: 0,
+      missCount: 0,
+      feverGauge: 0,
+      isFeverActive: false,
+      totalNotesCount: 0
+    });
+
+    setGameState('playing');
+
+    setTimeout(() => {
+      if (canvasRef.current) {
+        const renderEngine = new RenderEngine(canvasRef.current);
+        renderEngine.resize(window.innerWidth, window.innerHeight);
+
+        const loop = new GameLoop(
+          renderEngine,
+          DEFAULT_BEATMAPS[0],
+          selectedCostume,
+          'Normal',
+          1.0,
+          stats => setGameStats({ ...stats }),
+          () => {},
+          true, // isTutorialMode = true
+          info => {
+            setTutorialInfo(info);
+            if (gameLoopRef.current?.isTutorialCompleted) {
+              setIsTutorialCompleted(true);
+            }
           }
         );
         gameLoopRef.current = loop;
@@ -174,14 +255,36 @@ export const App: React.FC = () => {
       {/* 1. START SCREEN */}
       {gameState === 'menu' && (
         <StartScreen
-          onStartGame={(map, diff, speed) => handleStartGame(map, diff, speed)}
+          onStartGame={(map, diff, speed, song) => handleStartGame(map, diff, speed, song)}
           onOpenCostumes={() => setGameState('costumes')}
           onOpenEditor={() => setGameState('editor')}
+          onOpenSongSelect={() => setIsSongSelectOpen(true)}
+          onStartTutorial={handleStartTutorial}
           selectedCostume={selectedCostume}
+          selectedSongTrack={selectedSongTrack}
         />
       )}
 
-      {/* 2. COSTUME MODAL */}
+      {/* 2. SONG SELECT MODAL */}
+      {isSongSelectOpen && (
+        <SongSelectModal
+          onSelectSong={song => {
+            setIsSongSelectOpen(false);
+            if (song.isTutorial) {
+              handleStartTutorial();
+            } else {
+              setSelectedSongTrack(song);
+            }
+          }}
+          onClose={() => setIsSongSelectOpen(false)}
+          onOpenEditor={() => {
+            setIsSongSelectOpen(false);
+            setGameState('editor');
+          }}
+        />
+      )}
+
+      {/* 3. COSTUME MODAL */}
       {gameState === 'costumes' && (
         <CostumeModal
           selectedCostume={selectedCostume}
@@ -190,7 +293,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 3. BEATMAP EDITOR MODAL */}
+      {/* 4. BEATMAP EDITOR MODAL */}
       {gameState === 'editor' && (
         <BeatmapEditor
           onClose={() => setGameState('menu')}
@@ -198,7 +301,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 4. CANVAS RHYTHM GAMEPLAY */}
+      {/* 5. CANVAS RHYTHM GAMEPLAY */}
       <canvas
         ref={canvasRef}
         style={{
@@ -208,7 +311,22 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* 5. HUD OVERLAY */}
+      {/* 6. TUTORIAL OVERLAY (When in Tutorial Mode) */}
+      {gameState === 'playing' && isTutorialMode && (
+        <TutorialOverlay
+          phaseInfo={tutorialInfo}
+          onNextStep={() => gameLoopRef.current?.nextTutorialPhase()}
+          isCompleted={isTutorialCompleted}
+          onCompleteTutorial={() => {
+            if (gameLoopRef.current) gameLoopRef.current.stop();
+            setIsTutorialMode(false);
+            setIsTutorialCompleted(false);
+            setGameState('menu');
+          }}
+        />
+      )}
+
+      {/* 7. HUD OVERLAY */}
       {gameState === 'playing' && (
         <HUDOverlay
           stats={gameStats}
@@ -219,27 +337,31 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 6. PAUSE MODAL */}
+      {/* 8. PAUSE MODAL */}
       {isPaused && (
         <PauseModal
           stats={gameStats}
-          beatmapTitle={`${currentBeatmap.metadata.title} (${currentDifficulty})`}
+          beatmapTitle={`${selectedSongTrack.title} (${currentDifficulty})`}
           onResume={handleTogglePause}
-          onRestart={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed)}
+          onRestart={() => {
+            if (isTutorialMode) handleStartTutorial();
+            else handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack);
+          }}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setIsPaused(false);
+            setIsTutorialMode(false);
             setGameState('menu');
           }}
         />
       )}
 
-      {/* 7. RESULT SCREEN */}
+      {/* 9. RESULT SCREEN */}
       {gameState === 'result' && (
         <ResultScreen
           stats={gameStats}
-          beatmapTitle={`${currentBeatmap.metadata.title} (${currentDifficulty})`}
-          onReplay={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed)}
+          beatmapTitle={`${selectedSongTrack.title} (${currentDifficulty})`}
+          onReplay={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setGameState('menu');

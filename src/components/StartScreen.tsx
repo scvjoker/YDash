@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize } from 'lucide-react';
+import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize, GraduationCap, Music } from 'lucide-react';
 import { BeatmapData, CostumeId } from '../types/game';
 import { DEFAULT_BEATMAPS, COSTUMES_DATA } from '../game/Beatmaps';
+import { SongTrackData, BUILTIN_SONGS } from '../game/SongRegistry';
 
 interface StartScreenProps {
-  onStartGame: (beatmap: BeatmapData, difficulty: 'Easy' | 'Normal' | 'Hard', noteSpeed: number) => void;
+  onStartGame: (beatmap: BeatmapData, difficulty: 'Easy' | 'Normal' | 'Hard', noteSpeed: number, songTrack?: SongTrackData) => void;
   onOpenCostumes: () => void;
   onOpenEditor: () => void;
+  onOpenSongSelect: () => void;
+  onStartTutorial: () => void;
   selectedCostume: CostumeId;
+  selectedSongTrack: SongTrackData;
 }
 
 export const StartScreen: React.FC<StartScreenProps> = ({
   onStartGame,
   onOpenCostumes,
   onOpenEditor,
-  selectedCostume
+  onOpenSongSelect,
+  onStartTutorial,
+  selectedCostume,
+  selectedSongTrack
 }) => {
   const [selectedMap] = useState<BeatmapData>(DEFAULT_BEATMAPS[0]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -197,7 +204,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
       </div>
 
-      {/* RIGHT HALF (50vw): Desktop Restored Grand Size Menu Container */}
+      {/* RIGHT HALF (50vw): Menu Container */}
       <div style={{
         width: '50vw',
         height: '100vh',
@@ -206,24 +213,47 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         justifyContent: 'center',
         padding: isMobileScreen ? '0.4rem 2.5vw 0.4rem 0.5vw' : '0 4vw 0 1vw',
         zIndex: 2,
-        gap: isMobileScreen ? '0.5rem' : '1.1rem',
+        gap: isMobileScreen ? '0.4rem' : '0.9rem',
         overflowY: 'auto'
       }}>
-        {/* Top Campaign Badge Pill */}
-        <div style={{
-          alignSelf: 'flex-start',
-          background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: isMobileScreen ? '3px 14px' : '5px 22px',
-          borderRadius: '30px',
-          boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
-          <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
-            WEB3 小島區里長熱血大選！
-          </span>
+        {/* Top Campaign Badge Pill & Tutorial Shortcut Button */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{
+            background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
+            padding: isMobileScreen ? '3px 14px' : '5px 22px',
+            borderRadius: '30px',
+            boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
+            <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
+              WEB3 小島區里長熱血大選！
+            </span>
+          </div>
+
+          {/* 🎓 TUTORIAL ENTRY BUTTON */}
+          <button
+            onClick={onStartTutorial}
+            style={{
+              background: 'linear-gradient(135deg, #ffe600 0%, #ffb703 100%)',
+              border: '1.5px solid #fff',
+              color: '#000',
+              borderRadius: '20px',
+              padding: isMobileScreen ? '3px 12px' : '6px 18px',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              boxShadow: '0 0 16px rgba(255,230,0,0.6)'
+            }}
+          >
+            <GraduationCap size={isMobileScreen ? 14 : 18} /> 🎓 新手競選培訓
+          </button>
         </div>
 
         {/* Main Neon Title & Slogan Catchphrase Group */}
@@ -260,37 +290,46 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
         </div>
 
-        {/* Track Selection Card with Difficulty & Speed Switch */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.6rem' }}>
+        {/* Track Selection Card with Difficulty & Speed Switch & SONG SELECTOR ENTRY */}
+        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.5rem' }}>
             <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: isMobileScreen ? '0.78rem' : '0.9rem', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Disc size={isMobileScreen ? 14 : 18} /> 專屬競選拜票戰歌
+              <Disc size={isMobileScreen ? 14 : 18} /> 當前選定戰歌
             </span>
-            <span style={{
-              background: selectedDifficulty === 'Hard' ? '#ff007f' : selectedDifficulty === 'Normal' ? '#00f0ff' : '#ffe600',
-              color: '#000',
-              fontWeight: 900,
-              padding: isMobileScreen ? '1px 10px' : '3px 14px',
-              borderRadius: '20px',
-              fontSize: isMobileScreen ? '0.72rem' : '0.85rem'
-            }}>
-              {selectedDifficulty} Mode
-            </span>
+            
+            <button
+              onClick={onOpenSongSelect}
+              style={{
+                background: 'rgba(0, 240, 255, 0.15)',
+                border: '1.5px solid #00f0ff',
+                color: '#00f0ff',
+                borderRadius: '16px',
+                padding: '2px 10px',
+                fontSize: isMobileScreen ? '0.72rem' : '0.82rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Music size={13} /> 🎵 換歌選單 ({BUILTIN_SONGS.length}首)
+            </button>
           </div>
 
-          <h3 style={{ fontSize: isMobileScreen ? '1.25rem' : '2rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
-            yoaka競選之旅
+          <h3 style={{ fontSize: isMobileScreen ? '1.2rem' : '1.8rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
+            {selectedSongTrack.title}
           </h3>
 
           {/* Difficulty Switch Pills */}
-          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.8rem' }}>
+          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.7rem' }}>
             {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
                 style={{
                   flex: 1,
-                  padding: isMobileScreen ? '0.35rem' : '0.55rem',
+                  padding: isMobileScreen ? '0.35rem' : '0.5rem',
                   background: selectedDifficulty === diff ? (diff === 'Hard' ? 'linear-gradient(135deg, #ff007f, #d80068)' : diff === 'Normal' ? 'linear-gradient(135deg, #00f0ff, #0077b6)' : 'linear-gradient(135deg, #ffe600, #ffb703)') : 'rgba(255,255,255,0.05)',
                   border: selectedDifficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                   borderRadius: '10px',
@@ -309,7 +348,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
 
           {/* Note Speed Multiplier Selection Bar */}
-          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.5rem 0.8rem', borderRadius: '10px' }}>
+          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.45rem 0.8rem', borderRadius: '10px' }}>
             <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.82rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
               <Gauge size={isMobileScreen ? 12 : 16} color="#ffe600" /> 音符流速 (SPEED):
             </span>
@@ -339,25 +378,25 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         {/* Start Game Button */}
         <button
           className="muse-btn"
-          onClick={() => onStartGame(selectedMap, selectedDifficulty, selectedNoteSpeed)}
-          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.45rem', padding: isMobileScreen ? '0.65rem' : '1rem' }}
+          onClick={() => onStartGame(selectedMap, selectedDifficulty, selectedNoteSpeed, selectedSongTrack)}
+          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.4rem', padding: isMobileScreen ? '0.65rem' : '0.9rem' }}
         >
           <span><Play fill="#fff" size={isMobileScreen ? 18 : 24} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
         </button>
 
         {/* Sub Option Buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobileScreen ? '0.4rem' : '0.8rem' }}>
-          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
+          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.75rem' }}>
             <span><Sparkles size={isMobileScreen ? 14 : 18} /> 造型: {costumeObj.name}</span>
           </button>
 
-          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
+          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.75rem' }}>
             <span><Wand2 size={isMobileScreen ? 14 : 18} /> A+B 譜面創作者</span>
           </button>
         </div>
 
         {/* Key Guide Box */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.4rem 0.8rem' : '0.8rem 1.2rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.4rem 0.8rem' : '0.7rem 1.2rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: isMobileScreen ? '0.7rem' : '0.8rem', color: '#00f0ff', fontWeight: 800, marginBottom: '4px' }}>上軌 (空中投紙/閃避)</p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
