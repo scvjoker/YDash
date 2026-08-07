@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Play, Wand2, Trash2, ArrowDown, Maximize, Zap } from 'lucide-react';
+import { X, Upload, Play, Wand2, Trash2, ArrowDown, Maximize, Zap, Disc, Download, Music, AlertCircle } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
 
@@ -14,15 +14,20 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
 }) => {
   const [songTitle, setSongTitle] = useState<string>('我的自訂創作曲');
   const [bpm, setBpm] = useState<number>(130);
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [decodedBuffer, setDecodedBuffer] = useState<AudioBuffer | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+
+  // Playback & Live Tap Recording State
   const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
+  const [isTapRecording, setIsTapRecording] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -46,7 +51,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           setDecodedBuffer(decoded);
           audioEngine.setCustomAudioBuffer(decoded);
 
-          const autoNotes = audioEngine.detectBeatsFromBuffer(decoded, 'Normal');
+          const autoNotes = audioEngine.detectBeatsFromBuffer(decoded, difficulty);
           setNotes(autoNotes);
           setIsAnalyzing(false);
         } catch {
@@ -57,18 +62,104 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     reader.readAsArrayBuffer(file);
   };
 
-  const handleReDetectBeats = () => {
+  // Step A: Auto AI Beat Detection with Selected Density Difficulty
+  const handleReDetectBeats = (targetDiff: 'Easy' | 'Normal' | 'Hard' = difficulty) => {
     const activeBuf = decodedBuffer || audioEngine['bgmBuffer'];
     if (!activeBuf) {
-      alert('請先上傳 MP3 音樂檔！');
+      alert('請先點擊上傳 MP3 / WAV 音樂檔！');
       return;
     }
     setIsAnalyzing(true);
+    setDifficulty(targetDiff);
     setTimeout(() => {
-      const autoNotes = audioEngine.detectBeatsFromBuffer(activeBuf, 'Normal');
+      const autoNotes = audioEngine.detectBeatsFromBuffer(activeBuf, targetDiff);
       setNotes(autoNotes);
       setIsAnalyzing(false);
     }, 150);
+  };
+
+  // Step B: Live Tap Recording Mode Toggle
+  const handleToggleTapRecord = () => {
+    if (isTapRecording) {
+      setIsTapRecording(false);
+      setIsPlayingPreview(false);
+      audioEngine.stopBGM();
+    } else {
+      const activeBuf = decodedBuffer || audioEngine['bgmBuffer'];
+      if (!activeBuf) {
+        alert('請先點擊上傳 MP3 / WAV 音樂檔以進行打拍錄製！');
+        return;
+      }
+      setIsTapRecording(true);
+      setIsPlayingPreview(true);
+      audioEngine.playBGM(0);
+    }
+  };
+
+  // Keyboard Tap Listener for Live Recording Mode (D/F for Air, J/K for Ground)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isTapRecording || !isPlayingPreview) return;
+
+      const key = e.key.toLowerCase();
+      const timeSec = parseFloat(audioEngine.getHardwareTime().toFixed(3));
+
+      if (key === 'd' || key === 'f') {
+        // Air Note
+        const newNote: Note = {
+          id: `tap_air_${Date.now()}_${Math.random()}`,
+          time: timeSec,
+          track: 'air',
+          type: 'voter',
+          entity: 'voter_student'
+        };
+        setNotes(prev => [...prev, newNote].sort((a, b) => a.time - b.time));
+        audioEngine.playSFX('perfect');
+      } else if (key === 'j' || key === 'k') {
+        // Ground Note
+        const newNote: Note = {
+          id: `tap_ground_${Date.now()}_${Math.random()}`,
+          time: timeSec,
+          track: 'ground',
+          type: 'voter',
+          entity: 'voter_office'
+        };
+        setNotes(prev => [...prev, newNote].sort((a, b) => a.time - b.time));
+        audioEngine.playSFX('great');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isTapRecording, isPlayingPreview]);
+
+  // Export JSON Beatmap File
+  const handleExportJSON = () => {
+    if (notes.length === 0) {
+      alert('尚無音符資料可供匯出！');
+      return;
+    }
+
+    const exportData: BeatmapData = {
+      metadata: {
+        id: `custom_${Date.now()}`,
+        title: songTitle,
+        artist: 'Yoaka Community Beatmaker',
+        bpm,
+        offset: 0,
+        difficulty,
+        coverColor: '#ffe600'
+      },
+      notes
+    };
+
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `${songTitle}_beatmap.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   };
 
   const handleFullscreen = () => {
@@ -83,6 +174,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     if (isPlayingPreview) {
       audioEngine.stopBGM();
       setIsPlayingPreview(false);
+      setIsTapRecording(false);
     } else {
       audioEngine.playBGM(0);
       setIsPlayingPreview(true);
@@ -121,6 +213,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     if (isPlayingPreview) {
       audioEngine.stopBGM();
       setIsPlayingPreview(false);
+      setIsTapRecording(false);
     }
 
     const customMap: BeatmapData = {
@@ -130,7 +223,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
         artist: '自訂上傳創作者',
         bpm,
         offset: 0,
-        difficulty: 'Normal',
+        difficulty,
         coverColor: '#ffe600'
       },
       notes
@@ -151,7 +244,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       padding: '0.8rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '880px',
+        width: '900px',
         maxWidth: '96vw',
         height: '92vh',
         maxHeight: '92vh',
@@ -167,7 +260,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{
-              fontSize: '1.8rem',
+              fontSize: '1.75rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
@@ -194,6 +287,27 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {/* Export JSON Button */}
+            <button
+              onClick={handleExportJSON}
+              disabled={notes.length === 0}
+              style={{
+                background: notes.length > 0 ? 'rgba(0, 240, 255, 0.2)' : 'rgba(255,255,255,0.05)',
+                border: notes.length > 0 ? '1.5px solid #00f0ff' : '1px solid rgba(255,255,255,0.2)',
+                color: notes.length > 0 ? '#00f0ff' : '#888',
+                borderRadius: '16px',
+                padding: '4px 12px',
+                fontWeight: 900,
+                fontSize: '0.78rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: notes.length > 0 ? 'pointer' : 'not-allowed'
+              }}
+            >
+              <Download size={14} /> 📥 匯出 JSON 譜面
+            </button>
+
             {/* Fullscreen Button */}
             <button
               onClick={handleFullscreen}
@@ -203,14 +317,12 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                 color: '#ffe600',
                 borderRadius: '16px',
                 padding: '4px 12px',
-                fontFamily: 'Chakra Petch, sans-serif',
                 fontWeight: 900,
                 fontSize: '0.78rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                cursor: 'pointer',
-                boxShadow: '0 0 12px rgba(255,230,0,0.4)'
+                cursor: 'pointer'
               }}
             >
               <Maximize size={14} /> 全螢幕
@@ -229,8 +341,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)'
+                cursor: 'pointer'
               }}
             >
               <X size={18} />
@@ -245,59 +356,115 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           paddingRight: '6px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem'
+          gap: '0.9rem'
         }}>
-          {/* File Upload Box & Re-Detect Button */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '0.8rem' }}>
-            <div style={{
-              background: 'rgba(0,0,0,0.4)',
-              border: '2px dashed #ffe600',
-              borderRadius: '14px',
-              padding: '0.9rem',
-              textAlign: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }} onClick={() => fileInputRef.current?.click()}>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="audio/*"
-                style={{ display: 'none' }}
-                onChange={handleFileUpload}
-              />
+          {/* File Upload Box */}
+          <div style={{
+            background: 'rgba(0,0,0,0.4)',
+            border: '2px dashed #ffe600',
+            borderRadius: '14px',
+            padding: '0.8rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }} onClick={() => fileInputRef.current?.click()}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="audio/*"
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
 
-              <Upload size={28} color="#ffe600" style={{ margin: '0 auto 4px auto' }} />
+            <Upload size={28} color="#ffe600" style={{ margin: '0 auto 4px auto' }} />
 
-              <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
-                {audioFile ? `🎵 ${audioFile.name}` : '點擊上傳 MP3 / WAV 樂曲檔'}
-              </h3>
-              <p style={{ fontSize: '0.78rem', color: '#aaa', margin: 0 }}>
-                {isAnalyzing ? '⚡ AI 波形節奏抓拍分析中...' : 'Web Audio API 即時波峰抓拍，自動生成節奏譜面！'}
-              </p>
+            <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
+              {audioFile ? `🎵 ${audioFile.name}` : '點擊上傳 MP3 / WAV 樂曲檔'}
+            </h3>
+            <p style={{ fontSize: '0.78rem', color: '#aaa', margin: 0 }}>
+              {isAnalyzing ? '⚡ AI 波形節奏抓拍分析中...' : 'Web Audio API 即時波峰抓拍，自動生成節奏譜面！'}
+            </p>
+          </div>
+
+          {/* STEP A & STEP B Creation Control Section */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+            {/* Step A: AI Auto Beat Detection with Difficulty Density Pills */}
+            <div style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid #00f0ff', borderRadius: '12px', padding: '0.7rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#00f0ff', fontWeight: 900 }}>
+                  Step A: AI 自動波峰抓拍 (抓拍密度)
+                </span>
+                <button
+                  onClick={() => handleReDetectBeats(difficulty)}
+                  style={{
+                    background: '#00f0ff',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 900,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⚡ 一鍵抓拍
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
+                  <button
+                    key={diff}
+                    onClick={() => handleReDetectBeats(diff)}
+                    style={{
+                      flex: 1,
+                      padding: '4px',
+                      background: difficulty === diff ? '#00f0ff' : 'rgba(255,255,255,0.05)',
+                      color: difficulty === diff ? '#000' : '#fff',
+                      border: difficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '6px',
+                      fontWeight: 900,
+                      fontSize: '0.78rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {diff}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Explicit AI Re-Detect Beats Button */}
-            <button
-              onClick={handleReDetectBeats}
-              style={{
-                background: 'rgba(255, 230, 0, 0.15)',
-                border: '2px solid #ffe600',
-                borderRadius: '14px',
-                color: '#ffe600',
-                fontWeight: 900,
-                fontSize: '0.85rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                cursor: 'pointer',
-                boxShadow: '0 0 16px rgba(255, 230, 0, 0.3)'
-              }}
-            >
-              <Zap size={24} color="#ffe600" />
-              ⚡ 點擊 AI 自動抓拍譜面
-            </button>
+            {/* Step B: Live Keyboard Tap Recording */}
+            <div style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid #ff007f', borderRadius: '12px', padding: '0.7rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#ff007f', fontWeight: 900 }}>
+                  Step B: 手動 Tap 鍵盤錄製 (D/F/J/K)
+                </span>
+              </div>
+
+              <button
+                onClick={handleToggleTapRecord}
+                style={{
+                  width: '100%',
+                  padding: '6px',
+                  background: isTapRecording ? '#ff007f' : 'rgba(255, 0, 127, 0.15)',
+                  color: '#fff',
+                  border: '1.5px solid #ff007f',
+                  borderRadius: '6px',
+                  fontWeight: 900,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: isTapRecording ? '0 0 16px rgba(255, 0, 127, 0.6)' : 'none'
+                }}
+              >
+                <Disc size={16} className={isTapRecording ? 'spin-anim' : ''} />
+                {isTapRecording ? '🔴 Tap 錄製中！請按 D/F/J/K 鍵打拍' : '🎙️ 開啟手動 Tap 鍵盤即時錄製'}
+              </button>
+            </div>
           </div>
 
           {/* Song Info Controls */}
@@ -313,10 +480,10 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                   background: 'rgba(0,0,0,0.6)',
                   border: '1px solid rgba(255,255,255,0.2)',
                   color: '#ffe600',
-                  padding: '0.5rem 0.8rem',
+                  padding: '0.4rem 0.8rem',
                   borderRadius: '8px',
                   fontWeight: 900,
-                  fontSize: '0.95rem',
+                  fontSize: '0.92rem',
                   marginTop: '2px'
                 }}
               />
@@ -333,22 +500,22 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                   background: 'rgba(0,0,0,0.6)',
                   border: '1px solid rgba(255,255,255,0.2)',
                   color: '#00f0ff',
-                  padding: '0.5rem 0.8rem',
+                  padding: '0.4rem 0.8rem',
                   borderRadius: '8px',
                   fontWeight: 900,
-                  fontSize: '0.95rem',
+                  fontSize: '0.92rem',
                   marginTop: '2px'
                 }}
               />
             </div>
           </div>
 
-          {/* Music Playback & Quick Add Note Bar */}
+          {/* Music Playback & Manual Add Note Bar */}
           <div style={{
             background: 'rgba(0, 240, 255, 0.08)',
             border: '1px solid #00f0ff',
             borderRadius: '12px',
-            padding: '0.8rem 1rem',
+            padding: '0.7rem 1rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -357,7 +524,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             <button
               className={isPlayingPreview ? 'muse-btn muse-btn-yellow' : 'muse-btn'}
               onClick={handleTogglePreview}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+              style={{ fontSize: '0.85rem', padding: '0.45rem 0.9rem' }}
             >
               <span>{isPlayingPreview ? '⏸ 暫停試聽' : '▶ 播放音樂'}</span>
             </button>
@@ -410,7 +577,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>
-                譜面音符點位 (已抓拍 {notes.length} 個音符):
+                📍 已生成譜面點位 (共 {notes.length} 個音符 Note):
               </span>
             </div>
 
@@ -419,7 +586,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
               gap: '8px',
               overflowX: 'auto',
               paddingBottom: '8px',
-              minHeight: '60px',
+              minHeight: '55px',
               alignItems: 'center'
             }}>
               {notes.map(note => (
