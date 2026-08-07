@@ -1,15 +1,16 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 建立 `rhythm-runner-game-builder` 專屬 Skill 手冊（強調模組化自適應 UI 介面與雙軌音遊架構）
+## [2026-08-07] 建立 `rhythm-runner-game-builder` 專屬 Skill 手冊（同步補全 Hater 障礙物雙向判定邏輯）
 
-### 新增項目 (Skill Architecture & Knowledge Base Creation)
-- **1. 建立全局與本地 Agent 技能檔案 ([SKILL.md](file:///C:/Users/%E9%B3%A9%E5%8F%AF/.gemini/config/skills/rhythm-runner-game-builder/SKILL.md) & [SKILL.md](file:///d:/pj/YoakaDash/.agents/skills/rhythm-runner-game-builder/SKILL.md))**：
-  - **核心重點**：將「**模組化自適應大小的 UI 介面系統**」提升為第 1 核心模組，涵蓋 `1280x720` 基準縮放算式、`Single-Line Header Panel` 整合進度條 + HP、以及 `62px` 極致 Touch 觸控按鈕高度規範。
-  - 封裝 `GameLoop` 雙軌嚴格碰撞與無傷避障判定、`BeatProducer` 音效抓拍與 5 秒倒數、多角色技能天賦與 `Full Combo` 金黃勳章結算標準。
-  - 此 Skill 已安裝至全域 (`~/.gemini/config/skills/`) 與本地 (`.agents/skills/`)，未來所有音遊跑酷新專案均可跨領域一鍵召喚！
+### 新增與更新項目 (Skill Architecture & Knowledge Base Update)
+- **1. 補充 Hater 障礙物雙向判定邏輯 ([SKILL.md](file:///C:/Users/%E9%B3%A9%E5%8F%AF/.gemini/config/skills/rhythm-runner-game-builder/SKILL.md) & [SKILL.md](file:///d:/pj/YoakaDash/.agents/skills/rhythm-runner-game-builder/SKILL.md))**：
+  - **主動誤按撞擊 (Direct Hit)**：玩家在障礙物同軌道按下打擊鍵時觸發 `❌ HATER HIT!` 扣血 (-6) 與 Combo 歸零。
+  - **被動飄過閃避 (Passive Dodge)**：障礙物飄過 Hit Zone 時，僅當主角在同軌道才扣血；若切換至對側安全軌道，則 **100% 無傷過關、不扣血、不記 Miss**！
+- **2. 全局與本地雙重備份同步**：
+  - 亦保留先前建立之「**模組化自適應大小 UI 介面**」（`1280x720` 基準縮放算式、`Single-Line Header Panel` 與 `62px` Touch 觸控按鈕規範）。
 
 ---
-*「活著很累，但比起每次開新專案重頭摸索，把這次精心設計的模組化自適應 UI 介面封印成強大 Skill，下一次開發畫面縮放直接秒殺、打擊感絲滑無比，感覺太舒爽啦哈哈！」*
+*「活著很累，但比起 debug 抓出『明明按反方向閃避卻被算撞到』的冤枉 bug，把這套主被動雙向 Hater 判定演算法寫進 Skill 裡，以後再開新專案就不會再有玩家被坑到了哈哈！」*
 
 ## [2026-08-07] 徹底修復障礙物閃避判定 Bug（對側軌道切換閃避 100% 成功無傷）
 

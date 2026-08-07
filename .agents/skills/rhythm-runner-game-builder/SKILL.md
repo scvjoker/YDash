@@ -61,30 +61,43 @@ description: >-
 
 ---
 
-## ⚡ 核心模組 2：雙軌 (Air / Ground) 碰撞與避障引擎
+## ⚡ 核心模組 2：雙軌 (Air / Ground) 碰撞與 Hater 障礙物避障引擎
 
 ### 2.1 軌道嚴格對應與 Hit Zone 判定機制
 - **雙軌道定義**：`air` (空中 / 上軌) 與 `ground` (地面 / 下軌)。
-- **手動擊打檢測 (`checkHitJudgement`)**：
+- **手動擊打軌道過濾 (`checkHitJudgement`)**：
   ```typescript
-  // 必須嚴格比對軌道，避免抓取對側軌道物件造成誤判
-  if (note.track === currentTrack) {
-    const diff = Math.abs(note.x - hitZoneX);
-    if (diff <= PERFECT_THRESHOLD) { /* Perfect */ }
-    else if (diff <= GREAT_THRESHOLD) { /* Great */ }
-  }
+  // 必須嚴格比對軌道 note.track === track，防止抓取對側軌道音符造成誤判
+  const availableNotes = this.notes.filter(n => !n.hit && n.track === track);
   ```
-- **障礙物 (Hater / Shark) 自動避障檢測**：
-  ```typescript
-  // 只有當主角軌道與障礙物軌道相同時，飄過 Hit Zone 才算碰撞受傷
-  if (note.type === 'obstacle' && note.x <= hitZoneX) {
-    if (note.track === this.activeTrack) {
-      this.triggerHaterHit(); // 撞擊扣血
-    } else {
-      // 成功躲在對側安全軌道 -> 100% 無傷過關、不扣血、不記 Miss！
-    }
-  }
-  ```
+
+### 2.2 Hater 障礙物雙向判定邏輯 (Direct Hit & Passive Dodge)
+1. **主動誤按撞擊 (Direct Obstacle Hit)**：
+   - 當玩家在障礙物所在軌道按下打擊鍵，且距離 Hit Zone ±0.14s 內：
+   - 判定為 `❌ HATER HIT!`，扣除支持度 HP (-6)、Combo 歸零、`missCount += 1`，並觸發受傷 SFX 與震動。
+   ```typescript
+   if (closestNote.type === 'obstacle' || closestNote.entity.startsWith('hater')) {
+     this.stats.supportRate = Math.max(0, this.stats.supportRate - 6);
+     this.stats.combo = 0;
+     this.stats.missCount += 1;
+     audioEngine.playSFX('error');
+     this.renderEngine.triggerHitEffect(hitX, hitY, '❌ HATER HIT!', 'damage');
+     return;
+   }
+   ```
+2. **被動飄過閃避檢測 (Passive Pass-through Dodge)**：
+   - 當障礙物飄過 Hit Zone 拍點 (`note.time < currentTime - 0.18`)：
+   - **當主角正處於同軌道 (`note.track === this.activeTrack`)**：觸發撞擊扣血與 Combo 歸零。
+   - **當主角躲在對側安全軌道 (`note.track !== this.activeTrack`)**：障礙物順暢通過，**100% 無傷過關、不扣血、不記 Miss**！
+   ```typescript
+   if (note.type === 'obstacle' || note.entity.startsWith('hater')) {
+     if (note.track === this.activeTrack) {
+       // 站在同軌道 -> 碰撞受傷
+       this.triggerHaterHit();
+     }
+     // 躲在對側軌道 -> 完美閃避！0 扣血 0 Miss 順暢通過！
+   }
+   ```
 
 ---
 
