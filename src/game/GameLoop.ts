@@ -150,8 +150,9 @@ export class GameLoop {
     let closestNote: Note | null = null;
     let minDiff = Infinity;
 
+    // 🛡️ Strict Track Filtering: Player key input on 'track' ONLY checks notes belonging strictly to 'track'!
     for (const note of activeNotes) {
-      if (note.track === track || note.type === 'obstacle') {
+      if (note.track === track) {
         const diff = Math.abs(note.time - currentTime);
         if (diff < minDiff) {
           minDiff = diff;
@@ -166,6 +167,7 @@ export class GameLoop {
     if (minDiff <= 0.14) {
       closestNote.hit = true;
 
+      // Direct Obstacle Hit: Player deliberately pressed the SAME track button where obstacle is located!
       if (closestNote.type === 'obstacle' || closestNote.entity.startsWith('hater')) {
         const hitX = Math.max(150, this.renderEngine['canvas'].width * 0.20);
         const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
@@ -244,12 +246,29 @@ export class GameLoop {
     // Poll Gamepad Input State Every Frame
     this.gamepadController.update();
 
-    // Check Auto Miss Notes
+    // Check Auto Miss Notes & Obstacle Dodge Resolution
     for (const note of this.notes) {
       if (!note.hit && note.time < currentTime - 0.18) {
         note.hit = true;
         
-        if (note.type !== 'obstacle') {
+        if (note.type === 'obstacle' || note.entity.startsWith('hater')) {
+          // 🛡️ Obstacle Collision Rule: ONLY damages player if Yoaka is currently on the SAME track as the obstacle!
+          if (note.track === this.activeTrack) {
+            const hitX = Math.max(150, this.renderEngine['canvas'].width * 0.20);
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
+            
+            this.stats.supportRate = Math.max(0, this.stats.supportRate - 6);
+            this.stats.combo = 0;
+            this.stats.missCount += 1;
+            
+            audioEngine.playSFX('error');
+            audioEngine.triggerHapticVibration('damage');
+            this.renderEngine.triggerHitEffect(hitX, hitY, '❌ HATER HIT!', 'damage');
+            this.notifyStatsChange();
+          }
+          // If note.track !== this.activeTrack: Player successfully DODGED! Zero penalty & zero miss count!
+        } else {
+          // Normal voter note missed
           this.stats.combo = 0;
           this.stats.missCount += 1;
           

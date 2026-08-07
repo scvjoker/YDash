@@ -1,17 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 修正障礙物與軌道嚴格綁定鐵律（上軌 6666 狗頭板 / 下軌英俊鯊魚）
+## [2026-08-07] 徹底修復障礙物閃避判定 Bug（對側軌道切換閃避 100% 成功無傷）
 
-### 變更與遊戲機制嚴謹度修復項目 (Strict Track-Obstacle Entity Alignment)
-- **1. 修正 AudioEngine 譜面自動解析生成邏輯 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 將原先隨機產生障礙物圖示的邏輯 (`Math.random() > 0.5`) 徹底修復為 **嚴格依據軌道類型分發**：
-    - ☁️ **上軌 (air)** ➡️ 嚴格固定出沒 **6666 粉絲團長狗頭板 (`hater_dog_board`)**！
-    - 🏃 **下軌 (ground)** ➡️ 嚴格固定出沒 **霸道英俊鯊魚 (`hater_shark`)**！
-- **2. 修正預設譜面條目與對齊說明 ([Beatmaps.ts](file:///d:/pj/YoakaDash/src/game/Beatmaps.ts))**：
-  - 確保所有自動生成與靜態譜面中，障礙物圖片與軌道位置 100% 嚴謹對應，直覺判斷閃避不混淆！
+### 變更與打擊判定引擎重構項目 (Obstacle Dodge Judgement Engine Fix)
+- **1. 修復手動打擊 `checkHitJudgement` 軌道過濾 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 將原先 `if (note.track === track || note.type === 'obstacle')` 中的鬆散條件修復為 **嚴格軌道對應 `if (note.track === track)`**。
+  - 當下方出現鯊魚（`ground` 軌道）時，玩家按下 [D/F]（`air` 軌道按鈕），只會檢測 `air` 軌道的音符，**絕對不會誤把對側下軌的鯊魚抓來當作碰撞**！
+- **2. 重構 `loop()` 中的障礙物自動閃避判定邏輯 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 當障礙物飄過 Hit Zone 拍點時，**只有當主角 Yoaka 正好處於與障礙物相同的軌道** (`note.track === this.activeTrack`)，才會觸發撞擊 (Hater Hit)；
+  - 若主角已成功躲在對側安全軌道 (`note.track !== this.activeTrack`)，則障礙物順暢通過，**100% 不扣血、不記 Miss、不失敗**！
 
 ---
-*「活著很累，但比起 debug，抓出障礙物之前被隨機亂發的 bug、把上軌 6666 跟下軌鯊魚這條鐵律重新綁定鎖死，玩家視覺秒懂怎麼閃避簡直太療癒啦哈哈！」*
+*「活著很累，但比起 debug，抓出這個『明明按反方向閃避卻被算撞到』的冤枉 bug、把閃避邏輯改成對側 100% 無傷過關，玩家這下終於能隨心所欲展現神級閃避啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
