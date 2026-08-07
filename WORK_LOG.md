@@ -1,15 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 歌曲切換大廳左側曲庫 8px 顯性微光 Cyber 霓虹滾動條完美歸位還原
+## [2026-08-07] 修正障礙物與軌道嚴格綁定鐵律（上軌 6666 狗頭板 / 下軌英俊鯊魚）
 
-### 變更與 UI 滾動體驗優化項目 (Left Song List Cyber Scrollbar Restored)
-- **1. 左側曲庫顯性 Cyber 滾動條歸位 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 將左側曲庫容器設為 `overflowY: 'scroll'`, `paddingRight: '10px'`，確保左側 8 首曲庫列表不論在何種瀏覽器下，霓虹滾動條皆 100% 顯性立體呈現！
-- **2. 滾動條全瀏覽器（Firefox/Chrome/Safari/Mobile）樣式升級 ([index.css](file:///d:/pj/YoakaDash/src/index.css))**：
-  - 加寬 `.cyber-scrollbar` 軌道至 `8px`，並加入 `scrollbar-width: thin` 與 `#00f0ff` -> `#ff007f` 微光漸層，極致顯眼流暢！
+### 變更與遊戲機制嚴謹度修復項目 (Strict Track-Obstacle Entity Alignment)
+- **1. 修正 AudioEngine 譜面自動解析生成邏輯 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 將原先隨機產生障礙物圖示的邏輯 (`Math.random() > 0.5`) 徹底修復為 **嚴格依據軌道類型分發**：
+    - ☁️ **上軌 (air)** ➡️ 嚴格固定出沒 **6666 粉絲團長狗頭板 (`hater_dog_board`)**！
+    - 🏃 **下軌 (ground)** ➡️ 嚴格固定出沒 **霸道英俊鯊魚 (`hater_shark`)**！
+- **2. 修正預設譜面條目與對齊說明 ([Beatmaps.ts](file:///d:/pj/YoakaDash/src/game/Beatmaps.ts))**：
+  - 確保所有自動生成與靜態譜面中，障礙物圖片與軌道位置 100% 嚴謹對應，直覺判斷閃避不混淆！
 
 ---
-*「活著很累，但比起 debug，把左邊曲庫那條帶有藍粉霓虹微光的 Cyber 滾動條給您完整還回來，這看著隨時能拉動的微光軌道簡直太有安全感啦哈哈！」*
+*「活著很累，但比起 debug，抓出障礙物之前被隨機亂發的 bug、把上軌 6666 跟下軌鯊魚這條鐵律重新綁定鎖死，玩家視覺秒懂怎麼閃避簡直太療癒啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

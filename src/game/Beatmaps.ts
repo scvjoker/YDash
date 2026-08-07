@@ -47,7 +47,7 @@ export const DEFAULT_BEATMAPS: BeatmapData[] = [
       { id: 'n2', time: 5.4, track: 'air', type: 'voter', entity: 'voter_student' },
       { id: 'n3', time: 5.8, track: 'ground', type: 'voter', entity: 'voter_office' },
       { id: 'n4', time: 6.2, track: 'air', type: 'voter', entity: 'voter_cloud' },
-      { id: 'n5', time: 6.6, track: 'ground', type: 'obstacle', entity: 'hater_dog_board' },
+      { id: 'n5', time: 6.6, track: 'ground', type: 'obstacle', entity: 'hater_shark' },
       { id: 'n6', time: 7.0, track: 'ground', type: 'voter', entity: 'voter_office' },
       { id: 'n7', time: 7.4, track: 'air', type: 'voter', entity: 'voter_student', isDual: true },
       { id: 'n8', time: 7.4, track: 'ground', type: 'voter', entity: 'voter_office', isDual: true }

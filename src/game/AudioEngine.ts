@@ -221,7 +221,7 @@ export class AudioEngine {
               time: currItem.time,
               track,
               type: 'obstacle',
-              entity: Math.random() > 0.5 ? 'hater_dog_board' : 'hater_shark'
+              entity: track === 'air' ? 'hater_dog_board' : 'hater_shark'
             });
             lastObstacleTime = currItem.time;
             lastNoteTime = currItem.time;
