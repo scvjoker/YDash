@@ -19,18 +19,8 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(audioEngine.isSfxEnabled);
   const [vibrationEnabled, setVibrationEnabled] = useState<boolean>(audioEngine.isVibrationEnabled);
-  const [iosHint, setIosHint] = useState<boolean>(false);
 
   const toggleFullscreen = () => {
-    // Detect iOS Safari where Element.requestFullscreen is disabled
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream: unknown }).MSStream;
-
-    if (isIOS) {
-      setIosHint(true);
-      setTimeout(() => setIosHint(false), 4000);
-      return;
-    }
-
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
@@ -143,7 +133,7 @@ export const PauseModal: React.FC<PauseModalProps> = ({
           onClick={toggleFullscreen}
           style={{
             width: '100%',
-            marginBottom: iosHint ? '0.5rem' : '1.2rem',
+            marginBottom: '1.2rem',
             padding: '0.65rem',
             background: 'rgba(255, 230, 0, 0.12)',
             border: '1.5px solid #ffe600',
@@ -160,13 +150,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
         >
           {isFullscreen ? '📺 退出全螢幕 (EXIT FULLSCREEN)' : '🖥️ 切換全螢幕沉浸體驗 (FULLSCREEN)'}
         </button>
-
-        {/* iOS Native Fullscreen Hint */}
-        {iosHint && (
-          <p style={{ color: '#00f0ff', fontSize: '0.78rem', marginBottom: '1rem', fontWeight: 800 }}>
-            📱 iOS Safari 請點擊下方「分享 ➔ 加入主畫面」獲得 100% 獨立全螢幕體驗！
-          </p>
-        )}
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>

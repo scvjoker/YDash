@@ -1,22 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] iOS Safari 全螢幕與導覽列避讓 4 大黃金解法全數實裝落地
+## [2026-08-07] 暫時移除方案四 (PauseModal 特殊 iOS 提示)，專注測試方案一至三
 
-### 變更與 iOS Safari 視埠與 PWA 優化項目 (iOS Fullscreen & Safe Area Integration)
-- **1. 方案一：現代 CSS 動態視埠單位 (100svh) + Safe Area ([index.html](file:///d:/pj/YoakaDash/index.html) & [index.css](file:///d:/pj/YoakaDash/src/index.css))**：
-  - 設定 `viewport-fit=cover`, `maximum-scale=1.0`, `user-scalable=no`。
-  - 使用 `100svh` 鎖定視覺區域避免 Safari 工具列收合帶來的畫面抖動。
-  - 引入 `padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)` 避開 iPhone 瀏海與動態島。
-- **2. 方案二：引導用戶「加入主畫面」(PWA Standalone) ([IOSInstallPrompt.tsx](file:///d:/pj/YoakaDash/src/components/IOSInstallPrompt.tsx))**：
-  - 實裝 `apple-mobile-web-app-capable` 與 `apple-mobile-web-app-status-bar-style` 標籤。
-  - 建立 `IOSInstallPrompt` 獨立引導元件，在 iOS 非 Standalone 模式時溫馨引導玩家「分享 ➔ 加入主畫面」解鎖 100% 獨立無邊框全螢幕。
-- **3. 方案三：網址列動態折疊技巧 (Touch Nudge Scroll) ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 監聽玩家首次 `touchstart` 觸摸，自動觸發 `window.scrollTo(0, 1)` 自動觸發 Safari 網址列收合。
-- **4. 方案四：動態自適應畫布與安全區設計 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 在 `PauseModal` 中對 iOS 裝置提供專屬沉浸體驗提示，避免原生日誌報錯。
+### 變更項目 (Disable Scheme 4 to test Schemes 1-3)
+- **1. 還原 PauseModal 全螢幕按鈕邏輯 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 移除方案四的 iOS 特殊軟體提示與內縮。
+  - 讓暫停選單保持最簡潔乾淨的單一全螢幕切換按鈕，方便測試方案一 (100svh + safe-area-inset) + 方案二 (PWA 獨立主畫面) + 方案三 (Touch Nudge scroll) 組合之效果。
 
 ---
-*「活著很累，但比起 debug，把 iOS 4 大全螢幕方案一口氣實裝完成，iOS 上玩起來完全不被 Safari 工具列騷擾，這適配細節真的太講究啦哈哈！」*
+*「活著很累，但比起 debug，暫時移除方案四讓介面保持最乾淨狀態，測試看看方案一二三純粹組合的震撼效果哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
