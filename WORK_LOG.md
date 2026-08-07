@@ -1,21 +1,14 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 防單軌過密誤觸演算法 (Smart Alternate Distribution) + AI 自動辨識譜面階梯量化規則實裝
+## [2026-08-07] PauseModal 暫停選單版面極致精簡 (移除佔空間統計數據卡片)
 
-### 變更與譜面生成與打擊判定優化項目 (Smart Track Alternation & AI Beatmap Rules)
-- **1. 防單軌過密誤觸演算法 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 實裝 **Smart Alternate Distribution** 音符交錯分佈機制：
-    - 當同一軌道連續出現超過 2 顆 Note，或距離上一顆音符小於 `0.38` 秒時，系統自動將下一顆 Note 強制分配到對側軌道（Air ↔ Ground）。
-    - 形成流暢自然的上下/左右交替打擊感，徹底解決單軌過密導致手忙腳亂與連擊誤觸的痛點！
-- **2. 判定時間窗口精準校準 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
-  - 將 Hit Window 判定範圍從 `0.21s` 精確微調至 **`0.14s`**（Perfect 判定為 `±0.055s`），點擊按壓不再輕易吃下後方預備音符。
-- **3. AI 自動辨識譜面 3 大難度階梯規則表 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - **Easy (簡單故事)**：最小間隔 `0.48s` (~2.0音符/秒)，能量門檻 `0.32`，`0%` 雙擊，`5%` 障礙物，強效單軌1:1強制交錯。
-  - **Normal (標準競選)**：最小間隔 `0.32s` (~3.1音符/秒)，能量門檻 `0.20`，`10%` 雙擊，`10%` 障礙物，同軌連發上限 2 顆。
-  - **Hard (狂想高難)**：最小間隔 `0.20s` (~5.0音符/秒)，能量門檻 `0.12`，`20%` 雙擊，`16%` 障礙物，快節奏動態交錯。
+### 變保與選單介面精簡優化項目 (Compact PauseModal Cleanup)
+- **1. 移除 PauseModal 統計數據卡片 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 全面移除佔用中央版面的「得票分數 / 支持度 / Combo / Perfect」數據統計區塊。
+  - 讓暫停選單面板高度大幅縮減，聚焦於精緻的 **`🥁 打擊鼓聲`** & **`📳 手機震動`** 獨立開關、全螢幕切換與開局控制，在手機橫屏上更加乾淨俐落！
 
 ---
-*「活著很累，但比起 debug，單軌過密會自動分成上下軌交錯、按壓再也不會誤觸後面音符，這 AI 抓拍演算法簡直太聰明、太順手啦哈哈！」*
+*「活著很累，但比起 debug，把暫停選單裡佔空間的得分數據拿掉，版面秒變精簡俐落、按鈕順手好點，這視覺空間爽度簡直太棒啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
