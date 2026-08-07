@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Home, Award, Sparkles, Trophy } from 'lucide-react';
+import { RotateCcw, Home, Award, Trophy } from 'lucide-react';
 import { GameStats } from '../types/game';
 
 interface ResultScreenProps {
@@ -45,46 +45,49 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.72)', // Blurred Transparent Overlay over Runway
+      backgroundColor: 'rgba(7, 8, 20, 0.76)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '2rem'
+      padding: '0.8rem'
     }}>
       <div className="cyber-panel float-animation" style={{
         width: '780px',
-        maxWidth: '92vw',
-        padding: '2.5rem',
+        maxWidth: '94vw',
+        maxHeight: '92vh',
+        overflowY: 'auto',
+        padding: '1.2rem 1.6rem',
         textAlign: 'center',
         position: 'relative',
         border: isFullCombo ? '3px solid #ffe600' : '2px solid #00f0ff',
-        boxShadow: isFullCombo ? '0 0 50px rgba(255, 230, 0, 0.6)' : '0 0 35px rgba(0, 240, 255, 0.4)'
+        boxShadow: isFullCombo ? '0 0 40px rgba(255, 230, 0, 0.6)' : '0 0 30px rgba(0, 240, 255, 0.4)'
       }}>
         {/* Top Header Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: '5px 22px',
+          padding: '4px 16px',
           borderRadius: '30px',
           color: '#000',
           fontWeight: 900,
-          marginBottom: '1rem',
-          boxShadow: '0 0 20px rgba(0,240,255,0.5)'
+          marginBottom: '0.6rem',
+          fontSize: '0.82rem',
+          boxShadow: '0 0 15px rgba(0,240,255,0.4)'
         }}>
-          <Award size={18} />
+          <Award size={15} />
           <span>ELECTION CAMPAIGN RESULT • 競選拜票結果</span>
         </div>
 
         <h2 style={{
-          fontSize: '2.4rem',
+          fontSize: '1.8rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
           color: '#fff',
-          marginBottom: '0.4rem'
+          marginBottom: '0.3rem'
         }}>
           {beatmapTitle}
         </h2>
@@ -92,25 +95,25 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         {/* FULL COMBO CERTIFIED BADGE */}
         {isFullCombo && (
           <div style={{
-            margin: '0.8rem auto 1.2rem',
+            margin: '0.4rem auto 0.8rem',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '8px',
             background: 'linear-gradient(90deg, #ffe600, #ffb703)',
             color: '#000',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: '1.4rem',
+            fontSize: '1.1rem',
             fontWeight: 900,
-            padding: '8px 28px',
-            borderRadius: '40px',
-            boxShadow: '0 0 35px #ffe600',
+            padding: '5px 20px',
+            borderRadius: '30px',
+            boxShadow: '0 0 25px #ffe600',
             animation: 'pulse 1.5s infinite alternate'
           }}>
-            <Trophy size={26} fill="#000" /> 🏆 FULL COMBO! 全連擊完美達成
+            <Trophy size={20} fill="#000" /> 🏆 FULL COMBO! 全連擊完美達成
           </div>
         )}
 
-        <p style={{ color: '#aaa', fontSize: '1rem', marginBottom: '2rem' }}>
+        <p style={{ color: '#aaa', fontSize: '0.88rem', marginBottom: '1rem' }}>
           {evaluationText}
         </p>
 
@@ -119,40 +122,41 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          background: 'rgba(0, 0, 0, 0.4)',
-          borderRadius: '20px',
-          padding: '1.5rem',
-          marginBottom: '2rem',
+          background: 'rgba(0, 0, 0, 0.45)',
+          borderRadius: '16px',
+          padding: '0.8rem 1.2rem',
+          marginBottom: '1rem',
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
           {/* Grade Badge */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>評價 GRADE</p>
+            <p style={{ fontSize: '0.75rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>評價 GRADE</p>
             <div style={{
-              fontSize: '5.5rem',
+              fontSize: '3.6rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: gradeColor,
-              textShadow: `0 0 25px ${gradeColor}`,
+              textShadow: `0 0 20px ${gradeColor}`,
               lineHeight: 1
             }}>
               {grade}
             </div>
           </div>
 
-          <div style={{ width: '1px', height: '80px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '60px', background: 'rgba(255,255,255,0.15)' }} />
 
           {/* Score Display */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>總得票數 (FINAL SCORE)</p>
+            <p style={{ fontSize: '0.75rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>總得票數 (FINAL SCORE)</p>
             <div style={{
-              fontSize: '3.2rem',
+              fontSize: '2.4rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
-              textShadow: '0 0 20px rgba(255, 230, 0, 0.7)'
+              textShadow: '0 0 15px rgba(255, 230, 0, 0.7)',
+              lineHeight: 1.1
             }}>
-              {stats.score.toLocaleString()} <span style={{ fontSize: '1.2rem', color: '#fff' }}>票</span>
+              {stats.score.toLocaleString()} <span style={{ fontSize: '1rem', color: '#fff' }}>票</span>
             </div>
           </div>
         </div>
@@ -161,54 +165,54 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '1rem',
-          marginBottom: '2.2rem'
+          gap: '0.6rem',
+          marginBottom: '1.2rem'
         }}>
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(0,240,255,0.3)' }}>
-            <p style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>最高連擊 (MAX COMBO)</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: 900, color: isFullCombo ? '#ffe600' : '#00f0ff', marginTop: '4px' }}>
-              {stats.maxCombo} <span style={{ fontSize: '0.85rem', color: '#888' }}>/ {maxPossibleCombo} 極限</span>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.6rem 0.4rem', borderRadius: '10px', border: '1px solid rgba(0,240,255,0.3)' }}>
+            <p style={{ fontSize: '0.72rem', color: '#aaa', fontWeight: 800 }}>最高連擊 (MAX COMBO)</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: isFullCombo ? '#ffe600' : '#00f0ff', marginTop: '2px' }}>
+              {stats.maxCombo} <span style={{ fontSize: '0.72rem', color: '#888' }}>/ {maxPossibleCombo} 極限</span>
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,230,0,0.3)' }}>
-            <p style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>完美 WINK (PERFECT)</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffe600', marginTop: '4px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.6rem 0.4rem', borderRadius: '10px', border: '1px solid rgba(255,230,0,0.3)' }}>
+            <p style={{ fontSize: '0.72rem', color: '#aaa', fontWeight: 800 }}>完美 WINK (PERFECT)</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffe600', marginTop: '2px' }}>
               {stats.perfectCount}
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(0,240,255,0.3)' }}>
-            <p style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>良好拜票 (GREAT)</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: 900, color: '#00f0ff', marginTop: '4px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.6rem 0.4rem', borderRadius: '10px', border: '1px solid rgba(0,240,255,0.3)' }}>
+            <p style={{ fontSize: '0.72rem', color: '#aaa', fontWeight: 800 }}>良好拜票 (GREAT)</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: '#00f0ff', marginTop: '2px' }}>
               {stats.greatCount}
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,0,127,0.3)' }}>
-            <p style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>失誤/撞擊 (MISS)</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: 900, color: stats.missCount === 0 ? '#00f0ff' : '#ff007f', marginTop: '4px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.6rem 0.4rem', borderRadius: '10px', border: '1px solid rgba(255,0,127,0.3)' }}>
+            <p style={{ fontSize: '0.72rem', color: '#aaa', fontWeight: 800 }}>失誤/撞擊 (MISS)</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: stats.missCount === 0 ? '#00f0ff' : '#ff007f', marginTop: '2px' }}>
               {stats.missCount}
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '1.2rem', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center' }}>
           <button
             className="muse-btn muse-btn-cyan"
             onClick={onReplay}
-            style={{ flex: 1, padding: '1rem', fontSize: '1.25rem' }}
+            style={{ flex: 1, padding: '0.75rem', fontSize: '1.05rem' }}
           >
-            <span><RotateCcw size={22} /> 再次競選拜票 (REPLAY)</span>
+            <span><RotateCcw size={18} /> 再次競選拜票 (REPLAY)</span>
           </button>
 
           <button
             className="muse-btn muse-btn-yellow"
             onClick={onHome}
-            style={{ flex: 1, padding: '1rem', fontSize: '1.25rem' }}
+            style={{ flex: 1, padding: '0.75rem', fontSize: '1.05rem' }}
           >
-            <span><Home size={22} /> 返回選單 (MAIN MENU)</span>
+            <span><Home size={18} /> 返回選單 (MAIN MENU)</span>
           </button>
         </div>
       </div>

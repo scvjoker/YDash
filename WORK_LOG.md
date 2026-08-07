@@ -1,5 +1,18 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
+## [2026-08-07] ResultScreen 結算畫面手機版 RWD 極致自適應適配
+
+### 變更與 UI 自適應優化項目 (Mobile Landscape ResultScreen RWD)
+- **1. 結算畫面容器防溢出保護 ([ResultScreen.tsx](file:///d:/pj/YoakaDash/src/components/ResultScreen.tsx))**：
+  - 限制面板視窗 `maxHeight: '92vh'`, `maxWidth: '94vw'`, `overflowY: 'auto'`，內邊距由 2.5rem 精簡適應為 1.2rem 1.6rem。
+- **2. 元素字體與間距彈性微縮**：
+  - Grade 評級字體由 5.5rem 微縮至 3.6rem，Final Score 總得票數由 3.2rem 微縮至 2.4rem。
+  - 4 欄統計卡片 Padding 由 1rem 微縮至 0.6rem 0.4rem，字體同比例適應。
+  - 在手機橫屏（Mobile Landscape）與窄螢幕上 **100% 完美置中滿版不溢出、無須強制滾動**！
+
+---
+*「活著很累，但比起 debug，把結算畫面的字體跟內邊距按手機橫屏比例收緊，畫面一眼看清不用滾動，這 UI 適配看著太爽快啦哈哈！」*
+
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
 ### 變更項目 (User Tutorial Description Update)
