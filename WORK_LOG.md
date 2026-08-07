@@ -1,17 +1,26 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 切換歌曲雙音軌衝突修復 (Audio Mutex Lock) + 8 首實體 MP3 精確長度動態校準
+## [2026-08-07] 新手教學 5 大課程實體素材盤點與路徑規範備忘
 
-### 變更與音效互斥與動態秒數解析項目 (Audio Mutex & Real Duration Calibration)
-- **1. 全域音效互斥與 Token 異步防護 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 實裝 `audioEngine.stopAllAudio()` 方法，在打開音樂大廳與快速切換樂曲卡片時，第一時間清空停止主 BGM 與上一首試聽片段。
-  - 導入 `currentPreviewToken` 機制：若快速連續點擊多張樂曲卡片，上一首下載解碼完成後若 Discover 發現 Token 已失效，將自動 Discard，**100% 確保全世界只有一首 preview 在播放，零重疊衝突**！
-- **2. 8 首實體 MP3 長度精確動態校準 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - 動態讀取實體 AudioBuffer 的真實 duration（如《辯論會激戰 狂想曲》實體長度 5 分 21 秒、《開票夜勝選 狂想曲》實體長度 5 分 03 秒）。
-  - 將 8 首曲目的預設 metadata 長度與 BPM 100% 校準至與實體音訊檔完全貼合！
+### 🎨 圖文新手教學素材清單 (Tutorial Asset Checklist)
+- **Lesson 1 (Note 打擊)**：
+  - `public/assets/yoaka_default.png` (競選 Yoaka 跑者圖)
+  - `public/assets/tissue_pack.png` (拜票面紙包)
+  - `public/assets/voter_office.png` / `voter_student.png` (選民圖片)
+- **Lesson 2 (Dual Note 金黃雙擊)**：
+  - `public/assets/tutorial_lesson2.png` (雙擊教學示意卡片)
+- **Lesson 3 (Hater 障礙物)**：
+  - `public/assets/hater_dog_board.png` (6666 黑粉狗頭立牌)
+  - `public/assets/hater_shark.png` (霸道鯊魚)
+- **Lesson 4 (Fevertime 雙倍狂歡)**：
+  - `public/assets/tutorial_lesson4.png` (Fever 熱血爆發示意卡片)
+- **Lesson 5 (3 大造型戰力)**：
+  - `public/assets/yoaka_default.png` (競選 Yoaka - 減傷)
+  - `public/assets/yoaka_office.png` (學霸 Yoaka - +20%得分)
+  - `public/assets/yoaka_kpop.png` (偶像 Yoaka - 快速Fever)
 
 ---
-*「活著很累，但比起 debug，在選曲大廳隨便快速點擊切換，音軌都清清楚楚、絕不重疊混音，長度顯示還精確到秒，這音效防護寫好太過癮啦哈哈！」*
+*「活著很累，但比起 debug，把 5 大圖文教學素材清單條理分明整整齊齊寫出來，要補圖替換一目了然，真的太舒爽啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
