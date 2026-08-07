@@ -23,6 +23,10 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
   const [totalDuration, setTotalDuration] = useState<number>(40);
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
+  // Tap Ripple Wave Flash Effect States
+  const [airFlash, setAirFlash] = useState<boolean>(false);
+  const [groundFlash, setGroundFlash] = useState<boolean>(false);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
@@ -61,11 +65,15 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
 
   const handleAirTouch = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
+    setAirFlash(true);
+    setTimeout(() => setAirFlash(false), 180);
     onAirPress();
   };
 
   const handleGroundTouch = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
+    setGroundFlash(true);
+    setTimeout(() => setGroundFlash(false), 180);
     onGroundPress();
   };
 
@@ -124,7 +132,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         alignItems: 'center',
         gap: '0.6rem',
         marginTop: 'env(safe-area-inset-top, 0px)',
-        transform: isMobileScreen ? 'scale(0.85)' : 'scale(0.95)',
+        transform: isMobileScreen ? 'scale(0.88)' : 'scale(0.95)',
         transformOrigin: 'top center'
       }}>
         {/* Left: Compact Support Rate (HP) & Integrated Progress Bar */}
@@ -228,16 +236,16 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         </div>
       </div>
 
-      {/* 2. FULL-SCREEN HALF-SCREEN TAP ZONES (Left 50% = AIR, Right 50% = GROUND) + Circular Glowing Waterdrop Buttons (opacity: 0.25) */}
+      {/* 2. FULL-SCREEN HALF-SCREEN TAP ZONES WITH RIPPLE FLASH & ALIGNED COLORS (#00f0ff vs #ff007f) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        top: '55px',
+        top: '60px',
         pointerEvents: 'none',
         display: 'flex',
         zIndex: 5
       }}>
-        {/* LEFT HALF SCREEN TOUCH ZONE: AIR ATTACK */}
+        {/* LEFT HALF SCREEN TOUCH ZONE: AIR ATTACK (#00f0ff) */}
         <div
           onClick={handleAirTouch}
           onTouchStart={handleAirTouch}
@@ -248,37 +256,34 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-start',
-            padding: isMobileScreen ? '0.6rem 1.2rem' : '1.4rem 2.5rem',
-            cursor: 'pointer'
+            padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            cursor: 'pointer',
+            backgroundColor: airFlash ? 'rgba(0, 240, 255, 0.16)' : 'transparent',
+            boxShadow: airFlash ? 'inset 0 0 35px rgba(0, 240, 255, 0.4)' : 'none',
+            transition: 'background-color 0.15s ease-out, box-shadow 0.15s ease-out'
           }}
         >
-          {/* Cyber Neon Cyan Circular Waterdrop Button (opacity: 0.25, blurred glow) */}
+          {/* Transparent Floating Hint Button (Opacity lowered ~0.10) */}
           <div style={{
-            width: isMobileScreen ? '62px' : '76px',
-            height: isMobileScreen ? '62px' : '76px',
-            borderRadius: '50%',
-            background: 'rgba(0, 240, 255, 0.25)',
-            border: '2px solid rgba(0, 240, 255, 0.65)',
-            color: '#00f0ff',
+            background: airFlash ? 'rgba(0, 240, 255, 0.35)' : 'rgba(0, 240, 255, 0.08)',
+            border: airFlash ? '1.5px solid #00f0ff' : '1.5px solid rgba(0, 240, 255, 0.25)',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.55rem 1.3rem',
+            color: airFlash ? '#00f0ff' : 'rgba(255, 255, 255, 0.72)',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? '0.75rem' : '0.95rem',
+            fontSize: isMobileScreen ? '0.80rem' : '1.05rem',
             fontWeight: 900,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 0 25px rgba(0, 240, 255, 0.6), inset 0 0 15px rgba(0, 240, 255, 0.4)',
+            backdropFilter: 'blur(4px)',
+            boxShadow: airFlash ? '0 0 20px #00f0ff' : '0 0 10px rgba(0, 240, 255, 0.15)',
             marginBottom: 'env(safe-area-inset-bottom, 0px)',
-            opacity: 0.25,
-            transition: 'opacity 0.2s, transform 0.1s'
+            opacity: 0.72,
+            transition: 'all 0.15s ease-out'
           }}>
-            <span>☁️上軌</span>
-            <span style={{ fontSize: '0.62rem', opacity: 0.85 }}>(D/F)</span>
+            ☁️ 左半屏：上軌 (D/F)
           </div>
         </div>
 
-        {/* RIGHT HALF SCREEN TOUCH ZONE: GROUND ATTACK */}
+        {/* RIGHT HALF SCREEN TOUCH ZONE: GROUND ATTACK (#ff007f - Aligned 100% with Ground Pink Runway!) */}
         <div
           onClick={handleGroundTouch}
           onTouchStart={handleGroundTouch}
@@ -289,33 +294,30 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-end',
-            padding: isMobileScreen ? '0.6rem 1.2rem' : '1.4rem 2.5rem',
-            cursor: 'pointer'
+            padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            cursor: 'pointer',
+            backgroundColor: groundFlash ? 'rgba(255, 0, 127, 0.16)' : 'transparent',
+            boxShadow: groundFlash ? 'inset 0 0 35px rgba(255, 0, 127, 0.4)' : 'none',
+            transition: 'background-color 0.15s ease-out, box-shadow 0.15s ease-out'
           }}
         >
-          {/* Cyber Neon Magenta Circular Waterdrop Button (opacity: 0.25, blurred glow) */}
+          {/* Transparent Floating Hint Button (Opacity lowered ~0.10, Color Aligned to #ff007f!) */}
           <div style={{
-            width: isMobileScreen ? '62px' : '76px',
-            height: isMobileScreen ? '62px' : '76px',
-            borderRadius: '50%',
-            background: 'rgba(255, 0, 127, 0.25)',
-            border: '2px solid rgba(255, 0, 127, 0.65)',
-            color: '#ff007f',
+            background: groundFlash ? 'rgba(255, 0, 127, 0.35)' : 'rgba(255, 0, 127, 0.08)',
+            border: groundFlash ? '1.5px solid #ff007f' : '1.5px solid rgba(255, 0, 127, 0.25)',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.55rem 1.3rem',
+            color: groundFlash ? '#ff007f' : 'rgba(255, 255, 255, 0.72)',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? '0.75rem' : '0.95rem',
+            fontSize: isMobileScreen ? '0.80rem' : '1.05rem',
             fontWeight: 900,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 0 25px rgba(255, 0, 127, 0.6), inset 0 0 15px rgba(255, 0, 127, 0.4)',
+            backdropFilter: 'blur(4px)',
+            boxShadow: groundFlash ? '0 0 20px #ff007f' : '0 0 10px rgba(255, 0, 127, 0.15)',
             marginBottom: 'env(safe-area-inset-bottom, 0px)',
-            opacity: 0.25,
-            transition: 'opacity 0.2s, transform 0.1s'
+            opacity: 0.72,
+            transition: 'all 0.15s ease-out'
           }}>
-            <span>🏃下軌</span>
-            <span style={{ fontSize: '0.62rem', opacity: 0.85 }}>(J/K)</span>
+            🏃 右半屏：下軌 (J/K)
           </div>
         </div>
       </div>

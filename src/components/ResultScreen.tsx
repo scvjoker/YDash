@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { RotateCcw, Home, Award, Trophy } from 'lucide-react';
 import { GameStats } from '../types/game';
 
@@ -15,17 +15,6 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   onReplay,
   onHome
 }) => {
-  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   const isFullCombo = stats.missCount === 0 && stats.maxCombo > 0;
 
   // Grade Evaluation Logic
@@ -56,49 +45,48 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.78)',
+      backgroundColor: 'rgba(7, 8, 20, 0.76)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: isMobileScreen ? '0.4rem' : '0.8rem'
+      padding: '0.4rem'
     }}>
       <div className="cyber-panel float-animation" style={{
-        width: '780px',
-        maxWidth: '95vw',
+        width: '720px',
+        maxWidth: '94vw',
         maxHeight: '94svh',
-        overflowY: 'auto',
-        padding: isMobileScreen ? '0.55rem 0.9rem' : '1.2rem 1.6rem',
+        padding: '0.8rem 1.2rem',
         textAlign: 'center',
         position: 'relative',
-        border: isFullCombo ? '2.5px solid #ffe600' : '2px solid #00f0ff',
+        border: isFullCombo ? '3px solid #ffe600' : '2px solid #00f0ff',
         boxShadow: isFullCombo ? '0 0 35px rgba(255, 230, 0, 0.6)' : '0 0 25px rgba(0, 240, 255, 0.4)'
       }}>
         {/* Top Header Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '5px',
           background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: isMobileScreen ? '2px 12px' : '4px 16px',
+          padding: '3px 14px',
           borderRadius: '30px',
           color: '#000',
           fontWeight: 900,
-          marginBottom: isMobileScreen ? '0.2rem' : '0.5rem',
-          fontSize: isMobileScreen ? '0.72rem' : '0.82rem',
+          marginBottom: '0.3rem',
+          fontSize: '0.75rem',
           boxShadow: '0 0 15px rgba(0,240,255,0.4)'
         }}>
-          <Award size={isMobileScreen ? 13 : 15} />
+          <Award size={13} />
           <span>ELECTION CAMPAIGN RESULT • 競選拜票結果</span>
         </div>
 
         <h2 style={{
-          fontSize: isMobileScreen ? '1.25rem' : '1.8rem',
+          fontSize: '1.4rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
           color: '#fff',
-          marginBottom: '0.1rem'
+          marginBottom: '0.2rem'
         }}>
           {beatmapTitle}
         </h2>
@@ -106,44 +94,44 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         {/* FULL COMBO CERTIFIED BADGE */}
         {isFullCombo && (
           <div style={{
-            margin: isMobileScreen ? '0.2rem auto 0.4rem' : '0.4rem auto 0.8rem',
+            margin: '0.2rem auto 0.5rem',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
             background: 'linear-gradient(90deg, #ffe600, #ffb703)',
             color: '#000',
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? '0.88rem' : '1.1rem',
+            fontSize: '0.95rem',
             fontWeight: 900,
-            padding: isMobileScreen ? '3px 14px' : '5px 20px',
+            padding: '3px 16px',
             borderRadius: '30px',
             boxShadow: '0 0 20px #ffe600',
             animation: 'pulse 1.5s infinite alternate'
           }}>
-            <Trophy size={isMobileScreen ? 16 : 20} fill="#000" /> 🏆 FULL COMBO! 全連擊完美達成
+            <Trophy size={16} fill="#000" /> 🏆 FULL COMBO! 全連擊完美達成
           </div>
         )}
 
-        <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.75rem' : '0.88rem', marginBottom: isMobileScreen ? '0.5rem' : '1rem' }}>
+        <p style={{ color: '#aaa', fontSize: '0.78rem', marginBottom: '0.6rem' }}>
           {evaluationText}
         </p>
 
-        {/* Score & Grade Display */}
+        {/* Score & Grade Display: Grade Micro-scaled to 2.4rem & Score Micro-scaled to 1.65rem! */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
           background: 'rgba(0, 0, 0, 0.45)',
           borderRadius: '14px',
-          padding: isMobileScreen ? '0.4rem 0.8rem' : '0.8rem 1.2rem',
-          marginBottom: isMobileScreen ? '0.5rem' : '1rem',
+          padding: '0.5rem 0.8rem',
+          marginBottom: '0.6rem',
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
           {/* Grade Badge */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.65rem' : '0.75rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>評價 GRADE</p>
+            <p style={{ fontSize: '0.68rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>評價 GRADE</p>
             <div style={{
-              fontSize: isMobileScreen ? '2.4rem' : '3.6rem',
+              fontSize: '2.4rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: gradeColor,
@@ -154,20 +142,20 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             </div>
           </div>
 
-          <div style={{ width: '1px', height: isMobileScreen ? '40px' : '60px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '45px', background: 'rgba(255,255,255,0.15)' }} />
 
           {/* Score Display */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.65rem' : '0.75rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>總得票數 (FINAL SCORE)</p>
+            <p style={{ fontSize: '0.68rem', color: '#aaa', fontWeight: 800, textTransform: 'uppercase' }}>總得票數 (FINAL SCORE)</p>
             <div style={{
-              fontSize: isMobileScreen ? '1.65rem' : '2.4rem',
+              fontSize: '1.65rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
-              textShadow: '0 0 15px rgba(255, 230, 0, 0.7)',
+              textShadow: '0 0 12px rgba(255, 230, 0, 0.7)',
               lineHeight: 1.1
             }}>
-              {stats.score.toLocaleString()} <span style={{ fontSize: isMobileScreen ? '0.75rem' : '1rem', color: '#fff' }}>票</span>
+              {stats.score.toLocaleString()} <span style={{ fontSize: '0.85rem', color: '#fff' }}>票</span>
             </div>
           </div>
         </div>
@@ -176,54 +164,54 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: isMobileScreen ? '0.35rem' : '0.6rem',
-          marginBottom: isMobileScreen ? '0.6rem' : '1.2rem'
+          gap: '0.4rem',
+          marginBottom: '0.8rem'
         }}>
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: isMobileScreen ? '0.35rem 0.2rem' : '0.6rem 0.4rem', borderRadius: '8px', border: '1px solid rgba(0,240,255,0.3)' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.62rem' : '0.72rem', color: '#aaa', fontWeight: 800 }}>最高連擊 (COMBO)</p>
-            <p style={{ fontSize: isMobileScreen ? '1.0rem' : '1.2rem', fontWeight: 900, color: isFullCombo ? '#ffe600' : '#00f0ff', marginTop: '1px' }}>
-              {stats.maxCombo} <span style={{ fontSize: '0.62rem', color: '#888' }}>/ {maxPossibleCombo}</span>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.4rem 0.2rem', borderRadius: '8px', border: '1px solid rgba(0,240,255,0.3)' }}>
+            <p style={{ fontSize: '0.65rem', color: '#aaa', fontWeight: 800 }}>最高連擊 (MAX COMBO)</p>
+            <p style={{ fontSize: '1.05rem', fontWeight: 900, color: isFullCombo ? '#ffe600' : '#00f0ff', marginTop: '1px' }}>
+              {stats.maxCombo} <span style={{ fontSize: '0.65rem', color: '#888' }}>/ {maxPossibleCombo}</span>
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: isMobileScreen ? '0.35rem 0.2rem' : '0.6rem 0.4rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.62rem' : '0.72rem', color: '#aaa', fontWeight: 800 }}>完美 (PERFECT)</p>
-            <p style={{ fontSize: isMobileScreen ? '1.0rem' : '1.2rem', fontWeight: 900, color: '#ffe600', marginTop: '1px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.4rem 0.2rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)' }}>
+            <p style={{ fontSize: '0.65rem', color: '#aaa', fontWeight: 800 }}>完美 WINK (PERFECT)</p>
+            <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffe600', marginTop: '1px' }}>
               {stats.perfectCount}
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: isMobileScreen ? '0.35rem 0.2rem' : '0.6rem 0.4rem', borderRadius: '8px', border: '1px solid rgba(0,240,255,0.3)' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.62rem' : '0.72rem', color: '#aaa', fontWeight: 800 }}>良好 (GREAT)</p>
-            <p style={{ fontSize: isMobileScreen ? '1.0rem' : '1.2rem', fontWeight: 900, color: '#00f0ff', marginTop: '1px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.4rem 0.2rem', borderRadius: '8px', border: '1px solid rgba(0,240,255,0.3)' }}>
+            <p style={{ fontSize: '0.65rem', color: '#aaa', fontWeight: 800 }}>良好拜票 (GREAT)</p>
+            <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#00f0ff', marginTop: '1px' }}>
               {stats.greatCount}
             </p>
           </div>
 
-          <div style={{ background: 'rgba(255,255,255,0.04)', padding: isMobileScreen ? '0.35rem 0.2rem' : '0.6rem 0.4rem', borderRadius: '8px', border: '1px solid rgba(255,0,127,0.3)' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.62rem' : '0.72rem', color: '#aaa', fontWeight: 800 }}>失誤 (MISS)</p>
-            <p style={{ fontSize: isMobileScreen ? '1.0rem' : '1.2rem', fontWeight: 900, color: stats.missCount === 0 ? '#00f0ff' : '#ff007f', marginTop: '1px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '0.4rem 0.2rem', borderRadius: '8px', border: '1px solid rgba(255,0,127,0.3)' }}>
+            <p style={{ fontSize: '0.65rem', color: '#aaa', fontWeight: 800 }}>失誤/撞擊 (MISS)</p>
+            <p style={{ fontSize: '1.05rem', fontWeight: 900, color: stats.missCount === 0 ? '#00f0ff' : '#ff007f', marginTop: '1px' }}>
               {stats.missCount}
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: isMobileScreen ? '0.5rem' : '0.8rem', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
           <button
             className="muse-btn muse-btn-cyan"
             onClick={onReplay}
-            style={{ flex: 1, padding: isMobileScreen ? '0.55rem' : '0.75rem', fontSize: isMobileScreen ? '0.9rem' : '1.05rem' }}
+            style={{ flex: 1, padding: '0.55rem', fontSize: '0.92rem' }}
           >
-            <span><RotateCcw size={isMobileScreen ? 15 : 18} /> 再次競選拜票 (REPLAY)</span>
+            <span><RotateCcw size={16} /> 再次競選拜票 (REPLAY)</span>
           </button>
 
           <button
             className="muse-btn muse-btn-yellow"
             onClick={onHome}
-            style={{ flex: 1, padding: isMobileScreen ? '0.55rem' : '0.75rem', fontSize: isMobileScreen ? '0.9rem' : '1.05rem' }}
+            style={{ flex: 1, padding: '0.55rem', fontSize: '0.92rem' }}
           >
-            <span><Home size={isMobileScreen ? 15 : 18} /> 返回選單 (MAIN MENU)</span>
+            <span><Home size={16} /> 返回選單 (MAIN MENU)</span>
           </button>
         </div>
       </div>

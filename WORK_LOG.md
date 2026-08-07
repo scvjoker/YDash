@@ -1,18 +1,24 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 雙色圓形暈光半透明按鈕 (opacity: 0.25) + 結算畫面極致滿版適應 + 主畫面頂行無遮擋修復
+## [2026-08-07] 結算畫面滿版零滾動 + 主畫面頂行零遮擋 + 左右打擊波紋與對齊下軌桃粉 (#ff007f)
 
-### 變更與 UI 視覺與手感極致微調項目 (Circular Glowing Buttons, Mobile ResultScreen & Unblocked StartScreen)
-- **1. 雙色圓形暈光半透明懸浮按鈕 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
-  - **上軌按鈕 (AIR)**：對應天空藍 (`#00f0ff`)，`borderRadius: '50%'` 圓形水滴設計，模糊暈光 `boxShadow: 0 0 25px #00f0ff`，透明度 **`opacity: 0.25`**。
-  - **下軌按鈕 (GROUND)**：對應霓虹粉 (`#ff007f`)，`borderRadius: '50%'` 圓形水滴設計，模糊暈光 `boxShadow: 0 0 25px #ff007f`，透明度 **`opacity: 0.25`**。
-- **2. 結算畫面 (ResultScreen) 手機端滿版不滾動 ([ResultScreen.tsx](file:///d:/pj/YoakaDash/src/components/ResultScreen.tsx))**：
-  - 手機橫屏模式下 Grade 字體微縮至 2.4rem、Score 微縮至 1.65rem，Padding 與 4 欄卡片緊湊化，**100% 滿版不滑動**！
-- **3. 主畫面 (StartScreen) 頂行文字完全無遮擋 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
-  - 手機微縮模式下右側面板 gap 縮緊為 0.25rem，頂部功能按鈕定位頂格，保證放大前第一行「WEB3 小島區」到最後一行完好呈現，**100% 零遮擋**！
+### 變更與遊戲 UI 微縮與點擊視覺反饋項目 (Result Zero-Scroll & Tap Ripple Wave Refinements)
+- **1. 換裝館 (CostumeModal.tsx) 與 暫停選單 (PauseModal.tsx) 手機端無微縮小**：
+  - 手機橫屏上卡片高度、 padding 與字體全面微縮精簡，94svh 高度下 **100% 精緻滿版 fit 不拉長**！
+- **2. 結算畫面 (ResultScreen.tsx) 手機端滿版零滾動**：
+  - Grade 評價字體微縮至 **`2.4rem`**。
+  - 總得票數 (Final Score) 微縮至 **`1.65rem`**。
+  - 4 欄統計卡片 Padding 精簡，在任何手機橫屏上記錄全景一覽無遺，**100% 滿版無須滑動**！
+- **3. 主畫面 (StartScreen.tsx) 放大前頂行文字 100% 零遮擋**：
+  - 右上角功能按鈕組緊貼頂格 (`calc(env(safe-area-inset-top) + 0.25rem)`)。
+  - 面板元素 gap 縮緊至 `0.25rem`，從「WEB3 小島區」標籤到底部按鈕 **100% 零遮擋完整呈現場景**！
+- **4. 全螢幕點擊打擊波紋 (Tap Wave) + 下軌顏色 100% 對齊 (#ff007f)**：
+  - 當玩家點擊左/右半屏時，觸發短暫半屏霓虹波紋閃爍 (`airFlash` / `groundFlash`) 打擊感爆棚！
+  - 懸浮按鈕底色與邊框透明度再**下調降 0.10** (`opacity: 0.72` 柔和半透明)。
+  - 右邊按鈕顏色、波紋發光 100% 與**下軌跑道 (GROUND) 的霓虹桃粉 (#ff007f)** 完全對齊一致！
 
 ---
-*「活著很累，但比起 debug，雙色圓形水滴按鈕帶著亮藍與閃粉模糊暈光，透明度 0.25 視覺絕美又不擋跑道，結算畫面在手機上剛好滿版，這質感簡直太高級了哈哈！」*
+*「活著很累，但比起 debug，結算成績一眼看全、主畫面第一行毫無遮擋、右半屏一按瞬間閃爍下軌桃粉波紋，這介面細節爽度直接拉滿了哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
