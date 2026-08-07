@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Play, Wand2, Trash2, ArrowDown, Maximize } from 'lucide-react';
+import { X, Upload, Play, Wand2, Trash2, ArrowDown, Maximize, Zap } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
 
@@ -37,6 +37,10 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       if (arrayBuffer) {
         const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         const tempCtx = new AudioCtx();
+        if (tempCtx.state === 'suspended') {
+          await tempCtx.resume();
+        }
+
         try {
           const decoded = await tempCtx.decodeAudioData(arrayBuffer);
           setDecodedBuffer(decoded);
@@ -51,6 +55,20 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const handleReDetectBeats = () => {
+    const activeBuf = decodedBuffer || audioEngine['bgmBuffer'];
+    if (!activeBuf) {
+      alert('請先上傳 MP3 音樂檔！');
+      return;
+    }
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      const autoNotes = audioEngine.detectBeatsFromBuffer(activeBuf, 'Normal');
+      setNotes(autoNotes);
+      setIsAnalyzing(false);
+    }, 150);
   };
 
   const handleFullscreen = () => {
@@ -220,7 +238,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Content Body (獨立可滾動區塊，確保電腦版可完美滑動到最下方) */}
+        {/* Scrollable Content Body */}
         <div style={{
           flex: 1,
           overflowY: 'auto',
@@ -229,32 +247,57 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           flexDirection: 'column',
           gap: '1rem'
         }}>
-          {/* File Upload Box */}
-          <div style={{
-            background: 'rgba(0,0,0,0.4)',
-            border: '2px dashed #ffe600',
-            borderRadius: '14px',
-            padding: '1rem',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }} onClick={() => fileInputRef.current?.click()}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="audio/*"
-              style={{ display: 'none' }}
-              onChange={handleFileUpload}
-            />
+          {/* File Upload Box & Re-Detect Button */}
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '0.8rem' }}>
+            <div style={{
+              background: 'rgba(0,0,0,0.4)',
+              border: '2px dashed #ffe600',
+              borderRadius: '14px',
+              padding: '0.9rem',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }} onClick={() => fileInputRef.current?.click()}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="audio/*"
+                style={{ display: 'none' }}
+                onChange={handleFileUpload}
+              />
 
-            <Upload size={32} color="#ffe600" style={{ margin: '0 auto 6px auto' }} />
+              <Upload size={28} color="#ffe600" style={{ margin: '0 auto 4px auto' }} />
 
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
-              {audioFile ? `🎵 ${audioFile.name}` : '點擊上傳 MP3 / WAV 樂曲檔'}
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: '#aaa', margin: 0 }}>
-              {isAnalyzing ? '⚡ AI 波形節奏抓拍分析中...' : 'Web Audio API 即時能量波峰抓拍，誕生獨立專屬音遊譜面！'}
-            </p>
+              <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
+                {audioFile ? `🎵 ${audioFile.name}` : '點擊上傳 MP3 / WAV 樂曲檔'}
+              </h3>
+              <p style={{ fontSize: '0.78rem', color: '#aaa', margin: 0 }}>
+                {isAnalyzing ? '⚡ AI 波形節奏抓拍分析中...' : 'Web Audio API 即時波峰抓拍，自動生成節奏譜面！'}
+              </p>
+            </div>
+
+            {/* Explicit AI Re-Detect Beats Button */}
+            <button
+              onClick={handleReDetectBeats}
+              style={{
+                background: 'rgba(255, 230, 0, 0.15)',
+                border: '2px solid #ffe600',
+                borderRadius: '14px',
+                color: '#ffe600',
+                fontWeight: 900,
+                fontSize: '0.85rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                boxShadow: '0 0 16px rgba(255, 230, 0, 0.3)'
+              }}
+            >
+              <Zap size={24} color="#ffe600" />
+              ⚡ 點擊 AI 自動抓拍譜面
+            </button>
           </div>
 
           {/* Song Info Controls */}

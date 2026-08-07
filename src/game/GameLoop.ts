@@ -1,6 +1,7 @@
 import { Note, BeatmapData, GameStats, CostumeId } from '../types/game';
 import { audioEngine } from './AudioEngine';
 import { RenderEngine } from './RenderEngine';
+import { SongTrackData } from './SongRegistry';
 
 export class GameLoop {
   private renderEngine: RenderEngine;
@@ -8,6 +9,7 @@ export class GameLoop {
   private costume: CostumeId;
   private difficulty: 'Easy' | 'Normal' | 'Hard';
   private speedMultiplier: number;
+  private songTrack?: SongTrackData;
   private animFrameId: number | null = null;
   private isPausedState: boolean = false;
 
@@ -40,6 +42,7 @@ export class GameLoop {
     costume: CostumeId,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
     speedMultiplier: number = 1.0,
+    songTrack?: SongTrackData,
     onStatsChange?: (stats: GameStats) => void,
     onGameOver?: (stats: GameStats) => void
   ) {
@@ -48,6 +51,7 @@ export class GameLoop {
     this.costume = costume;
     this.difficulty = difficulty;
     this.speedMultiplier = speedMultiplier;
+    this.songTrack = songTrack;
     this.onStatsChange = onStatsChange;
     this.onGameOver = onGameOver;
 
@@ -56,10 +60,11 @@ export class GameLoop {
   }
 
   public async start(): Promise<void> {
-    const bgmBuf = await audioEngine.loadDefaultBGM();
+    const audioUrl = this.songTrack?.audioUrl || '';
+    const audioBuf = await audioEngine.loadAudioFromUrl(audioUrl);
     
-    if (bgmBuf) {
-      const detected = audioEngine.detectBeatsFromBuffer(bgmBuf, this.difficulty);
+    if (audioBuf) {
+      const detected = audioEngine.detectBeatsFromBuffer(audioBuf, this.difficulty);
       if (detected.length > 0) {
         this.notes = detected;
         this.stats.totalNotesCount = this.notes.filter(n => n.type !== 'obstacle').length;
@@ -307,7 +312,8 @@ export class GameLoop {
     );
 
     const lastNote = this.notes[this.notes.length - 1];
-    if (lastNote && currentTime > lastNote.time + 2.5) {
+    // Real end condition: either all notes passed by 3 seconds or full song length finished
+    if (lastNote && currentTime > lastNote.time + 3.0) {
       this.stop();
       if (this.onGameOver) this.onGameOver({ ...this.stats });
       return;

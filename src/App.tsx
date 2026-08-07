@@ -26,7 +26,7 @@ export const App: React.FC = () => {
   const [selectedCostume, setSelectedCostume] = useState<CostumeId>('campaign_vest');
 
   // Song Selector & Tutorial Modal State
-  const [selectedSongTrack, setSelectedSongTrack] = useState<SongTrackData>(BUILTIN_SONGS[1]);
+  const [selectedSongTrack, setSelectedSongTrack] = useState<SongTrackData>(BUILTIN_SONGS[0]);
   const [isSongSelectOpen, setIsSongSelectOpen] = useState<boolean>(false);
   const [isTutorialModalOpen, setIsTutorialModalOpen] = useState<boolean>(false);
 
@@ -100,6 +100,7 @@ export const App: React.FC = () => {
       gameLoopRef.current = null;
     }
 
+    const activeTrack = songTrack || selectedSongTrack;
     if (songTrack) {
       setSelectedSongTrack(songTrack);
     }
@@ -136,6 +137,7 @@ export const App: React.FC = () => {
           selectedCostume,
           difficulty,
           noteSpeed,
+          activeTrack,
           stats => setGameStats({ ...stats }),
           finalStats => {
             setGameStats({ ...finalStats });

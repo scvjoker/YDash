@@ -17,14 +17,15 @@ export class AudioEngine {
     // AudioContext lazily initialized on first user gesture
   }
 
-  private initCtx(): void {
+  public initCtx(): AudioContext {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtx();
     }
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
+    return this.ctx;
   }
 
   public setCustomAudioBuffer(buffer: AudioBuffer): void {
@@ -33,6 +34,28 @@ export class AudioEngine {
 
   public clearCustomAudioBuffer(): void {
     this.customAudioBuffer = null;
+  }
+
+  // Load Real MP3 Audio File from URL (public/assets/audio/*.mp3)
+  public async loadAudioFromUrl(url: string): Promise<AudioBuffer | null> {
+    const ctx = this.initCtx();
+    if (this.customAudioBuffer) return this.customAudioBuffer;
+
+    if (!url) {
+      return this.loadDefaultBGM();
+    }
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Audio fetch failed');
+      const arrayBuffer = await response.arrayBuffer();
+      const decoded = await ctx.decodeAudioData(arrayBuffer);
+      this.bgmBuffer = decoded;
+      return decoded;
+    } catch {
+      // Fallback to rich 180s cyber synth buffer if MP3 file is not yet placed
+      return this.loadDefaultBGM();
+    }
   }
 
   public async loadDefaultBGM(): Promise<AudioBuffer | null> {
@@ -49,29 +72,29 @@ export class AudioEngine {
   }
 
   public playBGM(offset: number = 0): void {
-    this.initCtx();
-    if (!this.ctx) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
 
     this.stopBGM();
 
     const activeBuf = this.customAudioBuffer || this.bgmBuffer;
     if (!activeBuf) return;
 
-    const source = this.ctx.createBufferSource();
+    const source = ctx.createBufferSource();
     source.buffer = activeBuf;
-    source.loop = true;
+    source.loop = false; // Real song playback without premature cutoffs
 
-    const gainNode = this.ctx.createGain();
+    const gainNode = ctx.createGain();
     gainNode.gain.value = 0.65;
 
     source.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(ctx.destination);
 
-    const safeOffset = offset % activeBuf.duration;
+    const safeOffset = Math.max(0, Math.min(offset, activeBuf.duration - 0.1));
     source.start(0, safeOffset);
 
     this.bgmSource = source;
-    this.bgmStartTime = this.ctx.currentTime - safeOffset;
+    this.bgmStartTime = ctx.currentTime - safeOffset;
     this.bgmPauseOffset = safeOffset;
     this.isPlayingBgm = true;
   }
@@ -79,7 +102,7 @@ export class AudioEngine {
   public pauseBGM(): void {
     if (!this.isPlayingBgm || !this.ctx || !this.bgmSource) return;
     this.bgmPauseOffset = this.getHardwareTime();
-    this.bgmSource.stop();
+    try { this.bgmSource.stop(); } catch {}
     this.bgmSource = null;
     this.isPlayingBgm = false;
 
@@ -109,41 +132,40 @@ export class AudioEngine {
     return this.ctx.currentTime - this.bgmStartTime;
   }
 
-  // TUTORIAL PHASE REPEAT LOOP AUDIO SYNTHESIZER (每個階段可重複 4 小節樂段 Repeat)
   public playTutorialPhaseRepeatLoop(phaseIndex: number): void {
-    this.initCtx();
-    if (!this.ctx) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
 
     this.stopBGM();
     this.currentTutorialPhase = phaseIndex;
 
     const loopBuf = this.createTutorialPhaseLoopBuffer(phaseIndex);
-    const source = this.ctx.createBufferSource();
+    const source = ctx.createBufferSource();
     source.buffer = loopBuf;
-    source.loop = true; // 無縫重複循環 (Repeat)
+    source.loop = true;
 
-    const gainNode = this.ctx.createGain();
+    const gainNode = ctx.createGain();
     gainNode.gain.value = 0.7;
 
     source.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(ctx.destination);
 
     source.start(0);
     this.tutorialLoopSource = source;
-    this.bgmStartTime = this.ctx.currentTime;
+    this.bgmStartTime = ctx.currentTime;
     this.isPlayingBgm = true;
   }
 
   public playSFX(type: 'perfect' | 'great' | 'swish' | 'cheer' | 'error'): void {
-    this.initCtx();
-    if (!this.ctx) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
 
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(ctx.destination);
 
     if (type === 'perfect') {
       osc.type = 'sine';
@@ -190,22 +212,24 @@ export class AudioEngine {
     }
   }
 
+  // Full Audio Waveform Peak Beat Detector (AI Beat Detection)
   public detectBeatsFromBuffer(buffer: AudioBuffer, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'): Note[] {
     const rawData = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
+    const duration = buffer.duration;
 
-    let threshold = 0.35;
-    let minDistanceSec = 0.32;
-    let obstacleProb = 0.20;
+    let threshold = 0.28;
+    let minDistanceSec = 0.35;
+    let obstacleProb = 0.18;
 
     if (difficulty === 'Easy') {
-      threshold = 0.48;
+      threshold = 0.42;
       minDistanceSec = 0.55;
-      obstacleProb = 0.12;
+      obstacleProb = 0.10;
     } else if (difficulty === 'Hard') {
-      threshold = 0.24;
+      threshold = 0.20;
       minDistanceSec = 0.22;
-      obstacleProb = 0.30;
+      obstacleProb = 0.28;
     }
 
     const minSamples = Math.floor(sampleRate * minDistanceSec);
@@ -224,11 +248,11 @@ export class AudioEngine {
         lastSampleIdx = i;
         const timeSec = parseFloat((i / sampleRate).toFixed(3));
 
-        if (timeSec < 2.5) continue;
+        if (timeSec < 2.0 || timeSec > duration - 1.5) continue;
 
         const isObstacle = Math.random() < obstacleProb;
         const track = Math.random() > 0.5 ? 'air' : 'ground';
-        const isDual = !isObstacle && Math.random() < 0.22;
+        const isDual = !isObstacle && Math.random() < 0.25;
 
         if (isObstacle) {
           notes.push({
@@ -254,20 +278,19 @@ export class AudioEngine {
     return notes;
   }
 
-  // Cyber Synth BGM Generator
+  // 180 Seconds (3 Minutes Full Length) Cyber Synth BGM Generator
   private createCyberBgmSynthBuffer(): AudioBuffer {
-    if (!this.ctx) this.initCtx();
-    const ctx = this.ctx!;
+    const ctx = this.initCtx();
 
     const sampleRate = ctx.sampleRate;
-    const duration = 40.0;
+    const duration = 180.0; // 3 Full Minutes!
     const totalSamples = Math.floor(sampleRate * duration);
     const buffer = ctx.createBuffer(2, totalSamples, sampleRate);
 
     const left = buffer.getChannelData(0);
     const right = buffer.getChannelData(1);
 
-    const bpm = 132;
+    const bpm = 135;
     const secondsPerBeat = 60 / bpm;
 
     for (let i = 0; i < totalSamples; i++) {
@@ -319,11 +342,10 @@ export class AudioEngine {
 
   // Synthesize 4-Bar Repeating Audio Loop for Tutorial Phase (120 BPM)
   private createTutorialPhaseLoopBuffer(phaseIndex: number): AudioBuffer {
-    if (!this.ctx) this.initCtx();
-    const ctx = this.ctx!;
+    const ctx = this.initCtx();
 
     const sampleRate = ctx.sampleRate;
-    const duration = 8.0; // 4 bars at 120 BPM
+    const duration = 8.0;
     const totalSamples = Math.floor(sampleRate * duration);
     const buffer = ctx.createBuffer(2, totalSamples, sampleRate);
 
@@ -338,14 +360,12 @@ export class AudioEngine {
       const currentBeat = t / secondsPerBeat;
       let sample = 0;
 
-      // Kick on beats 0, 1, 2, 3
       const kickBeatTime = (currentBeat % 1) * secondsPerBeat;
       if (kickBeatTime < 0.15) {
         const kickFreq = 150 * Math.exp(-kickBeatTime * 30);
         sample += Math.sin(2 * Math.PI * kickFreq * kickBeatTime) * Math.exp(-kickBeatTime * 18) * 0.75;
       }
 
-      // Snare on beats 1 & 3
       const beatInBar = currentBeat % 4;
       if (Math.abs(beatInBar - 1) < 0.2 || Math.abs(beatInBar - 3) < 0.2) {
         const snareTime = Math.min(Math.abs(beatInBar - 1), Math.abs(beatInBar - 3)) * secondsPerBeat;
@@ -355,13 +375,12 @@ export class AudioEngine {
         }
       }
 
-      // Distinct Phase Synth Melody per Tutorial Step
       let freq = 440;
-      if (phaseIndex === 1) freq = 523.25; // C5 Air
-      else if (phaseIndex === 2) freq = 349.23; // F4 Ground
-      else if (phaseIndex === 3) freq = 659.25; // E5 Dual
-      else if (phaseIndex === 4) freq = 293.66; // D4 Dodge
-      else if (phaseIndex === 5) freq = 880; // A5 Fever
+      if (phaseIndex === 1) freq = 523.25;
+      else if (phaseIndex === 2) freq = 349.23;
+      else if (phaseIndex === 3) freq = 659.25;
+      else if (phaseIndex === 4) freq = 293.66;
+      else if (phaseIndex === 5) freq = 880;
 
       const noteTime = (currentBeat % 0.5) * (secondsPerBeat / 2);
       const synthSample = Math.sin(2 * Math.PI * freq * noteTime) * Math.exp(-noteTime * 10) * 0.25;

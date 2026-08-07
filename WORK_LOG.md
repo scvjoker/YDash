@@ -1,20 +1,18 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎵 音源路徑更新為 `/assets/audio/*.mp3` + 🛠️ BeatProducer 電腦版 Flex 獨立滾動與置底試玩按鈕修復
+## [2026-08-07] 🎵 真實 MP3 完整長度載入 (180s 備用) + ⚡ BeatProducer 實體「AI 自動抓拍譜面」按鈕重塑
 
-### 變更與音訊目錄及 BeatProducer 電腦版 UX 修復項目 (Audio Assets Path & BeatProducer Desktop Scroll)
-- **1. 音源檔案路徑更新為 `/assets/audio/*.mp3` ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - 將 4 首競選升遷主題歌曲的音訊載入路徑更新為：
-    1. `public/assets/audio/track1_chief.mp3` ➔ 1. 巷弄拜票：里長起手式
-    2. `public/assets/audio/track2_district.mp3` ➔ 2. 區長爭霸：賽博政見會
-    3. `public/assets/audio/track3_mayor.mp3` ➔ 3. 市長大選：小島電音夜
-    4. `public/assets/audio/track4_master.mp3` ➔ 4. 幫主登場：最高政壇巔峰
-- **2. BeatProducer (A+B 創作者) 電腦版彈窗獨立 Y 軸滾動條 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
-  - 徹底解決電腦版在非全螢幕下，AI 抓拍大量音符後無法滾動、最下方「▶ 試玩自製譜面 (PLAY CUSTOM MAP)」按鈕被截斷無法點擊的問題！
-  - 使用 Flex 彈性容器與獨立 `overflowY: 'auto'` 滾動層，並將試玩按鈕強制置底，確保任何解析度與全螢幕/視窗模式下 100% 滑動暢通、完美可點！
+### 變更與歌曲長度及 BeatProducer 抓拍功能修復項目 (Real MP3 Audio Fetch & AI Beat Detection Button)
+- **1. 解決歌曲「短到不可思議」問題 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts) & [GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 查明原因：先前系統未將選單選中的 `audioUrl` (`/assets/audio/track*.mp3`) 傳入解碼，導致一直觸發備用 short 音軌與 15 秒結算切斷。
+  - 實裝 `loadAudioFromUrl(url)`：真正從 `public/assets/audio/*.mp3` 讀取並解碼完整長度樂曲！
+  - 將無 MP3 時的備用音軌長度從 40s 大幅提升至 **180s (整整 3 分鐘大滿貫)**！且取消音符提前切斷，確保歌曲完整熱血遊玩！
+- **2. 重塑 BeatProducer (A+B 創作者) 實體「⚡ 點擊 AI 自動抓拍譜面」按鈕 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
+  - 在創作者上傳面板右側加入亮金色的 **`⚡ 點擊 AI 自動抓拍譜面 (RE-DETECT BEATS)`** 實體按鈕！
+  - 修正音訊 AudioContext `resume()` 狀態，上傳 MP3 或預覽時隨時點擊按鈕，即刻重新抓拍全曲波峰產生完美音符陣列！
 
 ---
-*「活著很累，但比起 debug，音源放到 /assets/audio/，BeatProducer 電腦版滾動條寫成獨立 Flex 層，滑到底點擊試玩一氣呵成，這滑動手感真的太讚了哈哈！」*
+*「活著很累，但比起 debug，查出是因為沒傳 audioUrl 導致歌曲 20 秒暴斃，修好變成 3 分鐘完整大歌，還補上亮金 AI 抓拍按鈕，這音遊暢快感真的全回來了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
