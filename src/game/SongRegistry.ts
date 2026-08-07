@@ -22,7 +22,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'campaign_start',
     title: '競選出發！',
-    subtitle: '街頭拜票 (有歌詞)',
+    subtitle: '競選出發！ (純音樂)',
     artist: 'Yoaka 競選樂團',
     bpm: 132,
     duration: 188,
@@ -41,7 +41,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'street_campaign',
     title: '街頭拜票',
-    subtitle: '街頭拜票狂想曲 (純音樂)',
+    subtitle: '街頭拜票 (純音樂)',
     artist: 'Yoaka 競選樂團',
     bpm: 148,
     duration: 161,
@@ -79,7 +79,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'debate_battle',
     title: '辯論會激戰',
-    subtitle: '辯論會激戰 (標準版)',
+    subtitle: '辯論會激戰',
     artist: 'Yoaka 競選樂團',
     bpm: 172,
     duration: 165,
@@ -98,7 +98,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'debate_rhapsody',
     title: '辯論會激戰 (狂想曲)',
-    subtitle: '辯論會激戰 (有歌詞 狂想曲)',
+    subtitle: '辯論會激戰狂想曲',
     artist: 'Yoaka 競選樂團',
     bpm: 178,
     duration: 321,
@@ -117,7 +117,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'victory_night',
     title: '開票夜勝選大爆發',
-    subtitle: '開票夜勝選大爆發 (標準版)',
+    subtitle: '開票夜勝選大爆發',
     artist: 'Yoaka 競選樂團',
     bpm: 185,
     duration: 118,
@@ -136,7 +136,7 @@ export const SONG_REGISTRY: SongData[] = [
   {
     id: 'victory_rhapsody',
     title: '開票夜勝選大爆發 (狂想曲)',
-    subtitle: '開票夜勝選大爆發 (有歌詞 狂想曲)',
+    subtitle: '開票夜勝選大爆發狂想曲',
     artist: 'Yoaka 競選樂團',
     bpm: 190,
     duration: 303,

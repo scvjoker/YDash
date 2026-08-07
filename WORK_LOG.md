@@ -1,17 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 歌曲切換 Modal 左右兩欄等高對齊 + Cyber 炫彩滾動條 + 『↕️ 可上下滑動瀏覽』提醒
+## [2026-08-07] 歌曲切換大廳左右欄 100% 強效絕對等高 + 拔除重複選項 + 雙欄 Cyber 滾動條
 
-### 變更與 UI 佈局對齊與滑動體驗優化項目 (Song Select Equal Height Alignment & Scroll Enhancements)
-- **1. 左右兩欄 100% 精準等高對齊 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 設定兩欄 `alignItems: 'stretch'`, `height: '100%'`，使左側樂曲選擇清單與右側 Preview 試聽詳細卡片 **100% 垂直等高對齊**！
-- **2. 炫彩 Cyberpunk 美化滾動條 (.cyber-scrollbar)** ([index.css](file:///d:/pj/YoakaDash/src/index.css))**：
-  - 在 `index.css` 加入專屬自訂雙色微光軌道滾動條 (`#00f0ff` -> `#ff007f` 霓虹漸層 thumb)，滾動視覺感爆棚！
-- **3. 『↕️ 可上下滑動瀏覽』炫彩提示 Pill Badge**：
-  - 於左側樂曲大廳標題右方顯性加上 `↕️ 可上下滑動瀏覽` 閃爍提示徽章，讓使用者能一眼看出可上下滑動瀏覽全部 8 首競選曲目！
+### 變更與 UI 精簡與強效對齊項目 (Song Select Dual Scrollbar & Streamlined Exact Equal Height Layout)
+- **1. 拔除右側重複的「難度」與「流速」按鈕 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 拔除右側詳細卡片中重複佔空間的難度與流速切換選項（繼承主畫面已選好的難度與流速），介面變得無比乾淨清爽！
+- **2. 左右兩欄 100% 強效絕對等高對齊 (`height: 58vh/56vh`)**：
+  - 左側樂曲清單與右側詳情卡片高度強制固定為 `height: isMobileScreen ? '58vh' : '56vh'`，手機與電腦上記錄 **100% 絕對齊高對齊**！
+- **3. 雙欄獨立 `.cyber-scrollbar` 滾動條**：
+  - 為右側詳情卡片與左側曲庫清單同時裝備 `.cyber-scrollbar` 滾動條，任何欄位內容過長均可順暢滾動！
+- **4. 完美相容使用者對 `SongRegistry.ts` Subtitle Title 的最新修訂**：
+  - 自動相容與保留使用者對《競選出發！》、《街頭拜票》、《辯論會激戰》、《開票夜勝選大爆發》等 Subtitle/Title 的本機精修內容。
 
 ---
-*「活著很累，但比起 debug，歌曲選單左右兩邊拉到完全等高、滑動條變成霓虹漸層、右上角還有專屬滑動提示，這對齊強迫症簡直被治療得太舒服啦哈哈！」*
+*「活著很累，但比起 debug，把曲庫右邊重複的按鈕拔掉、左右兩邊拉到 100% 齊高、兩邊都有雙微光滾動條，這視覺乾淨度簡直太治癒啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
