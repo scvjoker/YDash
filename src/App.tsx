@@ -49,7 +49,7 @@ export const App: React.FC = () => {
     audioEngine.loadDefaultBGM();
   }, []);
 
-  // Monitor Fullscreen & Screen Size for 80% Non-Fullscreen Mobile Scaling
+  // Monitor Fullscreen & Screen Size for Non-Fullscreen Mobile Scaling
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -200,140 +200,150 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  // Non-fullscreen Mobile Viewport 80% Micro Scale Style
-  const shouldScale80Percent = isMobileScreen && !isFullscreen;
+  // Non-fullscreen Mobile Viewport Scale Protection (Using 100dvh & 0.76 scale)
+  const shouldScale78Percent = isMobileScreen && !isFullscreen;
 
   return (
     <div style={{
       width: '100vw',
-      height: '100vh',
+      height: '100dvh', // Real dynamic viewport height respecting mobile address bars!
       position: 'relative',
       overflow: 'hidden',
-      transform: shouldScale80Percent ? 'scale(0.80)' : 'none',
-      transformOrigin: 'center center',
-      transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      backgroundColor: '#050712',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     }}>
-      {/* Mobile Landscape Orientation Prompt */}
-      <LandscapePrompt />
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        transform: shouldScale78Percent ? 'scale(0.76)' : 'none',
+        transformOrigin: 'center center',
+        transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      }}>
+        {/* Mobile Landscape Orientation Prompt */}
+        <LandscapePrompt />
 
-      {/* 1. START SCREEN */}
-      {gameState === 'menu' && (
-        <StartScreen
-          currentSong={currentSong}
-          selectedCostume={selectedCostume}
-          onStartGame={(song, diff, speed) => handleStartGame(song, diff, speed)}
-          onOpenSongSelect={() => setShowSongSelect(true)}
-          onOpenTutorial={() => setShowTutorial(true)}
-          onOpenCostumes={() => setGameState('costumes')}
-          onOpenEditor={() => setGameState('editor')}
-        />
-      )}
+        {/* 1. START SCREEN */}
+        {gameState === 'menu' && (
+          <StartScreen
+            currentSong={currentSong}
+            selectedCostume={selectedCostume}
+            onStartGame={(song, diff, speed) => handleStartGame(song, diff, speed)}
+            onOpenSongSelect={() => setShowSongSelect(true)}
+            onOpenTutorial={() => setShowTutorial(true)}
+            onOpenCostumes={() => setGameState('costumes')}
+            onOpenEditor={() => setGameState('editor')}
+          />
+        )}
 
-      {/* 2. SONG SELECTION HALL MODAL */}
-      {showSongSelect && (
-        <SongSelectModal
-          currentSongId={currentSong.id}
-          currentDifficulty={currentDifficulty}
-          currentSpeed={currentNoteSpeed}
-          onSelectSong={(song, diff, speed) => {
-            setCurrentSong(song);
-            setCurrentDifficulty(diff);
-            setCurrentNoteSpeed(speed);
-            setShowSongSelect(false);
-          }}
-          onClose={() => setShowSongSelect(false)}
-        />
-      )}
+        {/* 2. SONG SELECTION HALL MODAL */}
+        {showSongSelect && (
+          <SongSelectModal
+            currentSongId={currentSong.id}
+            currentDifficulty={currentDifficulty}
+            currentSpeed={currentNoteSpeed}
+            onSelectSong={(song, diff, speed) => {
+              setCurrentSong(song);
+              setCurrentDifficulty(diff);
+              setCurrentNoteSpeed(speed);
+              setShowSongSelect(false);
+            }}
+            onClose={() => setShowSongSelect(false)}
+          />
+        )}
 
-      {/* 3. TUTORIAL OVERLAY MODAL */}
-      {showTutorial && (
-        <TutorialOverlay
-          onClose={() => setShowTutorial(false)}
-        />
-      )}
+        {/* 3. TUTORIAL OVERLAY MODAL */}
+        {showTutorial && (
+          <TutorialOverlay
+            onClose={() => setShowTutorial(false)}
+          />
+        )}
 
-      {/* 4. COSTUME MODAL */}
-      {gameState === 'costumes' && (
-        <CostumeModal
-          selectedCostume={selectedCostume}
-          onSelectCostume={id => setSelectedCostume(id)}
-          onClose={() => setGameState('menu')}
-        />
-      )}
+        {/* 4. COSTUME MODAL */}
+        {gameState === 'costumes' && (
+          <CostumeModal
+            selectedCostume={selectedCostume}
+            onSelectCostume={id => setSelectedCostume(id)}
+            onClose={() => setGameState('menu')}
+          />
+        )}
 
-      {/* 5. BEATMAP EDITOR MODAL */}
-      {gameState === 'editor' && (
-        <BeatmapEditor
-          onClose={() => setGameState('menu')}
-          onPlayCustomMap={customMap => {
-            const customSong: SongData = {
-              id: 'custom',
-              title: customMap.metadata.title,
-              subtitle: '玩家自製 A+B 譜面',
-              artist: customMap.metadata.artist,
-              bpm: customMap.metadata.bpm,
-              duration: 180,
-              cover: '/assets/yoaka_kpop.png',
-              bg: '/cyber_runway_bg.png',
-              audio: '/assets/audio/street_campaign_vocal.mp3',
-              storyStage: '合',
-              isRhapsody: true,
-              storyContext: '【A+B 自製譜面】玩家上傳音檔與 AI 自動抓拍譜面！',
-              difficultyRating: { Easy: 3, Normal: 4, Hard: 5 }
-            };
-            handleStartGame(customSong, 'Normal', 1.0);
-          }}
-        />
-      )}
+        {/* 5. BEATMAP EDITOR MODAL */}
+        {gameState === 'editor' && (
+          <BeatmapEditor
+            onClose={() => setGameState('menu')}
+            onPlayCustomMap={customMap => {
+              const customSong: SongData = {
+                id: 'custom',
+                title: customMap.metadata.title,
+                subtitle: '玩家自製 A+B 譜面',
+                artist: customMap.metadata.artist,
+                bpm: customMap.metadata.bpm,
+                duration: 180,
+                cover: '/assets/yoaka_kpop.png',
+                bg: '/cyber_runway_bg.png',
+                audio: '/assets/audio/street_campaign_vocal.mp3',
+                storyStage: '合',
+                isRhapsody: true,
+                storyContext: '【A+B 自製譜面】玩家上傳音檔與 AI 自動抓拍譜面！',
+                difficultyRating: { Easy: 3, Normal: 4, Hard: 5 }
+              };
+              handleStartGame(customSong, 'Normal', 1.0);
+            }}
+          />
+        )}
 
-      {/* 6. CANVAS RHYTHM GAMEPLAY */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          display: gameState === 'playing' || gameState === 'result' ? 'block' : 'none',
-          width: '100%',
-          height: '100%'
-        }}
-      />
-
-      {/* 7. HUD OVERLAY */}
-      {gameState === 'playing' && (
-        <HUDOverlay
-          stats={gameStats}
-          costume={selectedCostume}
-          onAirPress={() => gameLoopRef.current?.triggerKeyInput('air')}
-          onGroundPress={() => gameLoopRef.current?.triggerKeyInput('ground')}
-          onPause={handleTogglePause}
-        />
-      )}
-
-      {/* 8. PAUSE MODAL */}
-      {isPaused && (
-        <PauseModal
-          stats={gameStats}
-          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
-          onResume={handleTogglePause}
-          onRestart={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
-          onHome={() => {
-            if (gameLoopRef.current) gameLoopRef.current.stop();
-            setIsPaused(false);
-            setGameState('menu');
+        {/* 6. CANVAS RHYTHM GAMEPLAY */}
+        <canvas
+          ref={canvasRef}
+          style={{
+            display: gameState === 'playing' || gameState === 'result' ? 'block' : 'none',
+            width: '100%',
+            height: '100%'
           }}
         />
-      )}
 
-      {/* 9. RESULT SCREEN */}
-      {gameState === 'result' && (
-        <ResultScreen
-          stats={gameStats}
-          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
-          onReplay={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
-          onHome={() => {
-            if (gameLoopRef.current) gameLoopRef.current.stop();
-            setGameState('menu');
-          }}
-        />
-      )}
+        {/* 7. HUD OVERLAY */}
+        {gameState === 'playing' && (
+          <HUDOverlay
+            stats={gameStats}
+            costume={selectedCostume}
+            onAirPress={() => gameLoopRef.current?.triggerKeyInput('air')}
+            onGroundPress={() => gameLoopRef.current?.triggerKeyInput('ground')}
+            onPause={handleTogglePause}
+          />
+        )}
+
+        {/* 8. PAUSE MODAL */}
+        {isPaused && (
+          <PauseModal
+            stats={gameStats}
+            beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
+            onResume={handleTogglePause}
+            onRestart={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
+            onHome={() => {
+              if (gameLoopRef.current) gameLoopRef.current.stop();
+              setIsPaused(false);
+              setGameState('menu');
+            }}
+          />
+        )}
+
+        {/* 9. RESULT SCREEN */}
+        {gameState === 'result' && (
+          <ResultScreen
+            stats={gameStats}
+            beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
+            onReplay={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
+            onHome={() => {
+              if (gameLoopRef.current) gameLoopRef.current.stop();
+              setGameState('menu');
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
