@@ -120,6 +120,9 @@ export class AudioEngine {
     }
   }
 
+  /**
+   * 🎼 AI Automatic Beatmap Recognition with Balanced Tiered Difficulty & Smart Track Alternate Distribution
+   */
   public detectBeatsFromBuffer(buffer: AudioBuffer, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'): any[] {
     const channelData = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
@@ -148,19 +151,31 @@ export class AudioEngine {
       });
     }
 
-    let minEnergyThreshold = 0.18;
-    let minTimeGap = 0.28;
+    // 🎯 Quantized AI Difficulty Rules
+    let minEnergyThreshold = 0.20;
+    let minTimeGap = 0.32;
+    let dualChance = 0.10;
+    let obstacleChance = 0.10;
+    let maxSameTrackStreak = 2; // Force alternate if same track appears more than N times
 
     if (difficulty === 'Easy') {
-      minEnergyThreshold = 0.28;
-      minTimeGap = 0.45;
+      minEnergyThreshold = 0.32;
+      minTimeGap = 0.48; // Max ~2 notes per second
+      dualChance = 0.00; // No dual notes on Easy
+      obstacleChance = 0.05;
+      maxSameTrackStreak = 1; // Strict 1:1 alternate
     } else if (difficulty === 'Hard') {
       minEnergyThreshold = 0.12;
-      minTimeGap = 0.20;
+      minTimeGap = 0.20; // High speed ~5 notes per second
+      dualChance = 0.20;
+      obstacleChance = 0.16;
+      maxSameTrackStreak = 2;
     }
 
     const notes: any[] = [];
     let lastNoteTime = -1;
+    let lastTrack: 'air' | 'ground' = 'ground';
+    let sameTrackStreak = 0;
 
     for (let i = 2; i < energyList.length - 2; i++) {
       const prev = energyList[i - 1].energy;
@@ -170,9 +185,25 @@ export class AudioEngine {
 
       if (curr > minEnergyThreshold && curr > prev && curr > next) {
         if (currItem.time - lastNoteTime >= minTimeGap && currItem.time >= 5.0) {
-          const track = currItem.isBass ? 'ground' : 'air';
-          const isDual = Math.random() < (difficulty === 'Hard' ? 0.22 : 0.12);
-          const isObstacle = Math.random() < (difficulty === 'Hard' ? 0.18 : 0.10);
+          let track: 'air' | 'ground' = currItem.isBass ? 'ground' : 'air';
+
+          // 🛡️ Smart Alternate Distribution: Prevent single-track overcrowding to stop misclicks!
+          const timeSinceLast = currItem.time - lastNoteTime;
+          if (track === lastTrack) {
+            sameTrackStreak++;
+          } else {
+            sameTrackStreak = 1;
+          }
+
+          if (sameTrackStreak > maxSameTrackStreak || timeSinceLast < 0.38) {
+            track = lastTrack === 'air' ? 'ground' : 'air';
+            sameTrackStreak = 1;
+          }
+
+          lastTrack = track;
+
+          const isDual = Math.random() < dualChance;
+          const isObstacle = Math.random() < obstacleChance;
 
           if (isObstacle) {
             notes.push({

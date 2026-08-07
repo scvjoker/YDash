@@ -1,19 +1,21 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 鼓聲 Gain 音量柔和調降 (0.22) + Dual Strike 清亮「叮~」聲 + PauseModal 手機橫屏極致自適應
+## [2026-08-07] 防單軌過密誤觸演算法 (Smart Alternate Distribution) + AI 自動辨識譜面階梯量化規則實裝
 
-### 變更與聽感與手機介面優化項目 (Tuned Drum SFX Gain, Crisp Ding & Mobile Pause Layout)
-- **1. 鼓聲打擊音量調降與諧和化 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 將小鼓 (Snare) 與大鼓 (Kick) 的打擊 Gain 音量調降至 **`0.22`** 與 **`0.25`**。
-  - 聽感輕巧柔和、節奏紮實，絕不搶走背景音樂 (BGM) 的主旋律！
-- **2. Dual Strike 金黃雙擊：升級高頻清亮「叮~」聲 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 雙擊音效升級為 E6 / E7 雙高頻和音（1318.5Hz ~ 2637.0Hz 疊加），短促輕盈、清脆動聽的清亮「叮~」一聲！
-- **3. PauseModal 手機橫屏極致自適應 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 彈窗容器限制 `maxHeight: '92vh'`, `overflowY: 'auto'`，搭配極致適應的 Padding 與緊湊兩欄 Setting Grid。
-  - 在手機橫屏（Landscape Mode）下 100% 完美呈現，絕不超出畫面或遭裁切！
+### 變更與譜面生成與打擊判定優化項目 (Smart Track Alternation & AI Beatmap Rules)
+- **1. 防單軌過密誤觸演算法 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 實裝 **Smart Alternate Distribution** 音符交錯分佈機制：
+    - 當同一軌道連續出現超過 2 顆 Note，或距離上一顆音符小於 `0.38` 秒時，系統自動將下一顆 Note 強制分配到對側軌道（Air ↔ Ground）。
+    - 形成流暢自然的上下/左右交替打擊感，徹底解決單軌過密導致手忙腳亂與連擊誤觸的痛點！
+- **2. 判定時間窗口精準校準 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 將 Hit Window 判定範圍從 `0.21s` 精確微調至 **`0.14s`**（Perfect 判定為 `±0.055s`），點擊按壓不再輕易吃下後方預備音符。
+- **3. AI 自動辨識譜面 3 大難度階梯規則表 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - **Easy (簡單故事)**：最小間隔 `0.48s` (~2.0音符/秒)，能量門檻 `0.32`，`0%` 雙擊，`5%` 障礙物，強效單軌1:1強制交錯。
+  - **Normal (標準競選)**：最小間隔 `0.32s` (~3.1音符/秒)，能量門檻 `0.20`，`10%` 雙擊，`10%` 障礙物，同軌連發上限 2 顆。
+  - **Hard (狂想高難)**：最小間隔 `0.20s` (~5.0音符/秒)，能量門檻 `0.12`，`20%` 雙擊，`16%` 障礙物，快節奏動態交錯。
 
 ---
-*「活著很累，但比起 debug，每次雙擊傳來清脆極致的『叮~』一聲，鼓聲柔和地搭著主旋律背景音樂，手機橫屏暫停選單剛好滿版，這音遊細節真的太講究啦哈哈！」*
+*「活著很累，但比起 debug，單軌過密會自動分成上下軌交錯、按壓再也不會誤觸後面音符，這 AI 抓拍演算法簡直太聰明、太順手啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

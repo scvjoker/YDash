@@ -131,7 +131,8 @@ export class GameLoop {
       if (track === 'ground') this.inputState.groundActive = false;
     }, 120);
 
-    const windowSec = 0.21;
+    // 🎯 Calibrated Precision Hit Window (0.14s to prevent double misclicks)
+    const windowSec = 0.14;
     let closestNote: Note | null = null;
     let minDiff = Infinity;
 
@@ -150,7 +151,7 @@ export class GameLoop {
       let judgement: 'perfect' | 'great' = 'great';
       let scoreAdd = 60;
 
-      if (minDiff <= 0.065) {
+      if (minDiff <= 0.055) {
         judgement = 'perfect';
         scoreAdd = 100;
       }
@@ -282,8 +283,8 @@ export class GameLoop {
         }
       }
       
-      // 2. Process Missed Voter Notes
-      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.21) {
+      // 2. Process Missed Voter Notes (0.14s window)
+      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.14) {
         note.hit = true;
         note.judgement = 'miss';
         this.stats.missCount++;
