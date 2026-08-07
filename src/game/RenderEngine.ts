@@ -151,7 +151,7 @@ export class RenderEngine {
     // Dynamic Responsive Positions
     const airY = height * 0.36;
     const groundY = height * 0.70;
-    const hitX = Math.max(160 * scale, width * 0.22);
+    const hitX = Math.max(150 * scale, width * 0.20);
     const noteSpeed = width * 0.45 * speedMultiplier;
 
     // Smooth Yoaka Track Switch Animation & Extended Trail Tracking
@@ -215,11 +215,11 @@ export class RenderEngine {
       }
     });
 
-    // 5. Draw Borderless Hero Side Standee with Breathing Pulse
-    const sideCardX = Math.max(80 * scale, hitX - 175 * scale);
+    // 5. Draw Borderless Hero Side Standee with Breathing Pulse (Scaled down ~30% to 160px for clean view)
+    const sideCardX = Math.max(70 * scale, hitX - 140 * scale);
     this.drawHeroSideCard2X(ctx, sideCardX, this.yoakaCurrentY, costume, currentTime, activeTrack, scale);
 
-    // 6. Draw Hero Runner Stage
+    // 6. Draw Hero Runner Stage (Yoaka scaled down ~30% to r=28px)
     this.drawYoaka(ctx, hitX, this.yoakaCurrentY, costume, currentTime, inputState.airActive || inputState.groundActive, stats.isFeverActive, activeTrack, scale);
 
     // 7. Screen Flash Overlays
@@ -243,11 +243,11 @@ export class RenderEngine {
     if (currentTime < 4.8) {
       const countdown = Math.ceil(5.0 - currentTime);
       ctx.save();
-      ctx.font = `900 ${Math.floor(34 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(28 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 20 * scale;
+      ctx.shadowBlur = 18 * scale;
       ctx.fillText(`⚡ 準備拜票！音符將在 ${countdown} 秒後抵達 ⚡`, width / 2, height * 0.24);
       ctx.restore();
     }
@@ -257,16 +257,16 @@ export class RenderEngine {
       ctx.save();
       ctx.textAlign = 'right';
 
-      ctx.font = `italic 900 ${Math.floor(48 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `italic 900 ${Math.floor(40 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
       ctx.shadowColor = '#ff007f';
-      ctx.shadowBlur = 22 * scale;
-      ctx.fillText(`${stats.combo}`, width * 0.88 - Math.floor(65 * scale), height * 0.24);
+      ctx.shadowBlur = 18 * scale;
+      ctx.fillText(`${stats.combo}`, width * 0.88 - Math.floor(55 * scale), height * 0.24);
 
-      ctx.font = `900 ${Math.floor(18 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(15 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 15 * scale;
+      ctx.shadowBlur = 12 * scale;
       ctx.fillText(`COMBO`, width * 0.88, height * 0.24);
 
       ctx.restore();
@@ -368,9 +368,9 @@ export class RenderEngine {
     ctx.save();
     
     ctx.strokeStyle = isFever ? '#ff007f' : '#00f0ff';
-    ctx.lineWidth = Math.max(2.5, 4.5 * scale);
+    ctx.lineWidth = Math.max(2.5, 4.0 * scale);
     ctx.shadowColor = ctx.strokeStyle;
-    ctx.shadowBlur = 14 * scale;
+    ctx.shadowBlur = 12 * scale;
     ctx.beginPath();
     ctx.moveTo(0, airY);
     ctx.lineTo(width, airY);
@@ -397,11 +397,11 @@ export class RenderEngine {
     ctx.save();
     ctx.translate(x, y);
 
-    const radius = (isActive ? 52 : 42) * scale;
+    const radius = (isActive ? 42 : 32) * scale;
     ctx.strokeStyle = color;
-    ctx.lineWidth = (isActive ? 6 : 4) * scale;
+    ctx.lineWidth = (isActive ? 5 : 3.5) * scale;
     ctx.shadowColor = color;
-    ctx.shadowBlur = (isActive ? 30 : 15) * scale;
+    ctx.shadowBlur = (isActive ? 25 : 12) * scale;
 
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -425,9 +425,9 @@ export class RenderEngine {
     ctx.save();
 
     ctx.strokeStyle = '#ffe600';
-    ctx.lineWidth = 10 * scale;
+    ctx.lineWidth = 8 * scale;
     ctx.shadowColor = '#ffe600';
-    ctx.shadowBlur = 35 * scale;
+    ctx.shadowBlur = 28 * scale;
 
     ctx.beginPath();
     ctx.moveTo(x, airY);
@@ -435,7 +435,7 @@ export class RenderEngine {
     ctx.stroke();
 
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4 * scale;
+    ctx.lineWidth = 3 * scale;
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.moveTo(x, airY);
@@ -457,9 +457,10 @@ export class RenderEngine {
     ctx.save();
     ctx.translate(x, y);
 
+    // Scaled down ~30% to 160px for clean unblocked view
     const breathScale = 1.0 + Math.sin(time * 3.5) * 0.04;
-    const baseW = 240 * scale;
-    const baseH = 240 * scale;
+    const baseW = 160 * scale;
+    const baseH = 160 * scale;
     const cardW = baseW * breathScale;
     const cardH = baseH * breathScale;
 
@@ -478,23 +479,23 @@ export class RenderEngine {
     }
 
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 35 * scale;
+    ctx.shadowBlur = 25 * scale;
 
     if (targetImg && targetImg.complete && targetImg.naturalWidth !== 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 18 * scale);
+      ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 14 * scale);
       ctx.clip();
       ctx.drawImage(targetImg, -cardW / 2, -cardH / 2, cardW, cardH);
       ctx.restore();
     }
 
-    ctx.font = `900 ${Math.floor(14 * scale)}px "Chakra Petch", sans-serif`;
+    ctx.font = `900 ${Math.floor(12 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = accentColor;
     ctx.textAlign = 'center';
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 15 * scale;
-    ctx.fillText(costumeName, 0, cardH / 2 + 18 * scale);
+    ctx.shadowBlur = 12 * scale;
+    ctx.fillText(costumeName, 0, cardH / 2 + 14 * scale);
 
     ctx.restore();
   }
@@ -514,11 +515,12 @@ export class RenderEngine {
     const isObstacle = note.type === 'obstacle' || note.entity.startsWith('hater');
 
     if (isObstacle) {
-      const size = 320 * scale;
+      // Scaled down ~34% to 210px so obstacles never block vision!
+      const size = 210 * scale;
       const targetHaterImg = note.entity === 'hater_dog_board' ? this.haterDogImage : this.haterSharkImage;
 
       ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 80 * scale;
+      ctx.shadowBlur = 50 * scale;
 
       if (targetHaterImg && targetHaterImg.complete && targetHaterImg.naturalWidth !== 0) {
         ctx.drawImage(targetHaterImg, -size / 2, bounce - size / 2, size, size);
@@ -529,23 +531,23 @@ export class RenderEngine {
         ctx.fill();
       }
 
-      ctx.font = `900 ${Math.floor(16 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(13 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ff0055';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff0055';
-      ctx.shadowBlur = 20 * scale;
-      ctx.fillText('⚠️ DODGE 閃避!', 0, bounce + size / 2 + 16 * scale);
+      ctx.shadowBlur = 15 * scale;
+      ctx.fillText('⚠️ DODGE!', 0, bounce + size / 2 + 12 * scale);
 
     } else {
       const isAir = note.track === 'air';
       const mainColor = note.isDual ? '#ffe600' : isAir ? '#00f0ff' : '#ff007f';
-      const radius = 35 * scale;
+      const radius = 28 * scale;
 
       ctx.fillStyle = mainColor;
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 3.5 * scale;
+      ctx.lineWidth = 3.0 * scale;
       ctx.shadowColor = mainColor;
-      ctx.shadowBlur = 18 * scale;
+      ctx.shadowBlur = 15 * scale;
 
       ctx.beginPath();
       ctx.arc(0, bounce, radius, 0, Math.PI * 2);
@@ -557,10 +559,10 @@ export class RenderEngine {
       ctx.arc(0, bounce, radius * 0.4, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.font = `900 ${Math.floor(11 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(10 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = mainColor;
       ctx.textAlign = 'center';
-      ctx.fillText(note.isDual ? '⚡ DUAL' : isAir ? 'AIR VOTER' : 'GND VOTER', 0, bounce + 42 * scale);
+      ctx.fillText(note.isDual ? '⚡ DUAL' : isAir ? 'AIR VOTER' : 'GND VOTER', 0, bounce + 34 * scale);
     }
 
     ctx.restore();
@@ -585,11 +587,11 @@ export class RenderEngine {
       ctx.globalAlpha = trail.alpha;
       const trailColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
       ctx.strokeStyle = trailColor;
-      ctx.lineWidth = 5 * scale * trail.scale;
+      ctx.lineWidth = 4 * scale * trail.scale;
       ctx.shadowColor = trailColor;
-      ctx.shadowBlur = 25 * scale;
+      ctx.shadowBlur = 20 * scale;
 
-      const r = 40 * scale * trail.scale;
+      const r = 28 * scale * trail.scale;
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.stroke();
@@ -605,26 +607,27 @@ export class RenderEngine {
 
     ctx.translate(x, y);
 
-    const runCycle = Math.sin(time * 20) * 5 * scale;
+    const runCycle = Math.sin(time * 20) * 4 * scale;
     const bodyY = runCycle;
 
     let mainColor = activeTrack === 'air' ? '#00f0ff' : '#ff007f';
     if (costume === 'office_glasses') mainColor = '#ffe600';
 
     ctx.shadowColor = isFever ? '#ffe600' : mainColor;
-    ctx.shadowBlur = isStriking ? 35 * scale : 18 * scale;
+    ctx.shadowBlur = isStriking ? 30 * scale : 15 * scale;
 
-    const r = 40 * scale;
+    // Scaled down ~30% to r=28px
+    const r = 28 * scale;
     ctx.strokeStyle = mainColor;
-    ctx.lineWidth = 4 * scale;
+    ctx.lineWidth = 3.5 * scale;
     ctx.beginPath();
     ctx.arc(0, bodyY, r, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.font = `900 ${Math.floor(11 * scale)}px "Chakra Petch", sans-serif`;
+    ctx.font = `900 ${Math.floor(10 * scale)}px "Chakra Petch", sans-serif`;
     ctx.fillStyle = mainColor;
     ctx.textAlign = 'center';
-    ctx.fillText(activeTrack === 'air' ? '☁️ AIR' : '🏃 GND', 0, bodyY - 48 * scale);
+    ctx.fillText(activeTrack === 'air' ? '☁️ AIR' : '🏃 GND', 0, bodyY - 36 * scale);
 
     if (this.tissuePackImage && this.tissuePackImage.complete && this.tissuePackImage.naturalWidth !== 0) {
       ctx.save();
@@ -642,19 +645,29 @@ export class RenderEngine {
 
     if (isStriking) {
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 5 * scale;
+      ctx.lineWidth = 4 * scale;
       ctx.shadowColor = '#00f0ff';
-      ctx.shadowBlur = 25 * scale;
+      ctx.shadowBlur = 20 * scale;
       ctx.beginPath();
-      ctx.moveTo(18 * scale, bodyY);
-      ctx.lineTo(75 * scale, bodyY - 10 * scale);
+      ctx.moveTo(14 * scale, bodyY);
+      ctx.lineTo(55 * scale, bodyY - 8 * scale);
       ctx.stroke();
 
-      ctx.font = `900 ${Math.floor(15 * scale)}px "Chakra Petch", sans-serif`;
+      ctx.font = `900 ${Math.floor(13 * scale)}px "Chakra Petch", sans-serif`;
       ctx.fillStyle = '#ffe600';
-      ctx.fillText('V-TISSUES!', 88 * scale, bodyY - 10 * scale);
+      ctx.fillText('V-TISSUES!', 65 * scale, bodyY - 8 * scale);
     }
 
+    ctx.restore();
+  }
+
+  private drawFeverEffects(ctx: CanvasRenderingContext2D, width: number, height: number, time: number, scale: number): void {
+    ctx.save();
+    const feverGlow = ctx.createRadialGradient(width / 2, height / 2, 100 * scale, width / 2, height / 2, width * 0.8);
+    feverGlow.addColorStop(0, 'rgba(255, 0, 127, 0.15)');
+    feverGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = feverGlow;
+    ctx.fillRect(0, 0, width, height);
     ctx.restore();
   }
 
@@ -697,18 +710,18 @@ export class RenderEngine {
         color: '#00f0ff',
         life: 0.5,
         maxLife: 0.5,
-        size: 50
+        size: 40
       });
 
       this.particles.push({
         x,
-        y: y - 35,
+        y: y - 30,
         vx: 0,
-        vy: -3.5,
+        vy: -3.0,
         color: '#00f0ff',
         life: 1.0,
         maxLife: 1.0,
-        text: `✨ DODGE! 成功閃避`,
+        text: `✨ DODGE!`,
         type: 'dodge'
       });
       return;
@@ -723,14 +736,14 @@ export class RenderEngine {
       color: isWink ? '#ffe600' : '#00f0ff',
       life: 0.45,
       maxLife: 0.45,
-      size: 40
+      size: 32
     });
 
     this.particles.push({
       x,
-      y: y - 35,
+      y: y - 30,
       vx: (Math.random() - 0.5) * 2,
-      vy: -4.5,
+      vy: -4.0,
       color: isWink ? '#ffe600' : '#00f0ff',
       life: 1.0,
       maxLife: 1.0,
@@ -742,16 +755,16 @@ export class RenderEngine {
       this.triggerGoldFlashEffect();
     }
 
-    const count = isWink ? 18 : 9;
+    const count = isWink ? 15 : 8;
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x,
         y,
-        vx: (Math.random() - 0.5) * 12,
-        vy: (Math.random() - 0.5) * 12,
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10,
         color: ['#ff007f', '#00f0ff', '#ffe600', '#ffffff'][Math.floor(Math.random() * 4)],
-        life: 0.7,
-        maxLife: 0.7
+        life: 0.65,
+        maxLife: 0.65
       });
     }
   }
@@ -772,53 +785,33 @@ export class RenderEngine {
       ctx.globalAlpha = p.life / p.maxLife;
 
       if (p.size !== undefined) {
-        const currentRadius = (p.size + (1 - p.life / p.maxLife) * 100) * scale;
+        const currentRadius = (p.size + (1 - p.life / p.maxLife) * 80) * scale;
         ctx.strokeStyle = p.color;
-        ctx.lineWidth = 5 * scale * (p.life / p.maxLife);
+        ctx.lineWidth = 4 * scale * (p.life / p.maxLife);
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 24 * scale;
+        ctx.shadowBlur = 20 * scale;
         ctx.beginPath();
         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
         ctx.stroke();
       } else if (p.text) {
         const isDamage = p.type === 'damage';
         const isDual = p.type === 'dual_strike';
-        const fontSize = Math.floor((isDamage || isDual ? 32 : p.isWink ? 26 : 20) * scale);
+        const fontSize = Math.floor((isDamage || isDual ? 26 : p.isWink ? 22 : 17) * scale);
         ctx.font = `900 ${fontSize}px "Chakra Petch", sans-serif`;
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 25 * scale;
+        ctx.shadowBlur = 20 * scale;
         ctx.textAlign = 'center';
         ctx.fillText(p.text, p.x, p.y);
       } else {
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12 * scale;
+        ctx.shadowBlur = 10 * scale;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 5 * scale, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 4 * scale, 0, Math.PI * 2);
         ctx.fill();
       }
-
       ctx.restore();
     }
-  }
-
-  private drawFeverEffects(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    time: number,
-    scale: number
-  ): void {
-    ctx.save();
-
-    ctx.font = `900 ${Math.floor(32 * scale)}px "Chakra Petch", sans-serif`;
-    ctx.fillStyle = '#ffe600';
-    ctx.textAlign = 'center';
-    ctx.shadowColor = '#ff007f';
-    ctx.shadowBlur = 30 * scale;
-    ctx.fillText('🔥 FEVER MODE!! 雙倍票數熱血爆發 🔥', width / 2, 45 * scale);
-
-    ctx.restore();
   }
 }

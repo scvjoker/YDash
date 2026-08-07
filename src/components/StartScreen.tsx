@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize, HelpCircle, Music2 } from 'lucide-react';
-import { BeatmapData, CostumeId } from '../types/game';
+import { CostumeId } from '../types/game';
 import { COSTUMES_DATA } from '../game/Beatmaps';
 import { SongData } from '../game/SongRegistry';
 
@@ -81,7 +81,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   return (
     <div style={{
       width: '100vw',
-      height: '100vh',
+      height: '100svh',
       position: 'relative',
       backgroundColor: '#070814',
       display: 'flex',
@@ -114,11 +114,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
       {/* TOP RIGHT FUNCTION BUTTONS GROUP */}
       <div style={{
         position: 'absolute',
-        top: '1.2rem',
-        right: '1.5rem',
+        top: 'calc(env(safe-area-inset-top, 0.4rem) + 0.5rem)',
+        right: '1.2rem',
         zIndex: 10,
         display: 'flex',
-        gap: '0.8rem'
+        gap: '0.6rem'
       }}>
         {/* TUTORIAL BUTTON */}
         <button
@@ -128,10 +128,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             border: '1.5px solid #00f0ff',
             color: '#00f0ff',
             borderRadius: '20px',
-            padding: '6px 16px',
+            padding: isMobileScreen ? '4px 12px' : '6px 16px',
             fontFamily: 'Chakra Petch, sans-serif',
             fontWeight: 900,
-            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
+            fontSize: isMobileScreen ? '0.75rem' : '0.92rem',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
@@ -139,7 +139,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             boxShadow: '0 0 15px rgba(0,240,255,0.4)'
           }}
         >
-          <HelpCircle size={16} /> ❓ 新手指南
+          <HelpCircle size={15} /> ❓ 新手指南
         </button>
 
         {/* FULLSCREEN BUTTON */}
@@ -150,10 +150,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             border: '1.5px solid #ffe600',
             color: '#ffe600',
             borderRadius: '20px',
-            padding: '6px 16px',
+            padding: isMobileScreen ? '4px 12px' : '6px 16px',
             fontFamily: 'Chakra Petch, sans-serif',
             fontWeight: 900,
-            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
+            fontSize: isMobileScreen ? '0.75rem' : '0.92rem',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
@@ -161,25 +161,25 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             boxShadow: '0 0 15px rgba(255,230,0,0.4)'
           }}
         >
-          <Maximize size={16} /> 全螢幕 (FULLSCREEN)
+          <Maximize size={15} /> 全螢幕
         </button>
       </div>
 
       {/* LEFT HALF (50vw): Borderless Clean Hero Character Artwork Showcase */}
       <div style={{
         width: '50vw',
-        height: '100vh',
+        height: '100%',
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: isMobileScreen ? '0.5rem' : '1.5rem',
+        padding: isMobileScreen ? '0.4rem' : '1.5rem',
         zIndex: 2
       }}>
         <div className="float-animation" style={{
           position: 'relative',
           width: '100%',
-          height: '90vh',
+          height: '85%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -188,7 +188,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             src={imgSrc}
             alt="Yoaka Hero Character Artwork"
             style={{
-              maxHeight: isMobileScreen ? '82vh' : '88vh',
+              maxHeight: isMobileScreen ? '76vh' : '84vh',
               maxWidth: isMobileScreen ? '42vw' : '46vw',
               objectFit: 'contain',
               borderRadius: '24px',
@@ -198,22 +198,22 @@ export const StartScreen: React.FC<StartScreenProps> = ({
 
           <div style={{
             position: 'absolute',
-            bottom: isMobileScreen ? '10px' : '20px',
+            bottom: isMobileScreen ? '6px' : '18px',
             background: 'rgba(10, 12, 28, 0.85)',
             backdropFilter: 'blur(10px)',
             border: `1.5px solid ${costumeObj.accentColor}`,
             borderRadius: '20px',
-            padding: isMobileScreen ? '4px 16px' : '8px 24px',
+            padding: isMobileScreen ? '3px 12px' : '8px 24px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '8px',
             boxShadow: `0 0 20px ${costumeObj.accentColor}`
           }}>
             <span style={{
               color: costumeObj.accentColor,
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
-              fontSize: isMobileScreen ? '0.9rem' : '1.15rem'
+              fontSize: isMobileScreen ? '0.82rem' : '1.15rem'
             }}>
               👑 {costumeObj.name}
             </span>
@@ -221,9 +221,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               background: costumeObj.accentColor,
               color: '#000',
               fontWeight: 900,
-              padding: isMobileScreen ? '2px 10px' : '4px 14px',
+              padding: isMobileScreen ? '2px 8px' : '4px 14px',
               borderRadius: '14px',
-              fontSize: isMobileScreen ? '0.7rem' : '0.8rem'
+              fontSize: isMobileScreen ? '0.68rem' : '0.8rem'
             }}>
               ACTIVE
             </span>
@@ -231,31 +231,32 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
       </div>
 
-      {/* RIGHT HALF (50vw): Desktop Restored Grand Size Menu Container */}
+      {/* RIGHT HALF (50vw): Mobile-Friendly Non-Overflowing Panel */}
       <div style={{
         width: '50vw',
-        height: '100vh',
+        maxHeight: '92svh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: isMobileScreen ? '0.4rem 2.5vw 0.4rem 0.5vw' : '0 4vw 0 1vw',
+        padding: isMobileScreen ? '0.2rem 2.5vw 0.2rem 0.5vw' : '0 4vw 0 1vw',
+        margin: 'auto 0',
         zIndex: 2,
-        gap: isMobileScreen ? '0.5rem' : '1.1rem',
+        gap: isMobileScreen ? '0.35rem' : '0.9rem',
         overflowY: 'auto'
       }}>
         {/* Top Campaign Badge Pill */}
         <div style={{
           alignSelf: 'flex-start',
           background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-          padding: isMobileScreen ? '3px 14px' : '5px 22px',
+          padding: isMobileScreen ? '2px 10px' : '5px 22px',
           borderRadius: '30px',
           boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '6px'
         }}>
-          <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
-          <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
+          <Flame size={isMobileScreen ? 12 : 18} color="#ffe600" />
+          <span style={{ fontSize: isMobileScreen ? '0.72rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '1px' }}>
             WEB3 小島區里長熱血大選！
           </span>
         </div>
@@ -264,7 +265,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <div>
           <h1 style={{
             fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? 'calc(1.8rem + 1.8vh)' : '4.5rem',
+            fontSize: isMobileScreen ? 'calc(1.5rem + 1.2vh)' : '4.2rem',
             fontWeight: 900,
             fontStyle: 'italic',
             background: 'linear-gradient(180deg, #ffffff 0%, #ffe600 45%, #ff007f 100%)',
@@ -272,7 +273,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             WebkitTextFillColor: 'transparent',
             filter: 'drop-shadow(0 0 20px rgba(255, 0, 127, 0.9)) drop-shadow(0 0 35px rgba(0, 240, 255, 0.6))',
             lineHeight: 1.0,
-            marginBottom: '0.3rem',
+            marginBottom: '0.2rem',
             letterSpacing: '-1px'
           }}>
             YOAKA DASH!
@@ -281,11 +282,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            fontSize: isMobileScreen ? '0.85rem' : '1.15rem',
+            fontSize: isMobileScreen ? '0.78rem' : '1.15rem',
             color: '#00f0ff',
             fontWeight: 900,
             background: 'rgba(0, 240, 255, 0.12)',
-            padding: isMobileScreen ? '0.2rem 1rem' : '0.35rem 1.5rem',
+            padding: isMobileScreen ? '0.15rem 0.8rem' : '0.35rem 1.5rem',
             borderRadius: '40px',
             border: '1.5px solid rgba(0, 240, 255, 0.5)',
             boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)'
@@ -295,10 +296,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
 
         {/* Selected Track Display Card */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.6rem' }}>
-            <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: isMobileScreen ? '0.78rem' : '0.9rem', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Disc size={isMobileScreen ? 14 : 18} /> 當前競選戰歌 【{currentSong.storyStage}】
+        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.5rem 0.75rem' : '1.2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.15rem' : '0.5rem' }}>
+            <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: isMobileScreen ? '0.72rem' : '0.9rem', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Disc size={isMobileScreen ? 12 : 18} /> 【{currentSong.storyStage}】戰歌
             </span>
             
             <button
@@ -307,48 +308,48 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                 background: 'rgba(0, 240, 255, 0.2)',
                 border: '1.5px solid #00f0ff',
                 color: '#00f0ff',
-                padding: isMobileScreen ? '2px 10px' : '4px 14px',
+                padding: isMobileScreen ? '2px 8px' : '4px 14px',
                 borderRadius: '16px',
                 fontWeight: 900,
-                fontSize: isMobileScreen ? '0.75rem' : '0.85rem',
+                fontSize: isMobileScreen ? '0.70rem' : '0.85rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
-              <Music2 size={14} /> 🎵 切換樂曲
+              <Music2 size={12} /> 🎵 切換樂曲
             </button>
           </div>
 
-          <h3 style={{ fontSize: isMobileScreen ? '1.25rem' : '2rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
+          <h3 style={{ fontSize: isMobileScreen ? '1.1rem' : '1.8rem', fontWeight: 900, marginBottom: '0.1rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
             {currentSong.title}
             {currentSong.isRhapsody && (
-              <span style={{ fontSize: '0.8rem', color: '#ffe600', marginLeft: '10px', border: '1px solid #ffe600', padding: '2px 8px', borderRadius: '8px' }}>
-                ⚡ 狂想曲 (高難/長曲)
+              <span style={{ fontSize: '0.72rem', color: '#ffe600', marginLeft: '6px', border: '1px solid #ffe600', padding: '1px 6px', borderRadius: '6px' }}>
+                ⚡ 狂想曲
               </span>
             )}
           </h3>
-          <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.78rem' : '0.9rem', marginBottom: '0.6rem' }}>
+          <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.72rem' : '0.9rem', marginBottom: '0.4rem' }}>
             {currentSong.subtitle} • BPM {currentSong.bpm}
           </p>
 
           {/* Difficulty Switch Pills */}
-          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.8rem' }}>
+          <div style={{ display: 'flex', gap: isMobileScreen ? '0.3rem' : '0.6rem', marginTop: isMobileScreen ? '0.3rem' : '0.6rem' }}>
             {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
                 style={{
                   flex: 1,
-                  padding: isMobileScreen ? '0.35rem' : '0.55rem',
+                  padding: isMobileScreen ? '0.25rem' : '0.5rem',
                   background: selectedDifficulty === diff ? (diff === 'Hard' ? 'linear-gradient(135deg, #ff007f, #d80068)' : diff === 'Normal' ? 'linear-gradient(135deg, #00f0ff, #0077b6)' : 'linear-gradient(135deg, #ffe600, #ffb703)') : 'rgba(255,255,255,0.05)',
                   border: selectedDifficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                   borderRadius: '10px',
                   color: selectedDifficulty === diff && diff === 'Normal' ? '#000' : selectedDifficulty === diff && diff === 'Easy' ? '#000' : '#fff',
                   cursor: 'pointer',
                   fontWeight: 900,
-                  fontSize: isMobileScreen ? '0.75rem' : '0.9rem',
+                  fontSize: isMobileScreen ? '0.72rem' : '0.9rem',
                   transition: 'all 0.25s'
                 }}
               >
@@ -360,11 +361,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
 
           {/* Note Speed Multiplier Selection Bar */}
-          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.5rem 0.8rem', borderRadius: '10px' }}>
-            <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.82rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Gauge size={isMobileScreen ? 12 : 16} color="#ffe600" /> 音符流速 (SPEED):
+          <div style={{ marginTop: isMobileScreen ? '0.3rem' : '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.2rem 0.5rem' : '0.4rem 0.8rem', borderRadius: '10px' }}>
+            <span style={{ fontSize: isMobileScreen ? '0.68rem' : '0.82rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Gauge size={isMobileScreen ? 11 : 16} color="#ffe600" /> 流速:
             </span>
-            <div style={{ display: 'flex', gap: isMobileScreen ? '3px' : '5px' }}>
+            <div style={{ display: 'flex', gap: isMobileScreen ? '2px' : '4px' }}>
               {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(speed => (
                 <button
                   key={speed}
@@ -373,10 +374,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                     background: selectedNoteSpeed === speed ? (speed < 1.0 ? '#00f0ff' : '#ffe600') : 'rgba(255,255,255,0.08)',
                     color: selectedNoteSpeed === speed ? '#000' : '#fff',
                     border: selectedNoteSpeed === speed ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '8px',
-                    padding: isMobileScreen ? '1px 5px' : '2px 8px',
+                    borderRadius: '6px',
+                    padding: isMobileScreen ? '1px 4px' : '2px 8px',
                     fontWeight: 900,
-                    fontSize: isMobileScreen ? '0.7rem' : '0.8rem',
+                    fontSize: isMobileScreen ? '0.65rem' : '0.8rem',
                     cursor: 'pointer'
                   }}
                 >
@@ -391,19 +392,19 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <button
           className="muse-btn"
           onClick={() => onStartGame(currentSong, selectedDifficulty, selectedNoteSpeed)}
-          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.45rem', padding: isMobileScreen ? '0.65rem' : '1rem' }}
+          style={{ width: '100%', fontSize: isMobileScreen ? '1.05rem' : '1.45rem', padding: isMobileScreen ? '0.5rem' : '0.9rem' }}
         >
-          <span><Play fill="#fff" size={isMobileScreen ? 18 : 24} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
+          <span><Play fill="#fff" size={isMobileScreen ? 16 : 24} /> 開啟競選拜票 ({selectedNoteSpeed.toFixed(2)}x)</span>
         </button>
 
         {/* Sub Option Buttons */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobileScreen ? '0.4rem' : '0.8rem' }}>
-          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
-            <span><Sparkles size={isMobileScreen ? 14 : 18} /> 造型: {costumeObj.name}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobileScreen ? '0.35rem' : '0.8rem' }}>
+          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.75rem' : '1rem', padding: isMobileScreen ? '0.45rem' : '0.8rem' }}>
+            <span><Sparkles size={isMobileScreen ? 13 : 18} /> 造型: {costumeObj.name}</span>
           </button>
 
-          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
-            <span><Wand2 size={isMobileScreen ? 14 : 18} /> A+B 譜面創作者</span>
+          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.75rem' : '1rem', padding: isMobileScreen ? '0.45rem' : '0.8rem' }}>
+            <span><Wand2 size={isMobileScreen ? 13 : 18} /> A+B 譜面創作者</span>
           </button>
         </div>
       </div>

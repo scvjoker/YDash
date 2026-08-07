@@ -59,12 +59,12 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
     };
   }, [stats.supportRate, prevHp]);
 
-  const handleAirTouch = (e: React.TouchEvent) => {
+  const handleAirTouch = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
     onAirPress();
   };
 
-  const handleGroundTouch = (e: React.TouchEvent) => {
+  const handleGroundTouch = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
     onGroundPress();
   };
@@ -85,21 +85,21 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         gradient: 'linear-gradient(90deg, #00ff87 0%, #60efff 100%)',
         color: '#00ff87',
         glow: '#00ff87',
-        label: '選民支持度 (HP)'
+        label: '支持度'
       };
     } else if (hp > 30) {
       return {
         gradient: 'linear-gradient(90deg, #ffe600 0%, #ff9900 100%)',
         color: '#ffe600',
         glow: '#ffe600',
-        label: '選民支持度 (HP)'
+        label: '支持度'
       };
     } else {
       return {
         gradient: 'linear-gradient(90deg, #ff0055 0%, #ff007f 100%)',
         color: '#ff0055',
         glow: '#ff0055',
-        label: '⚠️ 支持度告急!'
+        label: '⚠️告急'
       };
     }
   };
@@ -114,189 +114,196 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: isMobileScreen ? '0.4rem 0.8rem' : '1.2rem 2.2rem',
+      padding: isMobileScreen ? '0.3rem 0.6rem' : '0.8rem 1.6rem',
       zIndex: 10
     }}>
-      {/* 1. TOP HUD (Anchored to Top with Safe Area padding) */}
+      {/* 1. TOP HUD: Scaled Down to 60% for Unobstructed Runway View */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        gap: '0.8rem',
-        marginTop: 'env(safe-area-inset-top, 0px)'
+        gap: '0.6rem',
+        marginTop: 'env(safe-area-inset-top, 0px)',
+        transform: isMobileScreen ? 'scale(0.88)' : 'scale(0.95)',
+        transformOrigin: 'top center'
       }}>
-        {/* Left: Support Rate (HP) & Integrated Song Progress Bar */}
+        {/* Left: Compact Support Rate (HP) & Integrated Progress Bar */}
         <div 
           className="cyber-panel" 
           style={{ 
             flex: 1,
-            maxWidth: isMobileScreen ? '560px' : '760px',
-            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.85rem 1.6rem',
+            maxWidth: isMobileScreen ? '400px' : '600px',
+            padding: isMobileScreen ? '0.25rem 0.6rem' : '0.5rem 1.2rem',
             display: 'flex',
             alignItems: 'center',
-            gap: isMobileScreen ? '10px' : '20px',
-            border: isHpFlashing ? '2.5px solid #ff0055' : `1.5px solid ${hpTheme.color}66`,
-            boxShadow: isHpFlashing ? '0 0 30px #ff0055, inset 0 0 15px #ff0055' : `0 0 20px ${hpTheme.glow}44`,
+            gap: isMobileScreen ? '8px' : '14px',
+            border: isHpFlashing ? '2px solid #ff0055' : `1.2px solid ${hpTheme.color}66`,
+            boxShadow: isHpFlashing ? '0 0 20px #ff0055' : `0 0 12px ${hpTheme.glow}33`,
             backgroundColor: isHpFlashing ? 'rgba(255, 0, 85, 0.35)' : 'rgba(10, 12, 28, 0.85)',
             transition: 'all 0.25s ease-out'
           }}
         >
           {/* HP Label & Bar */}
-          <div style={{ minWidth: isMobileScreen ? '105px' : '165px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.70rem' : '0.95rem', fontWeight: 900, color: isHpFlashing && stats.supportRate <= 30 ? '#ff0055' : hpTheme.color, marginBottom: '2px', transition: 'color 0.25s' }}>
+          <div style={{ minWidth: isMobileScreen ? '80px' : '130px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: isMobileScreen ? '0.62rem' : '0.82rem', fontWeight: 900, color: hpTheme.color, marginBottom: '1px' }}>
               <span>{hpTheme.label}</span>
               <span>{stats.supportRate.toFixed(0)}%</span>
             </div>
             <div style={{
               width: '100%',
-              height: isMobileScreen ? '7px' : '14px',
+              height: isMobileScreen ? '5px' : '10px',
               background: 'rgba(0,0,0,0.6)',
-              borderRadius: '6px',
-              overflow: 'hidden',
-              border: isHpFlashing ? '1.5px solid #ff0055' : '1px solid rgba(255,255,255,0.2)'
+              borderRadius: '5px',
+              overflow: 'hidden'
             }}>
               <div style={{
                 width: `${stats.supportRate}%`,
                 height: '100%',
                 background: isHpFlashing ? 'linear-gradient(90deg, #ff0055 0%, #ff4d00 100%)' : hpTheme.gradient,
-                boxShadow: `0 0 10px ${hpTheme.glow}`,
-                transition: 'width 0.2s ease-out, background 0.3s ease'
+                transition: 'width 0.2s ease-out'
               }} />
             </div>
           </div>
 
-          <div style={{ width: '1.5px', height: isMobileScreen ? '20px' : '36px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ width: '1px', height: isMobileScreen ? '16px' : '28px', background: 'rgba(255,255,255,0.2)' }} />
 
-          {/* Integrated Song Progress Bar in same row */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: isMobileScreen ? '8px' : '14px' }}>
-            <Music size={isMobileScreen ? 12 : 18} color="#ffe600" />
+          {/* Integrated Song Progress Bar */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: isMobileScreen ? '6px' : '10px' }}>
+            <Music size={isMobileScreen ? 11 : 15} color="#ffe600" />
             <div style={{
               flex: 1,
-              height: isMobileScreen ? '5px' : '10px',
+              height: isMobileScreen ? '4px' : '8px',
               background: 'rgba(0, 0, 0, 0.6)',
-              borderRadius: '5px',
-              overflow: 'hidden',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
+              borderRadius: '4px',
+              overflow: 'hidden'
             }}>
               <div style={{
                 width: `${songProgressPct}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #00f0ff 0%, #ffe600 50%, #ff007f 100%)',
-                boxShadow: '0 0 12px #00f0ff',
-                transition: 'width 0.1s linear'
+                background: 'linear-gradient(90deg, #00f0ff 0%, #ffe600 50%, #ff007f 100%)'
               }} />
             </div>
-            <span style={{ fontSize: isMobileScreen ? '0.70rem' : '0.92rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: isMobileScreen ? '0.62rem' : '0.80rem', color: '#ffe600', fontWeight: 900, whiteSpace: 'nowrap' }}>
               {formatTime(currentTime)} / {formatTime(totalDuration)}
             </span>
           </div>
         </div>
 
-        {/* Right: Score Badge & Pause Button */}
-        <div style={{ display: 'flex', gap: isMobileScreen ? '0.5rem' : '1.2rem', alignItems: 'center' }}>
-          <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.3rem 0.7rem' : '0.75rem 1.4rem', textAlign: 'right' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.62rem' : '0.78rem', color: '#aaa', fontWeight: 700, textTransform: 'uppercase' }}>
-              得票數 (SCORE)
+        {/* Right: Score & Compact Pause */}
+        <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.8rem', alignItems: 'center' }}>
+          <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.25rem 0.6rem' : '0.5rem 1rem', textAlign: 'right' }}>
+            <p style={{ fontSize: isMobileScreen ? '0.58rem' : '0.70rem', color: '#aaa', fontWeight: 700 }}>
+              得票 (SCORE)
             </p>
             <p style={{
-              fontSize: isMobileScreen ? '1.15rem' : '2.2rem',
+              fontSize: isMobileScreen ? '1.0rem' : '1.7rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
-              textShadow: '0 0 15px rgba(255,230,0,0.6)',
-              lineHeight: 1.1
+              lineHeight: 1
             }}>
-              {stats.score.toLocaleString()} <span style={{ fontSize: isMobileScreen ? '0.68rem' : '0.95rem', color: '#fff' }}>票</span>
+              {stats.score.toLocaleString()} <span style={{ fontSize: '0.65rem', color: '#fff' }}>票</span>
             </p>
           </div>
 
-          {/* Pause Button */}
           <button
             onClick={onPause}
             style={{
               pointerEvents: 'auto',
-              background: 'rgba(255, 0, 127, 0.2)',
-              border: '2px solid #ff007f',
+              background: 'rgba(255, 0, 127, 0.25)',
+              border: '1.5px solid #ff007f',
               color: '#fff',
-              borderRadius: '14px',
-              width: isMobileScreen ? '36px' : '52px',
-              height: isMobileScreen ? '36px' : '52px',
+              borderRadius: '12px',
+              width: isMobileScreen ? '32px' : '44px',
+              height: isMobileScreen ? '32px' : '44px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: '0 0 20px rgba(255,0,127,0.5)',
-              transition: 'all 0.2s'
+              boxShadow: '0 0 15px rgba(255,0,127,0.4)'
             }}
           >
-            <Pause size={isMobileScreen ? 16 : 26} />
+            <Pause size={isMobileScreen ? 14 : 20} />
           </button>
         </div>
       </div>
 
-      {/* 2. BOTTOM TOUCH CONTROLS (Anchored to Bottom with Enlarged Blind-Touch Area) */}
+      {/* 2. FULL-SCREEN HALF-SCREEN TAP ZONES (Left 50% = AIR, Right 50% = GROUND) + High Transparency Hint Buttons */}
       <div style={{
-        pointerEvents: 'auto',
+        position: 'absolute',
+        inset: 0,
+        top: '60px',
+        pointerEvents: 'none',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        gap: isMobileScreen ? '0.8rem' : '1.5rem',
-        width: '100%',
-        marginBottom: 'env(safe-area-inset-bottom, 0px)'
+        zIndex: 5
       }}>
-        {/* Air Touch Button (Left: D/F) - Enlarged Height for Blind Touch */}
-        <button
-          onClick={onAirPress}
+        {/* LEFT HALF SCREEN TOUCH ZONE: AIR ATTACK */}
+        <div
+          onClick={handleAirTouch}
           onTouchStart={handleAirTouch}
           style={{
             flex: 1,
-            height: isMobileScreen ? '85px' : '110px',
-            background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.40) 0%, rgba(0, 119, 182, 0.65) 100%)',
-            border: '2.5px solid #00f0ff',
-            borderRadius: isMobileScreen ? '16px' : '22px',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 30px rgba(0, 240, 255, 0.6)',
-            color: '#fff',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? '1.15rem' : '1.5rem',
-            fontWeight: 900,
-            cursor: 'pointer',
+            height: '100%',
+            pointerEvents: 'auto',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.8rem',
-            touchAction: 'manipulation'
+            alignItems: 'flex-end',
+            justifyContent: 'flex-start',
+            padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            cursor: 'pointer'
           }}
         >
-          上軌 (空中投紙/閃避) <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', opacity: 0.85 }}>(D / F)</span>
-        </button>
+          {/* Transparent Floating Hint Button */}
+          <div style={{
+            background: 'rgba(0, 240, 255, 0.18)',
+            border: '1.5px solid rgba(0, 240, 255, 0.45)',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.6rem 1.4rem',
+            color: 'rgba(255, 255, 255, 0.85)',
+            fontFamily: 'Chakra Petch, sans-serif',
+            fontSize: isMobileScreen ? '0.82rem' : '1.1rem',
+            fontWeight: 900,
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 0 15px rgba(0, 240, 255, 0.25)',
+            marginBottom: 'env(safe-area-inset-bottom, 0px)',
+            opacity: 0.85
+          }}>
+            ☁️ 左半屏：上軌 (D/F)
+          </div>
+        </div>
 
-        {/* Ground Touch Button (Right: J/K) - Enlarged Height for Blind Touch */}
-        <button
-          onClick={onGroundPress}
+        {/* RIGHT HALF SCREEN TOUCH ZONE: GROUND ATTACK */}
+        <div
+          onClick={handleGroundTouch}
           onTouchStart={handleGroundTouch}
           style={{
             flex: 1,
-            height: isMobileScreen ? '85px' : '110px',
-            background: 'linear-gradient(135deg, rgba(255, 0, 127, 0.40) 0%, rgba(216, 0, 104, 0.65) 100%)',
-            border: '2.5px solid #ff007f',
-            borderRadius: isMobileScreen ? '16px' : '22px',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 30px rgba(255, 0, 127, 0.6)',
-            color: '#fff',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontSize: isMobileScreen ? '1.15rem' : '1.5rem',
-            fontWeight: 900,
-            cursor: 'pointer',
+            height: '100%',
+            pointerEvents: 'auto',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.8rem',
-            touchAction: 'manipulation'
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end',
+            padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            cursor: 'pointer'
           }}
         >
-          下軌 (地面發紙/閃避) <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', opacity: 0.85 }}>(J / K)</span>
-        </button>
+          {/* Transparent Floating Hint Button */}
+          <div style={{
+            background: 'rgba(255, 0, 127, 0.18)',
+            border: '1.5px solid rgba(255, 0, 127, 0.45)',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.6rem 1.4rem',
+            color: 'rgba(255, 255, 255, 0.85)',
+            fontFamily: 'Chakra Petch, sans-serif',
+            fontSize: isMobileScreen ? '0.82rem' : '1.1rem',
+            fontWeight: 900,
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 0 15px rgba(255, 0, 127, 0.25)',
+            marginBottom: 'env(safe-area-inset-bottom, 0px)',
+            opacity: 0.85
+          }}>
+            🏃 右半屏：下軌 (J/K)
+          </div>
+        </div>
       </div>
     </div>
   );
