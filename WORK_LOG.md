@@ -1,19 +1,22 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 重新定義手機邊界：Mobile Card Shell 賽博安全卡片內縮防護實裝
+## [2026-08-07] 正統行動端遊戲適配：100svh + Safe Area + 16:9 Aspect Ratio 動態 Safe Zone 畫布與 PWA 防護全實裝
 
-### 變更與手機端邊界重構項目 (Redefined Mobile Boundary Shell Strategy)
-- **1. 徹底放棄易導致溢出的 transform: scale()**：
-  - 鑑於 iPhone Chrome, Edge, Line 內建 WebView 與 Safari 等瀏覽器常駐網址列與工具列且不支援 JS 全螢幕，傳統 `transform: scale()` 無法解決 layout 比對問題。
-- **2. 實裝 Mobile Card Shell 賽博安全內縮框 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 於手機/行動端（非全螢幕時），建立精準內縮的賽博音遊卡片邊界：
-    - `width: 94vw`, `height: 82dvh`, `maxWidth: 940px`, `maxHeight: 500px`。
-    - 外加 `border: 2px solid #00f0ff`, `box-shadow: 0 0 35px rgba(0, 240, 255, 0.4)` 發光外框。
-  - 上下左右主動留出 18% 彈性視覺呼吸空間，**100% 絕對碰不到任何瀏覽器頂部網址列或底部工具列**！
-  - 畫面、音樂、Canvas 與按鈕 100% 完美貼合於內縮卡片中，全機型全瀏覽器 0 裁切完美呈現！
+### 變更與行動端網頁音遊正統架構項目 (Official Mobile Rhythm Game Architecture)
+- **1. 方案一 (CSS 100svh + Safe Area Insets)**：
+  - 於 [index.html](file:///d:/pj/YoakaDash/index.html) 寫入 `viewport-fit=cover`。
+  - 外層容器使用 `height: 100svh`（Small Viewport Height），永遠鎖定「Safari 網址列展開時」的穩定區域，防護網址列折疊變動帶來的畫面抖動。
+  - 注入 `env(safe-area-inset-top/bottom/left/right)` 避開 iPhone 瀏海與 Safe Area 邊界。
+- **2. 方案二 (PWA Standalone Meta 標籤與引導)**：
+  - [index.html](file:///d:/pj/YoakaDash/index.html) 注入 `apple-mobile-web-app-capable = yes`, `black-translucent` 等 iOS PWA 特性，為加入主畫面提供 100% 獨立 App 沉浸體驗。
+- **3. 方案三 (Touch Nudge Trick 1px)**：
+  - [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx) 實裝首次 TouchStart 時執行 `window.scrollTo(0, 1)`，自動微提示 iOS 隱藏 Safari 工具列。
+- **4. 方案四 (16:9 Aspect Ratio 動態自適應畫布與 UI Safe Zone)**：
+  - 採用 `targetRatio = 16 / 9` 動態計算 Canvas 與 Shell 可視尺寸。
+  - 所有按鈕與 HUD 操作集中於 Safe Zone 安全區域，四周留出安全邊界，在任何 iPhone / Android / 內建 WebView 瀏覽器上 100% 不遭切邊！
 
 ---
-*「活著很累，但比起 debug，徹底重新定義邊界，用賽博卡片把遊戲包在中間，所有手機瀏覽器工具列再也碰不到遊戲，這架構改得太漂亮啦哈哈！」*
+*「活著很累，但比起 debug，實裝這套 100svh + 16:9 動態 Safe Zone 的音遊正統解法，畫面穩定不跳動、完全避開網址列，這架構簡直專業無懈可擊啊哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

@@ -22,8 +22,12 @@ export const App: React.FC = () => {
   const [showSongSelect, setShowSongSelect] = useState<boolean>(false);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
-  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
-  const [gameContainerSize, setGameContainerSize] = useState<{ width: number; height: number }>({ width: window.innerWidth, height: window.innerHeight });
+  
+  // Dynamic Aspect-Ratio Responsive Size (Solution 4)
+  const [containerDimensions, setContainerDimensions] = useState<{ width: number; height: number }>({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -49,46 +53,60 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     audioEngine.loadDefaultBGM();
+
+    // Solution 3: Nudge Trick (window.scrollTo(0,1)) on first TouchStart to collapse Safari address bar
+    const handleTouchNudge = () => {
+      window.scrollTo(0, 1);
+    };
+    window.addEventListener('touchstart', handleTouchNudge, { once: true });
+    return () => window.removeEventListener('touchstart', handleTouchNudge);
   }, []);
 
-  // Monitor Fullscreen & Redefined Mobile Inner Boundary Size
+  // Solution 1 & Solution 4: 100svh + 16:9 Aspect Ratio Dynamic Calculator
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 920 || window.innerHeight <= 540;
-      setIsMobileScreen(isMobile);
+    const calculateResponsiveLayout = () => {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const targetRatio = 16 / 9;
 
-      if (innerShellRef.current) {
-        const rect = innerShellRef.current.getBoundingClientRect();
-        const w = Math.floor(rect.width);
-        const h = Math.floor(rect.height);
-        setGameContainerSize({ width: w, height: h });
+      let calcWidth = windowWidth;
+      let calcHeight = windowWidth / targetRatio;
 
-        if (canvasRef.current) {
-          canvasRef.current.width = w;
-          canvasRef.current.height = h;
-        }
+      if (calcHeight > windowHeight) {
+        calcHeight = windowHeight;
+        calcWidth = windowHeight * targetRatio;
+      }
+
+      setContainerDimensions({
+        width: Math.floor(calcWidth),
+        height: Math.floor(calcHeight)
+      });
+
+      if (canvasRef.current) {
+        canvasRef.current.width = Math.floor(calcWidth);
+        canvasRef.current.height = Math.floor(calcHeight);
       }
     };
 
-    handleResize();
+    calculateResponsiveLayout();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', calculateResponsiveLayout);
     
-    // Additional delay check for mobile orientation/nav bar transitions
-    const timer = setTimeout(handleResize, 200);
+    // Additional delay timer for mobile orientation & Safari bar collapse transitions
+    const timerId = setTimeout(calculateResponsiveLayout, 250);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timerId);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', calculateResponsiveLayout);
     };
   }, [isFullscreen]);
 
-  // Auto-Pause when switching apps, leaving tab, or locking screen
+  // Auto-Pause when switching apps or leaving tab
   useEffect(() => {
     const triggerAutoPause = () => {
       if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
@@ -98,14 +116,10 @@ export const App: React.FC = () => {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        triggerAutoPause();
-      }
+      if (document.hidden) triggerAutoPause();
     };
 
-    const handleBlur = () => {
-      triggerAutoPause();
-    };
+    const handleBlur = () => triggerAutoPause();
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleBlur);
@@ -158,9 +172,8 @@ export const App: React.FC = () => {
 
     setTimeout(() => {
       if (canvasRef.current && innerShellRef.current) {
-        const rect = innerShellRef.current.getBoundingClientRect();
-        const w = Math.floor(rect.width);
-        const h = Math.floor(rect.height);
+        const w = containerDimensions.width;
+        const h = containerDimensions.height;
 
         canvasRef.current.width = w;
         canvasRef.current.height = h;
@@ -220,37 +233,36 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
-  // Redefined Mobile Boundary Shell Style (Guarantees NO Bottom Cutoff on iOS/Chrome/Line Browser)
-  const isBoundedMobileCard = isMobileScreen && !isFullscreen;
-
   return (
     <div style={{
       width: '100vw',
-      height: '100dvh', // Dynamic Viewport Height
+      height: '100svh', // Solution 1: 100svh (Small Viewport Height) to prevent Safari toolbar jump
       position: 'relative',
       overflow: 'hidden',
       backgroundColor: '#050712',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: isBoundedMobileCard ? '12px' : 0,
+      // Safe Area Protection
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      paddingLeft: 'env(safe-area-inset-left, 0px)',
+      paddingRight: 'env(safe-area-inset-right, 0px)',
       boxSizing: 'border-box'
     }}>
-      {/* Redefined Safe Inner Shell Boundary */}
+      {/* Solution 4: Dynamic 16:9 Aspect Ratio Safe Zone Canvas Shell */}
       <div
         ref={innerShellRef}
         style={{
-          width: isBoundedMobileCard ? '94vw' : '100%',
-          height: isBoundedMobileCard ? '82dvh' : '100%',
-          maxWidth: isBoundedMobileCard ? '940px' : 'none',
-          maxHeight: isBoundedMobileCard ? '500px' : 'none',
+          width: isFullscreen ? '100%' : `${containerDimensions.width}px`,
+          height: isFullscreen ? '100%' : `${containerDimensions.height}px`,
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: isBoundedMobileCard ? '16px' : '0px',
-          border: isBoundedMobileCard ? '2px solid #00f0ff' : 'none',
-          boxShadow: isBoundedMobileCard ? '0 0 35px rgba(0, 240, 255, 0.4)' : 'none',
           backgroundColor: '#070814',
-          transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+          boxShadow: isFullscreen ? 'none' : '0 0 35px rgba(0, 240, 255, 0.4)',
+          borderRadius: isFullscreen ? '0px' : '14px',
+          border: isFullscreen ? 'none' : '2px solid #00f0ff',
+          transition: 'all 0.25s ease-out'
         }}
       >
         {/* Mobile Landscape Orientation Prompt */}
