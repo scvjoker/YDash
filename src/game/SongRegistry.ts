@@ -8,7 +8,7 @@ export interface SongData {
   cover: string;
   bg: string;
   audio: string;
-  storyStage: '起' | '承' | '轉' | '合';
+  storyStage: '起' | '承' | '轉' | '合' | 'DLC';
   isRhapsody: boolean; // True if it's an extended high-difficulty Rhapsody track
   storyContext: string;
   difficultyRating: {
@@ -130,6 +130,25 @@ export const SONG_REGISTRY: SongData[] = [
     difficultyRating: {
       Easy: 4,
       Normal: 5,
+      Hard: 5
+    }
+  },
+  {
+    id: 'dlc_whats_next',
+    title: 'Whats Next?',
+    subtitle: '✨ 賽博龐克特別合作 DLC 特典',
+    artist: 'A Li & Jay Lin',
+    bpm: 168,
+    duration: 195,
+    cover: '/assets/yoaka_kpop.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/whats_next_ali_jaylin.mp3',
+    storyStage: 'DLC',
+    isRhapsody: true,
+    storyContext: '【DLC 特別合作特典】由 A Li & Jay Lin 強強聯手打造的賽博極限電音神曲！熱血節奏與絢麗音浪交織，迎向下一階段的終極挑戰！',
+    difficultyRating: {
+      Easy: 3,
+      Normal: 4,
       Hard: 5
     }
   }

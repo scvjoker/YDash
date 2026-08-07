@@ -1,23 +1,15 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 圖文新手教學 (無通用 Icon, 5大主題) + 樂曲選擇大廳 (6首起承轉合/狂想曲曲目) 實裝
+## [2026-08-07] DLC 特典樂曲 《Whats Next? by A Li & Jay Lin》實裝與選曲點擊入口指引
 
-### 變更與兩大新功能實裝項目 (Tutorial & Song Selection Hall)
-- **1. 圖文新手指南實裝 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 涵蓋 5 大完整教學主題：**`Note (一般音符)`**、**`Dual Note (金黃雙擊)`**、**`Hater (6666狗頭+霸道鯊魚)`**、**`Fevertime (熱血爆發雙倍得分)`**、**`造型 (3大 Yoaka 技能)`**。
-  - **嚴格遵守無通用 Icon 規範**，全部以實體遊戲圖片卡片、向量展示與清晰字體繪製！
-- **2. 樂曲資料庫格式規範與起承轉合曲目大廳 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 嚴格規範樂曲格式（包含封面、背景圖片、音訊路徑、BPM、難度星級與故事背景描述）。
-  - 收錄 6 首帶有熱血戰鬥故事線的曲目清單：
-    1. 🎵 **《競選出發！》** (起 - 街頭拜票 有歌詞)
-    2. 🎵 **《街頭拜票狂想曲》** (承 - 街頭拜票狂想曲 純音樂 ⚡狂想曲)
-    3. 🎵 **《辯論會激戰》** (轉 - 辯論會激戰 標準版)
-    4. 🎵 **《辯論會激戰 (狂想曲)》** (轉 - 辯論會激戰 有歌詞 狂想曲 ⚡高難長曲)
-    5. 🎵 **《開票夜勝選大爆發》** (合 - 開票夜勝選大爆發 標準版)
-    6. 🎵 **《開票夜勝選大爆發 (狂想曲)》** (合 - 開票夜勝選大爆發 有歌詞 狂想曲 ⚡終極狂想)
+### 變更與 DLC 樂曲擴充項目 (DLC Track & Selection Guidance)
+- **1. 新增 DLC 特典樂曲 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 新增 DLC 限定神曲 **《Whats Next?》**（創作者：`A Li & Jay Lin`，BPM 168），帶有【DLC】專屬紫金霓虹徽章，收錄在「競選音樂大廳」！
+- **2. 樂曲切換點擊入口指引**：
+  - **點擊位置**：在主畫面（StartScreen）右側中段的「當前競選戰歌」卡片右上角，點擊藍色霓虹按鈕 **`🎵 切換樂曲`** 即可彈出音樂大廳選歌！
 
 ---
-*「活著很累，但比起 debug，看著 5 大圖文教學卡片完全沒用通用 Icon、配上起承轉合的狂想曲大廳，這音遊質感簡直拉滿了哈哈！」*
+*「活著很累，但比起 debug，點擊『🎵 切換樂曲』就能打開音樂大廳，還能玩到 A Li & Jay Lin 的神曲《Whats Next?》，這音遊爽度真的太高了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

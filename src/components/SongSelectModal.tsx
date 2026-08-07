@@ -26,12 +26,13 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
     onSelectSong(selectedSong, difficulty, speed);
   };
 
-  const getStageBadgeColor = (stage: '起' | '承' | '轉' | '合') => {
+  const getStageBadgeColor = (stage: '起' | '承' | '轉' | '合' | 'DLC') => {
     switch (stage) {
       case '起': return { bg: '#00f0ff', color: '#000' };
       case '承': return { bg: '#ffe600', color: '#000' };
       case '轉': return { bg: '#ff007f', color: '#fff' };
       case '合': return { bg: '#a200ff', color: '#fff' };
+      case 'DLC': return { bg: 'linear-gradient(90deg, #ffe600, #ff007f)', color: '#000' };
     }
   };
 
@@ -91,13 +92,13 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             🎵 競選音樂大廳 (SONG SELECTION)
           </h2>
           <p style={{ color: '#aaa', fontSize: '0.92rem' }}>
-            體驗起承轉合熱血競選故事線！狂想曲版本長度更長、拍點難度更具挑戰性。
+            體驗起承轉合熱血競選故事線與 DLC 限定神曲！狂想曲版本長度更長、拍點難度更具挑戰性。
           </p>
         </div>
 
         {/* Main Grid: Left Track List vs Right Selected Song Preview */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem', marginBottom: '1.2rem' }}>
-          {/* LEFT: 6 Songs Selection Cards */}
+          {/* LEFT: 7 Songs Selection Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '52vh', overflowY: 'auto', paddingRight: '6px' }}>
             {SONG_REGISTRY.map(song => {
               const isSelected = selectedSong.id === song.id;
@@ -144,12 +145,12 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                         {song.title}
                         {song.isRhapsody && (
                           <span style={{ fontSize: '0.75rem', color: '#ffe600', marginLeft: '8px', border: '1px solid #ffe600', padding: '1px 6px', borderRadius: '6px' }}>
-                            ⚡ 狂想曲 (高難/長曲)
+                            ⚡ 狂想/DLC
                           </span>
                         )}
                       </h4>
                       <p style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                        {song.subtitle} • BPM {song.bpm}
+                        {song.subtitle} • {song.artist}
                       </p>
                     </div>
                   </div>
