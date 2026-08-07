@@ -17,9 +17,11 @@
   touch-action: manipulation;
 }
 
+/* 核心滿版 Layout：放棄固定 16:9 比例縮放，強制 Canvas 與容器 100vw x 100svh 動態鋪滿 */
 html, body, #root {
+  margin: 0;
+  padding: 0;
   width: 100vw;
-  /* 1. iOS Modern Dynamic Viewport Unit: 100svh prevents Safari toolbar jitter */
   height: 100vh;
   height: 100svh;
   position: relative;
@@ -28,11 +30,19 @@ html, body, #root {
   font-family: 'Noto Sans TC', sans-serif;
   color: #ffffff;
 
-  /* 2. iOS Safe Area Insets Protection (Dynamic Notch & Home Bar) */
+  /* Safe Area Insets Protection */
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* 遊戲 Canvas 與舞台：強制滿版覆蓋 (object-fit: cover)，背景滾動延伸 */
+canvas, .game-stage {
+  width: 100vw !important;
+  height: 100svh !important;
+  object-fit: cover;
+  display: block;
 }
 
 /* Animations */

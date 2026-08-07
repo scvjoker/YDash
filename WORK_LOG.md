@@ -1,14 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 暫時移除方案四 (PauseModal 特殊 iOS 提示)，專注測試方案一至三
+## [2026-08-07] 核心 Layout 策略升級：動態 Canvas 100vw x 100svh 鋪滿 (Cover) + 相對 Safe Area 貼邊 UI
 
-### 變更項目 (Disable Scheme 4 to test Schemes 1-3)
-- **1. 還原 PauseModal 全螢幕按鈕邏輯 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
-  - 移除方案四的 iOS 特殊軟體提示與內縮。
-  - 讓暫停選單保持最簡潔乾淨的單一全螢幕切換按鈕，方便測試方案一 (100svh + safe-area-inset) + 方案二 (PWA 獨立主畫面) + 方案三 (Touch Nudge scroll) 組合之效果。
+### 變更與遊戲舞台 Layout 重構項目 (Full Width Cover & Safe Area Anchored UI Layout)
+- **1. 放棄固定 16:9 Aspect Ratio 等比例死守 ([index.css](file:///d:/pj/YoakaDash/src/index.css))**：
+  - 將舞台與 Canvas 設定為 `width: 100vw !important; height: 100svh !important; object-fit: cover;`。
+  - 背景與跑道採動態多瓦片 (Tile Loop) 自動鋪滿全螢幕，寧可上下或左右動態延伸裁切，也保證 100% 滿版無黑邊！
+- **2. UI 元素相對 Safe Area 貼邊 (Anchoring) ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
+  - **頂部 HUD** 實裝 `marginTop: env(safe-area-inset-top)`，緊貼頂部安全區。
+  - **底部 Touch 雙擊按鈕** 實裝 `marginBottom: env(safe-area-inset-bottom)` 貼底，並在手持設備上將按鈕高度加高拉寬至 85px~110px，讓玩家盲按手感 100% 順暢精準！
 
 ---
-*「活著很累，但比起 debug，暫時移除方案四讓介面保持最乾淨狀態，測試看看方案一二三純粹組合的震撼效果哈哈！」*
+*「活著很累，但比起 debug，放棄 16:9 硬性縮放改用 100vw x 100svh 動態鋪滿，按鈕拉大貼底盲按，這 Layout 改變簡直是神來之筆，畫面再也不縮成一條啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
