@@ -21,6 +21,8 @@ export const App: React.FC = () => {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [showSongSelect, setShowSongSelect] = useState<boolean>(false);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -47,16 +49,29 @@ export const App: React.FC = () => {
     audioEngine.loadDefaultBGM();
   }, []);
 
+  // Monitor Fullscreen & Screen Size for 80% Non-Fullscreen Mobile Scaling
   useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
     const handleResize = () => {
+      const isMobile = window.innerWidth <= 920 || window.innerHeight <= 540;
+      setIsMobileScreen(isMobile);
+
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
       }
     };
+
     handleResize();
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
@@ -185,8 +200,19 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
+  // Non-fullscreen Mobile Viewport 80% Micro Scale Style
+  const shouldScale80Percent = isMobileScreen && !isFullscreen;
+
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      position: 'relative',
+      overflow: 'hidden',
+      transform: shouldScale80Percent ? 'scale(0.80)' : 'none',
+      transformOrigin: 'center center',
+      transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+    }}>
       {/* Mobile Landscape Orientation Prompt */}
       <LandscapePrompt />
 

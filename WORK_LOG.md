@@ -1,17 +1,16 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] ResultScreen 結算畫面手機版 RWD 極致自適應適配
+## [2026-08-07] 手機版未開啟全螢幕前 App 畫面整體 80% 微縮自適應實裝
 
-### 變更與 UI 自適應優化項目 (Mobile Landscape ResultScreen RWD)
-- **1. 結算畫面容器防溢出保護 ([ResultScreen.tsx](file:///d:/pj/YoakaDash/src/components/ResultScreen.tsx))**：
-  - 限制面板視窗 `maxHeight: '92vh'`, `maxWidth: '94vw'`, `overflowY: 'auto'`，內邊距由 2.5rem 精簡適應為 1.2rem 1.6rem。
-- **2. 元素字體與間距彈性微縮**：
-  - Grade 評級字體由 5.5rem 微縮至 3.6rem，Final Score 總得票數由 3.2rem 微縮至 2.4rem。
-  - 4 欄統計卡片 Padding 由 1rem 微縮至 0.6rem 0.4rem，字體同比例適應。
-  - 在手機橫屏（Mobile Landscape）與窄螢幕上 **100% 完美置中滿版不溢出、無須強制滾動**！
+### 變更與手機介面縮放優化項目 (Non-Fullscreen Mobile 80% Scale Alignment)
+- **1. 手機端非全螢幕 80% 微縮 ([App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 偵測當前裝置為手機（寬 `<=920px` 或高 `<=540px`）且尚未點擊進入全螢幕時，App 根容器自動施加 `transform: scale(0.80)` 動態微縮。
+  - 為瀏覽器自帶網址列與頂部 UI 預留充裕空間，使整個 UI Panel 與畫面顯得極致袖珍精緻、視野一目瞭然！
+- **2. 沉浸全螢幕切換**：
+  - 玩家點擊「全螢幕體驗」進入 Fullscreen 後，系統自動恢復 `100%` 滿版視覺，實現靈活切換！
 
 ---
-*「活著很累，但比起 debug，把結算畫面的字體跟內邊距按手機橫屏比例收緊，畫面一眼看清不用滾動，這 UI 適配看著太爽快啦哈哈！」*
+*「活著很累，但比起 debug，在點擊全螢幕之前畫面縮小 80% 袖珍精緻、點擊後滿版大銀幕，這視覺靈活度簡直太讚啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
