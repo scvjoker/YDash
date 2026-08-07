@@ -13,6 +13,10 @@ export class AudioEngine {
   private activeAudioUrl: string | null = null;
   private currentPreviewToken: number = 0;
 
+  // Global Settings for SFX and Haptic Vibration
+  public isSfxEnabled: boolean = true;
+  public isVibrationEnabled: boolean = true;
+
   constructor() {
     // Lazy AudioContext initialization
   }
@@ -260,47 +264,113 @@ export class AudioEngine {
     return Math.max(0, this.audioCtx.currentTime - this.bgmStartTime);
   }
 
+  // Trigger Mobile Haptic Vibration Feedback
+  public triggerHapticVibration(type: 'hit' | 'dual' | 'damage'): void {
+    if (!this.isVibrationEnabled) return;
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        if (type === 'hit') {
+          navigator.vibrate(16); // 16ms Crisp Hit Pulse
+        } else if (type === 'dual') {
+          navigator.vibrate([22, 35, 22]); // Burst Double Vibration
+        } else if (type === 'damage') {
+          navigator.vibrate([45, 60, 45]); // Heavy Warning Vibration
+        }
+      } catch (e) {}
+    }
+  }
+
+  // Realistic Web Audio Synthesized Drum Beats (Snare, Kick/Tom, Cymbal)
   public playSFX(type: 'perfect' | 'swish' | 'cheer' | 'error'): void {
+    if (!this.isSfxEnabled) return;
+
     const ctx = this.initCtx();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
     const now = ctx.currentTime;
 
     if (type === 'perfect') {
+      // 🥁 PERFECT: Crisp Acoustic Snare Drum Snap + Noise Burst
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+
+      gain.gain.setValueAtTime(0.65, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+
+      // Add Noise Snap Buffer
+      const bufferSize = ctx.sampleRate * 0.08;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.35, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+      noiseSource.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noiseSource.start(now);
+
+    } else if (type === 'swish') {
+      // 🥁 GREAT: Punchy Low Kick / Tom Drum Punch
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now);
-      osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1);
-      gain.gain.setValueAtTime(0.3, now);
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(45, now + 0.15);
+
+      gain.gain.setValueAtTime(0.8, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
       osc.start(now);
       osc.stop(now + 0.15);
-    } else if (type === 'swish') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-      osc.start(now);
-      osc.stop(now + 0.08);
+
     } else if (type === 'cheer') {
+      // 🥁 DUAL STRIKE: Bright Cymbal Metallic Hit
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
       osc.type = 'square';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-      osc.start(now);
-      osc.stop(now + 0.25);
-    } else if (type === 'error') {
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(160, now);
-      osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+      osc.frequency.setValueAtTime(587.33, now);
+      osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.25);
+
       gain.gain.setValueAtTime(0.4, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.25);
+
+    } else if (type === 'error') {
+      // ❌ DAMAGE MISS: Heavy Error Buzz
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(130, now);
+      osc.frequency.linearRampToValueAtTime(60, now + 0.25);
+
+      gain.gain.setValueAtTime(0.45, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
       osc.start(now);
       osc.stop(now + 0.25);
     }

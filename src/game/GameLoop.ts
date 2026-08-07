@@ -174,6 +174,7 @@ export class GameLoop {
         this.stats.maxCombo = this.stats.combo;
       }
 
+      // Trigger Drum SFX & Mobile Haptic Vibration
       if (judgement === 'perfect') {
         this.stats.perfectCount++;
         audioEngine.playSFX(closestNote.isDual ? 'cheer' : 'perfect');
@@ -181,6 +182,7 @@ export class GameLoop {
         this.stats.greatCount++;
         audioEngine.playSFX('swish');
       }
+      audioEngine.triggerHapticVibration(closestNote.isDual ? 'dual' : 'hit');
 
       const feverInc = this.costume === 'kpop_idol' ? 12 : 6;
       this.stats.feverGauge = Math.min(100, this.stats.feverGauge + feverInc);
@@ -200,6 +202,7 @@ export class GameLoop {
   private activateFever(): void {
     this.stats.isFeverActive = true;
     audioEngine.playSFX('cheer');
+    audioEngine.triggerHapticVibration('dual');
     setTimeout(() => {
       this.stats.isFeverActive = false;
       this.stats.feverGauge = 0;
@@ -259,6 +262,7 @@ export class GameLoop {
             const missPen = this.costume === 'campaign_vest' ? 4 : 6;
             this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
             audioEngine.playSFX('error');
+            audioEngine.triggerHapticVibration('damage');
 
             const hitX = this.renderEngine['canvas'].width * 0.22;
             const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
@@ -288,6 +292,7 @@ export class GameLoop {
         const missPen = this.costume === 'campaign_vest' ? 4 : 6;
         this.stats.supportRate = Math.max(0, this.stats.supportRate - missPen);
         audioEngine.playSFX('error');
+        audioEngine.triggerHapticVibration('damage');
 
         this.renderEngine.triggerDamageEffect();
 

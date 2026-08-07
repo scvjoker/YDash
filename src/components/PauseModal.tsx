@@ -1,6 +1,6 @@
-import React from 'react';
-import { Play, RotateCcw, Home, Maximize } from 'lucide-react';
+import React, { useState } from 'react';
 import { GameStats } from '../types/game';
+import { audioEngine } from '../game/AudioEngine';
 
 interface PauseModalProps {
   stats: GameStats;
@@ -17,12 +17,35 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   onRestart,
   onHome
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
+  const [sfxEnabled, setSfxEnabled] = useState<boolean>(audioEngine.isSfxEnabled);
+  const [vibrationEnabled, setVibrationEnabled] = useState<boolean>(audioEngine.isVibrationEnabled);
 
-  const handleFullscreen = () => {
+  const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
     } else {
-      document.exitFullscreen().catch(() => {});
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  const toggleSfx = () => {
+    audioEngine.isSfxEnabled = !sfxEnabled;
+    setSfxEnabled(!sfxEnabled);
+    if (!sfxEnabled) {
+      audioEngine.playSFX('perfect');
+    }
+  };
+
+  const toggleVibration = () => {
+    audioEngine.isVibrationEnabled = !vibrationEnabled;
+    setVibrationEnabled(!vibrationEnabled);
+    if (!vibrationEnabled) {
+      audioEngine.triggerHapticVibration('dual');
     }
   };
 
@@ -30,112 +53,187 @@ export const PauseModal: React.FC<PauseModalProps> = ({
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.88)',
+      backgroundColor: 'rgba(5, 7, 18, 0.90)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 50,
-      padding: '1rem'
+      zIndex: 100
     }}>
       <div className="cyber-panel" style={{
         width: '460px',
         maxWidth: '92vw',
-        padding: '1.8rem',
+        padding: '2rem',
         textAlign: 'center',
-        border: '2px solid #ff007f',
-        boxShadow: '0 0 35px rgba(255, 0, 127, 0.4)',
-        position: 'relative'
+        border: '2px solid #00f0ff',
+        boxShadow: '0 0 35px rgba(0, 240, 255, 0.4)'
       }}>
-        {/* Fullscreen Button on Top Right */}
-        <button
-          onClick={handleFullscreen}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            background: 'rgba(255, 230, 0, 0.15)',
-            border: '1.5px solid #ffe600',
-            color: '#ffe600',
-            borderRadius: '16px',
-            padding: '4px 12px',
-            fontFamily: 'Chakra Petch, sans-serif',
-            fontWeight: 900,
-            fontSize: '0.78rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer',
-            boxShadow: '0 0 12px rgba(255,230,0,0.4)'
-          }}
-        >
-          <Maximize size={14} /> 全螢幕
-        </button>
-
+        {/* Modal Title Header */}
         <h2 style={{
-          fontSize: '2.2rem',
+          fontSize: '2.4rem',
           fontFamily: 'Chakra Petch, sans-serif',
           fontWeight: 900,
-          color: '#ff007f',
-          marginBottom: '0.2rem',
-          textShadow: '0 0 15px rgba(255,0,127,0.6)'
+          color: '#ffe600',
+          textShadow: '0 0 15px rgba(255, 230, 0, 0.6)',
+          marginBottom: '6px'
         }}>
-          ⏸️ 遊戲暫停 (PAUSED)
+          ⏸ 遊戲暫停 (PAUSED)
         </h2>
-        <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '1.2rem' }}>
+        <p style={{ color: '#aaa', fontSize: '0.95rem', marginBottom: '1.4rem' }}>
           {beatmapTitle}
         </p>
 
-        {/* Game Stats Snapshot */}
+        {/* Live Gameplay Stats Card */}
         <div style={{
-          background: 'rgba(0,0,0,0.4)',
-          borderRadius: '14px',
-          padding: '0.8rem 1rem',
-          marginBottom: '1.5rem',
+          background: 'rgba(0,0,0,0.5)',
+          padding: '1rem',
+          borderRadius: '12px',
+          border: '1px solid rgba(255,255,255,0.1)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: '8px'
+          gap: '0.8rem',
+          marginBottom: '1.4rem',
+          textAlign: 'left'
         }}>
           <div>
-            <span style={{ fontSize: '0.75rem', color: '#aaa' }}>當前得票: </span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffe600' }}>
+            <span style={{ fontSize: '0.8rem', color: '#888' }}>目前得票分數:</span>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#00f0ff' }}>
               {stats.score.toLocaleString()} 票
-            </span>
+            </div>
           </div>
-
           <div>
-            <span style={{ fontSize: '0.75rem', color: '#aaa' }}>最高 COMBO: </span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#00f0ff' }}>
-              {stats.maxCombo}
-            </span>
+            <span style={{ fontSize: '0.8rem', color: '#888' }}>選民支持度 (HP):</span>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: stats.supportRate <= 30 ? '#ff0055' : '#ffe600' }}>
+              {stats.supportRate}%
+            </div>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.8rem', color: '#888' }}>最高 Combo 連擊:</span>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff' }}>
+              {stats.maxCombo} 連擊
+            </div>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.8rem', color: '#888' }}>Perfect 完美聲勢:</span>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#00f0ff' }}>
+              {stats.perfectCount} 次
+            </div>
           </div>
         </div>
 
-        {/* Buttons List */}
+        {/* SFX & Vibration Settings Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1.4rem' }}>
+          {/* Drum SFX Toggle */}
+          <button
+            onClick={toggleSfx}
+            style={{
+              padding: '0.65rem 0.4rem',
+              background: sfxEnabled ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: sfxEnabled ? '1.5px solid #00f0ff' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: sfxEnabled ? '#00f0ff' : '#888',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px'
+            }}
+          >
+            🥁 打擊鼓聲: <span style={{ color: sfxEnabled ? '#ffe600' : '#888', fontWeight: 900 }}>{sfxEnabled ? 'ON 啟用' : 'OFF 靜音'}</span>
+          </button>
+
+          {/* Mobile Vibration Toggle */}
+          <button
+            onClick={toggleVibration}
+            style={{
+              padding: '0.65rem 0.4rem',
+              background: vibrationEnabled ? 'rgba(255, 0, 127, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: vibrationEnabled ? '1.5px solid #ff007f' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: vibrationEnabled ? '#ff007f' : '#888',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px'
+            }}
+          >
+            📳 手機震動: <span style={{ color: vibrationEnabled ? '#ffe600' : '#888', fontWeight: 900 }}>{vibrationEnabled ? 'ON 啟用' : 'OFF 關閉'}</span>
+          </button>
+        </div>
+
+        {/* Fullscreen Button */}
+        <button
+          onClick={toggleFullscreen}
+          style={{
+            width: '100%',
+            marginBottom: '1rem',
+            padding: '0.65rem',
+            background: 'rgba(255, 230, 0, 0.12)',
+            border: '1.5px solid #ffe600',
+            color: '#ffe600',
+            borderRadius: '10px',
+            fontWeight: 800,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}
+        >
+          {isFullscreen ? '📺 退出全螢幕 (EXIT FULLSCREEN)' : '🖥️ 切換全螢幕沉浸體驗 (FULLSCREEN)'}
+        </button>
+
+        {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
           <button
             className="muse-btn"
             onClick={onResume}
-            style={{ fontSize: '1.2rem', padding: '0.85rem' }}
+            style={{ width: '100%', fontSize: '1.2rem', padding: '0.85rem' }}
           >
-            <span><Play fill="#fff" size={20} /> 繼續拜票 (RESUME - 享 5 秒緩衝)</span>
+            <span>▶ 繼續競選 (RESUME)</span>
           </button>
 
-          <button
-            className="muse-btn muse-btn-cyan"
-            onClick={onRestart}
-            style={{ fontSize: '1rem', padding: '0.7rem' }}
-          >
-            <span><RotateCcw size={18} /> 重新開始 (RESTART)</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <button
+              onClick={onRestart}
+              style={{
+                flex: 1,
+                padding: '0.75rem',
+                background: 'rgba(0, 240, 255, 0.1)',
+                border: '1.5px solid #00f0ff',
+                color: '#00f0ff',
+                borderRadius: '10px',
+                fontWeight: 800,
+                fontSize: '0.95rem',
+                cursor: 'pointer'
+              }}
+            >
+              🔄 重新開局
+            </button>
 
-          <button
-            className="muse-btn muse-btn-yellow"
-            onClick={onHome}
-            style={{ fontSize: '1rem', padding: '0.7rem' }}
-          >
-            <span><Home size={18} /> 返回競選主頁 (HOME)</span>
-          </button>
+            <button
+              onClick={onHome}
+              style={{
+                flex: 1,
+                padding: '0.75rem',
+                background: 'rgba(255, 0, 85, 0.1)',
+                border: '1.5px solid #ff0055',
+                color: '#ff0055',
+                borderRadius: '10px',
+                fontWeight: 800,
+                fontSize: '0.95rem',
+                cursor: 'pointer'
+              }}
+            >
+              🏠 返回主畫面
+            </button>
+          </div>
         </div>
       </div>
     </div>

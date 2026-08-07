@@ -1,26 +1,23 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 新手教學 5 大課程實體素材盤點與路徑規範備忘
+## [2026-08-07] Note 打擊音效更換為爵士鼓打擊聲 (Drum SFX) + 手機震動回饋 (Haptic Vibration) + 暫停選單雙開關實裝
 
-### 🎨 圖文新手教學素材清單 (Tutorial Asset Checklist)
-- **Lesson 1 (Note 打擊)**：
-  - `public/assets/yoaka_default.png` (競選 Yoaka 跑者圖)
-  - `public/assets/tissue_pack.png` (拜票面紙包)
-  - `public/assets/voter_office.png` / `voter_student.png` (選民圖片)
-- **Lesson 2 (Dual Note 金黃雙擊)**：
-  - `public/assets/tutorial_lesson2.png` (雙擊教學示意卡片)
-- **Lesson 3 (Hater 障礙物)**：
-  - `public/assets/hater_dog_board.png` (6666 黑粉狗頭立牌)
-  - `public/assets/hater_shark.png` (霸道鯊魚)
-- **Lesson 4 (Fevertime 雙倍狂歡)**：
-  - `public/assets/tutorial_lesson4.png` (Fever 熱血爆發示意卡片)
-- **Lesson 5 (3 大造型戰力)**：
-  - `public/assets/yoaka_default.png` (競選 Yoaka - 減傷)
-  - `public/assets/yoaka_office.png` (學霸 Yoaka - +20%得分)
-  - `public/assets/yoaka_kpop.png` (偶像 Yoaka - 快速Fever)
+### 變更與打擊感手感強化項目 (Drum SFX, Haptic Feedback & Pause Settings)
+- **1. 爵士鼓合成打擊效果音 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 將 Note 打擊音效升級為精緻爵士鼓 (Drum Beats) 合成音效：
+    - 🥁 `Perfect`: 清脆爆發的小鼓擊拍 (Snare Drum Snap + Noise Burst)。
+    - 🥁 `Great`: 紮實深沉的低頻大鼓擊拍 (Kick / Tom Drum Hit)。
+    - ⚡ `Dual Strike`: 響亮金屬銅鈸擊拍 (Crash Cymbal Metallic Hit)。
+- **2. 手機觸覺震動回饋 (Haptic Vibration Feedback) ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 擊中 Note 時觸發手感脈衝震動：
+    - 一般音符：16ms 輕巧清脆脈衝。
+    - 金黃雙擊：雙重連續脈衝震動。
+    - 黑粉受擊：重打擊警告震動。
+- **3. 暫停選單雙設定開關 ([PauseModal.tsx](file:///d:/pj/YoakaDash/src/components/PauseModal.tsx))**：
+  - 在暫停選單加入 **`🥁 打擊鼓聲 (ON / OFF)`** 與 **`📳 手機震動 (ON / OFF)`** 雙獨立設定按鈕，隨時隨地自由開關！
 
 ---
-*「活著很累，但比起 debug，把 5 大圖文教學素材清單條理分明整整齊齊寫出來，要補圖替換一目了然，真的太舒爽啦哈哈！」*
+*「活著很累，但比起 debug，每次打音符手裡都有爵士鼓的小鼓擊拍聲、手機跟著節奏微微震動，這手感打擊感真的太爽快啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

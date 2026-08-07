@@ -10,7 +10,7 @@ export const TUTORIAL_SLIDES = [
     badge: '第一課：音符打擊 (NOTE)',
     title: '空中與地面選民音符',
     subtitle: '親切發放拜票衛生紙，獲得選民支持得票！',
-    img: '/assets/yoaka_default.png',
+    img: '/assets/tutorial_lesson1.png',
     cardBorder: '#00f0ff',
     content: (
       <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
@@ -33,9 +33,9 @@ export const TUTORIAL_SLIDES = [
   {
     id: 'dual_note',
     badge: '第二課：金黃雙擊 (DUAL NOTE)',
-    title: '⚡ 雙軌同時重音打擊',
+    title: '⚡ 雙軌同時打擊',
     subtitle: '上下軌同時出現金黃光芒音符，獲得 2 倍超高票數！',
-    img: '/assets/tissue_pack.png',
+    img: '/assets/tutorial_lesson2.png',
     cardBorder: '#ffe600',
     content: (
       <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
@@ -53,28 +53,28 @@ export const TUTORIAL_SLIDES = [
   },
   {
     id: 'hater',
-    badge: '第三課：黑粉障礙物 (HATER)',
-    title: '⚠️ 6666 狗頭板與霸道鯊魚',
-    subtitle: '小心路上的黑粉與立牌，即時切換軌道閃避！',
+    badge: '第三課：閃避障礙物',
+    title: '⚠️ 6666板板 與 帥氣鯊魚',
+    subtitle: '小心路上的生物，即時切換軌道閃避！',
     img: '/assets/hater_dog_board.png',
     cardBorder: '#ff0055',
     content: (
       <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
           <div style={{ background: 'rgba(255, 0, 85, 0.15)', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ff0055', textAlign: 'center' }}>
-            <img src="/assets/hater_dog_board.png" alt="6666 狗頭立牌" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>6666 狗頭立牌</p>
+            <img src="/assets/hater_dog_board.png" alt="6666 板板" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>6666 板板</p>
           </div>
 
           <div style={{ background: 'rgba(255, 0, 85, 0.15)', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ff0055', textAlign: 'center' }}>
-            <img src="/assets/hater_shark.png" alt="霸道黑粉鯊魚" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>霸道黑粉鯊魚</p>
+            <img src="/assets/hater_shark.png" alt="帥氣鯊魚" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>帥氣鯊魚</p>
           </div>
         </div>
 
         <div style={{ background: 'rgba(255, 0, 85, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid #ff0055' }}>
           <p style={{ color: '#ff0055', fontWeight: 900, marginBottom: '4px' }}>⚠️ 撞擊懲罰：</p>
-          <p>若未及時切換軌道閃避，撞上黑粉將會<strong>扣除 6% 選民支持度 (HP)</strong> 並中斷 Combo！支持度降至 0% 競選將告失敗！</p>
+          <p>若未及時切換軌道閃避，撞上障礙物將會<strong>扣除 6% 選民支持度 (HP)</strong> 並中斷 Combo！支持度降至 0% 競選將告失敗！</p>
         </div>
       </div>
     )
@@ -84,7 +84,7 @@ export const TUTORIAL_SLIDES = [
     badge: '第四課：熱血爆發 (FEVER TIME)',
     title: '🔥 FEVER 雙倍票數熱血狂歡',
     subtitle: '連續完美 Hit 累積熱血能量，觸發全場雙倍得分！',
-    img: '/assets/yoaka_kpop.png',
+    img: '/assets/tutorial_lesson4.png',
     cardBorder: '#ffe600',
     content: (
       <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
