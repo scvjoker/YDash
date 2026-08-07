@@ -4,7 +4,7 @@ export interface SongData {
   subtitle: string;
   artist: string;
   bpm: number;
-  duration: number; // Approximate seconds
+  duration: number; // Real Audio Duration in seconds
   cover: string;
   bg: string;
   audio: string;
@@ -25,7 +25,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '街頭拜票 (有歌詞)',
     artist: 'Yoaka 競選樂團',
     bpm: 132,
-    duration: 140,
+    duration: 188,
     cover: '/assets/covers/cover_start.jpg',
     bg: '/assets/bgs/bg_start.jpg',
     audio: '/assets/audio/campaign_start.mp3',
@@ -44,7 +44,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '街頭拜票狂想曲 (純音樂)',
     artist: 'Yoaka 競選樂團',
     bpm: 148,
-    duration: 165,
+    duration: 161,
     cover: '/assets/covers/cover_street.jpg',
     bg: '/assets/bgs/bg_street.jpg',
     audio: '/assets/audio/street_rhapsody_inst.mp3',
@@ -63,7 +63,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '街頭拜票狂想曲 (高難/長曲)',
     artist: 'Yoaka 競選樂團',
     bpm: 155,
-    duration: 195,
+    duration: 130,
     cover: '/assets/covers/cover_street_rh.jpg',
     bg: '/assets/bgs/bg_street_rh.jpg',
     audio: '/assets/audio/street_rhapsody.mp3',
@@ -82,7 +82,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '辯論會激戰 (標準版)',
     artist: 'Yoaka 競選樂團',
     bpm: 172,
-    duration: 160,
+    duration: 165,
     cover: '/assets/covers/cover_debate.jpg',
     bg: '/assets/bgs/bg_debate.jpg',
     audio: '/assets/audio/debate_battle.mp3',
@@ -101,7 +101,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '辯論會激戰 (有歌詞 狂想曲)',
     artist: 'Yoaka 競選樂團',
     bpm: 178,
-    duration: 210,
+    duration: 321,
     cover: '/assets/covers/cover_debate_rh.jpg',
     bg: '/assets/bgs/bg_debate_rh.jpg',
     audio: '/assets/audio/debate_rhapsody_vocal.mp3',
@@ -120,7 +120,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '開票夜勝選大爆發 (標準版)',
     artist: 'Yoaka 競選樂團',
     bpm: 185,
-    duration: 165,
+    duration: 118,
     cover: '/assets/covers/cover_victory.jpg',
     bg: '/assets/bgs/bg_victory.jpg',
     audio: '/assets/audio/victory_night.mp3',
@@ -139,7 +139,7 @@ export const SONG_REGISTRY: SongData[] = [
     subtitle: '開票夜勝選大爆發 (有歌詞 狂想曲)',
     artist: 'Yoaka 競選樂團',
     bpm: 190,
-    duration: 230,
+    duration: 303,
     cover: '/assets/covers/cover_victory_rh.jpg',
     bg: '/assets/bgs/bg_victory_rh.jpg',
     audio: '/assets/audio/victory_rhapsody_vocal.mp3',

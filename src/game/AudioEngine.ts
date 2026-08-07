@@ -11,6 +11,7 @@ export class AudioEngine {
   private isBgmPlaying: boolean = false;
 
   private activeAudioUrl: string | null = null;
+  private currentPreviewToken: number = 0;
 
   constructor() {
     // Lazy AudioContext initialization
@@ -25,6 +26,11 @@ export class AudioEngine {
       this.audioCtx.resume();
     }
     return this.audioCtx;
+  }
+
+  public stopAllAudio(): void {
+    this.stopBGM();
+    this.stopPreview();
   }
 
   public setCustomAudioBuffer(buffer: AudioBuffer): void {
@@ -55,39 +61,52 @@ export class AudioEngine {
       this.activeAudioUrl = url;
       return decodedBuf;
     } catch (err) {
-      console.warn(`Failed to load audio from ${url}, falling back to default BGM`, err);
-      if (this.bgmBuffer) return this.bgmBuffer;
+      console.warn(`Failed to load audio from ${url}`, err);
       return null;
     }
   }
 
-  public async playPreviewFromUrl(url: string): Promise<void> {
+  public async playPreviewFromUrl(url: string): Promise<number | null> {
     const ctx = this.initCtx();
-    this.stopPreview();
+    
+    // Stop all ongoing main BGM and previous preview to guarantee NO OVERLAP CONFLICT!
+    this.stopAllAudio();
+
+    // Increment preview token to cancel out-of-order async loads
+    const thisToken = ++this.currentPreviewToken;
 
     try {
       const buffer = await this.loadAudioFromUrl(url);
-      if (!buffer) return;
+      if (!buffer) return null;
+
+      // Discard if user already clicked another song card during fetch/decode
+      if (thisToken !== this.currentPreviewToken) {
+        return null;
+      }
 
       const source = ctx.createBufferSource();
       source.buffer = buffer;
 
       const gainNode = ctx.createGain();
-      gainNode.gain.setValueAtTime(0.7, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.75, ctx.currentTime);
 
       source.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      // Play 15-second Preview from middle of the song
+      // Play 15-second Preview from middle of the song (e.g. 20% timestamp offset)
       const startOffset = Math.min(15, buffer.duration * 0.2);
       source.start(0, startOffset, 15);
       this.previewBgmSource = source;
+
+      return Math.round(buffer.duration);
     } catch (e) {
       console.warn('Failed to play preview', e);
+      return null;
     }
   }
 
   public stopPreview(): void {
+    this.currentPreviewToken++;
     if (this.previewBgmSource) {
       try {
         this.previewBgmSource.stop();
@@ -192,8 +211,7 @@ export class AudioEngine {
 
   public playBGM(offsetSec: number = 0): void {
     const ctx = this.initCtx();
-    this.stopBGM();
-    this.stopPreview();
+    this.stopAllAudio();
 
     const activeBuf = this.customAudioBuffer || this.bgmBuffer;
     if (!activeBuf) return;

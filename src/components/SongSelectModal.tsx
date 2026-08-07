@@ -23,22 +23,34 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
   const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>(currentDifficulty);
   const [speed, setSpeed] = useState<number>(currentSpeed);
   const [coverErrors, setCoverErrors] = useState<{ [id: string]: boolean }>({});
+  const [realDurationSec, setRealDurationSec] = useState<number | null>(null);
 
-  // Auto-play audio preview when clicking a song card
+  // Auto-play audio preview when clicking a song card with Strict Mutex Protection
   useEffect(() => {
-    audioEngine.playPreviewFromUrl(selectedSong.audio);
+    audioEngine.stopAllAudio();
+    setRealDurationSec(null);
+
+    let isMounted = true;
+
+    audioEngine.playPreviewFromUrl(selectedSong.audio).then(durationSec => {
+      if (isMounted && durationSec) {
+        setRealDurationSec(durationSec);
+      }
+    });
+
     return () => {
+      isMounted = false;
       audioEngine.stopPreview();
     };
   }, [selectedSong]);
 
   const handleConfirmPlay = () => {
-    audioEngine.stopPreview();
+    audioEngine.stopAllAudio();
     onSelectSong(selectedSong, difficulty, speed);
   };
 
   const handleClose = () => {
-    audioEngine.stopPreview();
+    audioEngine.stopAllAudio();
     onClose();
   };
 
@@ -58,6 +70,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
     }
     return song.cover;
   };
+
+  const displayDuration = realDurationSec || selectedSong.duration;
 
   return (
     <div style={{
@@ -115,7 +129,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             🎵 競選音樂大廳 (8 首精選曲庫)
           </h2>
           <p style={{ color: '#aaa', fontSize: '0.92rem' }}>
-            點擊切換樂曲即可自動試聽！體驗起承轉合 8 首熱血故事線與阿狸 DLC 限定企劃神曲。
+            點擊切換樂曲即可自動試聽！無縫切換零衝突，實時解析動態長度。
           </p>
         </div>
 
@@ -229,7 +243,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                   </h3>
                   <p style={{ fontSize: '0.85rem', color: '#aaa' }}>{selectedSong.artist}</p>
                   <p style={{ fontSize: '0.8rem', color: '#ffe600', fontWeight: 800, marginTop: '2px' }}>
-                    BPM {selectedSong.bpm} • 大約 {Math.floor(selectedSong.duration / 60)}分{selectedSong.duration % 60}秒
+                    BPM {selectedSong.bpm} • 長度 {Math.floor(displayDuration / 60)}分{displayDuration % 60}秒
                   </p>
                 </div>
               </div>

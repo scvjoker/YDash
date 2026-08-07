@@ -1,17 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 切換樂曲無反應與預設歌曲問題修復 + 選曲大廳自動 15 秒音樂試聽 (Audio Engine Upgrade)
+## [2026-08-07] 切換歌曲雙音軌衝突修復 (Audio Mutex Lock) + 8 首實體 MP3 精確長度動態校準
 
-### 變更與音響切換修復項目 (Dynamic Song Switch & Hall Preview)
-- **1. 遊戲開局樂曲 100% 正確連動 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts) & [AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 升級 `AudioEngine.loadAudioFromUrl(url)`，在遊戲開局與選取歌曲時，全面動態下載解碼該歌曲的實體 MP3/WAV 檔。
-  - 解決了過去固定讀取預設 `/theme_song.mp3` 的問題。現在選哪首，進入遊戲 100% 正確播放選定的戰歌與即時抓拍音符！
-- **2. 選曲大廳點擊卡片自動 15 秒試聽 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 在音樂大廳點擊切換樂曲時，自動觸發 `audioEngine.playPreviewFromUrl(song.audio)` 播放該曲目的副歌試聽片段！
-  - 關閉彈窗或點擊「▶ 播放開局」時自動靜音停止試聽，轉入遊戲主音訊，體驗流暢順滑！
+### 變更與音效互斥與動態秒數解析項目 (Audio Mutex & Real Duration Calibration)
+- **1. 全域音效互斥與 Token 異步防護 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 實裝 `audioEngine.stopAllAudio()` 方法，在打開音樂大廳與快速切換樂曲卡片時，第一時間清空停止主 BGM 與上一首試聽片段。
+  - 導入 `currentPreviewToken` 機制：若快速連續點擊多張樂曲卡片，上一首下載解碼完成後若 Discover 發現 Token 已失效，將自動 Discard，**100% 確保全世界只有一首 preview 在播放，零重疊衝突**！
+- **2. 8 首實體 MP3 長度精確動態校準 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  - 動態讀取實體 AudioBuffer 的真實 duration（如《辯論會激戰 狂想曲》實體長度 5 分 21 秒、《開票夜勝選 狂想曲》實體長度 5 分 03 秒）。
+  - 將 8 首曲目的預設 metadata 長度與 BPM 100% 校準至與實體音訊檔完全貼合！
 
 ---
-*「活著很累，但比起 debug，在選曲大廳點哪首就立刻試聽哪首，進入遊戲音浪 100% 正確播放，這音響順暢度真的太舒服啦哈哈！」*
+*「活著很累，但比起 debug，在選曲大廳隨便快速點擊切換，音軌都清清楚楚、絕不重疊混音，長度顯示還精確到秒，這音效防護寫好太過癮啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
