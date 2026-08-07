@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Wand2, Play, Music, AlertCircle, Maximize, ArrowDown } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
@@ -18,8 +18,18 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
   const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [generatedNotes, setGeneratedNotes] = useState<Note[]>([]);
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth <= 900 || window.innerHeight <= 550);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -98,20 +108,20 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 50,
-      padding: '0.8rem'
+      padding: isMobileScreen ? '0.4rem' : '0.8rem'
     }}>
       <div className="cyber-panel" style={{
         width: '820px',
         maxWidth: '96vw',
-        maxHeight: '96vh',
+        maxHeight: '94svh',
         overflowY: 'auto',
-        padding: '1rem 1.4rem',
+        padding: isMobileScreen ? '0.6rem 0.9rem' : '1rem 1.4rem',
         position: 'relative',
         border: '2px solid #ffe600',
         boxShadow: '0 0 35px rgba(255, 230, 0, 0.4)'
       }}>
         {/* Top Control Action Buttons (Fullscreen & Close) */}
-        <div style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', display: 'flex', gap: '8px', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: isMobileScreen ? '0.4rem' : '0.6rem', right: isMobileScreen ? '0.4rem' : '0.6rem', display: 'flex', gap: '6px', zIndex: 10 }}>
           <button
             onClick={handleFullscreen}
             style={{
@@ -119,10 +129,10 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
               border: '1.5px solid #ffe600',
               color: '#ffe600',
               borderRadius: '16px',
-              padding: '4px 12px',
+              padding: isMobileScreen ? '2px 8px' : '4px 12px',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
-              fontSize: '0.78rem',
+              fontSize: isMobileScreen ? '0.70rem' : '0.78rem',
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
@@ -130,7 +140,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
               boxShadow: '0 0 12px rgba(255,230,0,0.4)'
             }}
           >
-            <Maximize size={14} /> 全螢幕
+            <Maximize size={isMobileScreen ? 12 : 14} /> 全螢幕
           </button>
 
           <button
@@ -143,8 +153,8 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
               border: '1.5px solid #ff007f',
               color: '#fff',
               borderRadius: '50%',
-              width: '34px',
-              height: '34px',
+              width: isMobileScreen ? '28px' : '34px',
+              height: isMobileScreen ? '28px' : '34px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -152,15 +162,15 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
               boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)'
             }}
           >
-            <X size={18} />
+            <X size={isMobileScreen ? 15 : 18} />
           </button>
         </div>
 
         {/* Title Header with Scroll Hint Badge */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.4rem' : '0.6rem' }}>
           <div>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: isMobileScreen ? '1.15rem' : '1.5rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
@@ -168,7 +178,7 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             }}>
               ⚡ A+B 智慧譜面創作者 (BEAT PRODUCER)
             </h2>
-            <p style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '2px' }}>
+            <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.70rem' : '0.78rem', marginTop: '1px' }}>
               上傳您最喜愛的 MP3 歌曲，AI 演算法自動抓拍並生成專屬音遊譜面！
             </p>
           </div>
@@ -179,15 +189,15 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             border: '1px solid rgba(0, 240, 255, 0.4)',
             color: '#00f0ff',
             borderRadius: '12px',
-            padding: '3px 10px',
-            fontSize: '0.72rem',
+            padding: isMobileScreen ? '2px 6px' : '3px 10px',
+            fontSize: isMobileScreen ? '0.68rem' : '0.72rem',
             fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
-            marginRight: '120px'
+            gap: '3px',
+            marginRight: isMobileScreen ? '95px' : '120px'
           }}>
-            <ArrowDown size={13} /> ↕️ 上下滑動檢視
+            <ArrowDown size={isMobileScreen ? 11 : 13} /> ↕️ 滑動
           </div>
         </div>
 
@@ -196,12 +206,12 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
           onClick={() => fileInputRef.current?.click()}
           style={{
             border: '2px dashed #00f0ff',
-            borderRadius: '14px',
-            padding: '1rem 1.2rem',
+            borderRadius: '12px',
+            padding: isMobileScreen ? '0.6rem 0.8rem' : '1rem 1.2rem',
             textAlign: 'center',
             cursor: 'pointer',
             backgroundColor: 'rgba(0, 240, 255, 0.05)',
-            marginBottom: '1rem',
+            marginBottom: isMobileScreen ? '0.6rem' : '1rem',
             transition: 'all 0.25s'
           }}
         >
@@ -213,12 +223,12 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             style={{ display: 'none' }}
           />
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <Upload size={28} color="#00f0ff" />
-            <p style={{ fontSize: '0.95rem', fontWeight: 900, color: '#fff' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+            <Upload size={isMobileScreen ? 20 : 28} color="#00f0ff" />
+            <p style={{ fontSize: isMobileScreen ? '0.85rem' : '0.95rem', fontWeight: 900, color: '#fff' }}>
               {audioFile ? `已選擇音樂: ${audioFile.name}` : '點擊或拖曳上傳 MP3 / WAV 歌曲檔'}
             </p>
-            <p style={{ fontSize: '0.75rem', color: '#888' }}>
+            <p style={{ fontSize: isMobileScreen ? '0.68rem' : '0.75rem', color: '#888' }}>
               支援主流音訊格式，自動解析節奏並配對選民音符
             </p>
           </div>
@@ -226,10 +236,10 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
 
         {/* Song Info & Difficulty Settings (Mobile Adaptive Layout) */}
         {audioBuffer && (
-          <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '12px', padding: '0.8rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '6px' }}>
-              <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Music size={15} /> 歌曲名稱 (TITLE):
+          <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '10px', padding: isMobileScreen ? '0.5rem' : '0.8rem', marginBottom: isMobileScreen ? '0.6rem' : '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.4rem' : '0.6rem', flexWrap: 'wrap', gap: '4px' }}>
+              <span style={{ color: '#ffe600', fontWeight: 900, fontSize: isMobileScreen ? '0.75rem' : '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Music size={isMobileScreen ? 12 : 15} /> 歌曲名稱:
               </span>
               <input
                 type="text"
@@ -240,31 +250,31 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                   border: '1px solid rgba(255,255,255,0.2)',
                   borderRadius: '6px',
                   color: '#fff',
-                  padding: '3px 10px',
-                  fontSize: '0.85rem',
+                  padding: isMobileScreen ? '2px 6px' : '3px 10px',
+                  fontSize: isMobileScreen ? '0.75rem' : '0.85rem',
                   fontWeight: 800,
-                  width: '220px',
+                  width: isMobileScreen ? '160px' : '220px',
                   textAlign: 'right'
                 }}
               />
             </div>
 
             {/* Difficulty Pills Switch */}
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ color: '#aaa', fontWeight: 800, fontSize: '0.8rem' }}>抓拍密度:</span>
+            <div style={{ display: 'flex', gap: isMobileScreen ? '0.3rem' : '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ color: '#aaa', fontWeight: 800, fontSize: isMobileScreen ? '0.72rem' : '0.8rem' }}>抓拍密度:</span>
               {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
                 <button
                   key={diff}
                   onClick={() => setDifficulty(diff)}
                   style={{
                     flex: 1,
-                    padding: '0.4rem',
+                    padding: isMobileScreen ? '0.25rem' : '0.4rem',
                     background: difficulty === diff ? '#00f0ff' : 'rgba(255,255,255,0.05)',
                     color: difficulty === diff ? '#000' : '#fff',
                     border: difficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                     borderRadius: '6px',
                     fontWeight: 900,
-                    fontSize: '0.8rem',
+                    fontSize: isMobileScreen ? '0.72rem' : '0.8rem',
                     cursor: 'pointer'
                   }}
                 >
@@ -280,16 +290,16 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
                   border: '1px solid #ff007f',
                   color: '#fff',
                   borderRadius: '6px',
-                  padding: '0.4rem 0.8rem',
+                  padding: isMobileScreen ? '0.25rem 0.5rem' : '0.4rem 0.8rem',
                   fontWeight: 900,
-                  fontSize: '0.78rem',
+                  fontSize: isMobileScreen ? '0.70rem' : '0.78rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '3px'
                 }}
               >
-                <Wand2 size={14} /> 重新抓拍
+                <Wand2 size={isMobileScreen ? 12 : 14} /> 重新抓拍
               </button>
             </div>
           </div>
@@ -301,21 +311,21 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             <div style={{
               background: 'rgba(0, 240, 255, 0.1)',
               border: '1px solid rgba(0, 240, 255, 0.3)',
-              borderRadius: '10px',
-              padding: '0.5rem',
-              marginBottom: '1rem',
+              borderRadius: '8px',
+              padding: isMobileScreen ? '0.35rem' : '0.5rem',
+              marginBottom: isMobileScreen ? '0.6rem' : '1rem',
               display: 'flex',
               justifyContent: 'space-around',
               alignItems: 'center'
             }}>
               <div>
-                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>抓拍音符: </span>
-                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffe600' }}>{generatedNotes.length} 個 Note</span>
+                <span style={{ fontSize: isMobileScreen ? '0.68rem' : '0.78rem', color: '#aaa' }}>抓拍音符: </span>
+                <span style={{ fontSize: isMobileScreen ? '0.90rem' : '1.05rem', fontWeight: 900, color: '#ffe600' }}>{generatedNotes.length} 個 Note</span>
               </div>
 
               <div>
-                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>音訊時長: </span>
-                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#00f0ff' }}>
+                <span style={{ fontSize: isMobileScreen ? '0.68rem' : '0.78rem', color: '#aaa' }}>音訊時長: </span>
+                <span style={{ fontSize: isMobileScreen ? '0.90rem' : '1.05rem', fontWeight: 900, color: '#00f0ff' }}>
                   {audioBuffer ? `${Math.floor(audioBuffer.duration)} 秒` : '--'}
                 </span>
               </div>
@@ -324,17 +334,17 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
             <button
               className="muse-btn"
               onClick={handleStartPlay}
-              style={{ width: '100%', fontSize: '1.2rem', padding: '0.8rem' }}
+              style={{ width: '100%', fontSize: isMobileScreen ? '0.95rem' : '1.2rem', padding: isMobileScreen ? '0.55rem' : '0.8rem' }}
             >
-              <span><Play fill="#fff" size={20} /> ▶ 試玩自製譜面 (PLAY MAP - 使用上傳曲目)</span>
+              <span><Play fill="#fff" size={isMobileScreen ? 16 : 20} /> ▶ 試玩自製譜面 (PLAY MAP)</span>
             </button>
           </div>
         )}
 
         {/* Info Hint */}
         {!audioBuffer && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', color: '#888', fontSize: '0.8rem', marginTop: '0.6rem' }}>
-            <AlertCircle size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', color: '#888', fontSize: isMobileScreen ? '0.72rem' : '0.8rem', marginTop: '0.4rem' }}>
+            <AlertCircle size={13} />
             <span>請上傳音樂檔案解鎖 ▶ 試玩自製譜面功能</span>
           </div>
         )}

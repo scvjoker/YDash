@@ -1,19 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 歌曲切換大廳左右欄 100% 強效絕對等高 + 拔除重複選項 + 雙欄 Cyber 滾動條
+## [2026-08-07] 新手指南 Modal + A+B 譜面創作者 Modal 手機端自適應 RWD 滿版縮放
 
-### 變更與 UI 精簡與強效對齊項目 (Song Select Dual Scrollbar & Streamlined Exact Equal Height Layout)
-- **1. 拔除右側重複的「難度」與「流速」按鈕 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 拔除右側詳細卡片中重複佔空間的難度與流速切換選項（繼承主畫面已選好的難度與流速），介面變得無比乾淨清爽！
-- **2. 左右兩欄 100% 強效絕對等高對齊 (`height: 58vh/56vh`)**：
-  - 左側樂曲清單與右側詳情卡片高度強制固定為 `height: isMobileScreen ? '58vh' : '56vh'`，手機與電腦上記錄 **100% 絕對齊高對齊**！
-- **3. 雙欄獨立 `.cyber-scrollbar` 滾動條**：
-  - 為右側詳情卡片與左側曲庫清單同時裝備 `.cyber-scrollbar` 滾動條，任何欄位內容過長均可順暢滾動！
-- **4. 完美相容使用者對 `SongRegistry.ts` Subtitle Title 的最新修訂**：
-  - 自動相容與保留使用者對《競選出發！》、《街頭拜票》、《辯論會激戰》、《開票夜勝選大爆發》等 Subtitle/Title 的本機精修內容。
+### 變更與全站 Modal 彈性自適應優化項目 (Tutorial & Beatmap Producer Mobile RWD Scaling)
+- **1. 新手指南 Modal (TutorialOverlay.tsx) 手機自適應縮放**：
+  - 在小螢幕手機橫屏下限制 `maxHeight: '94svh'`, `padding: '0.6rem 0.9rem'`。
+  - 左側教學圖（Note打擊、Dual、閃避、Fevertime）縮小至 `maxHeight: 100px`，字體與按鈕隨視埠彈性微縮，每一頁 **100% 滿版 Fit，絕不下扯**！
+- **2. A+B 智慧譜面創作者 (BeatmapEditor.tsx) 手機自適應縮放**：
+  - 限制外層 Modal `maxHeight: '94svh'`, `padding: '0.6rem 0.9rem'`。
+  - 上傳區、歌名輸入框、難度切換與抓拍統計卡片全面適應手機橫屏，在手機上打開創作者工具同樣 **100% 精緻滿版、無縫排版**！
 
 ---
-*「活著很累，但比起 debug，把曲庫右邊重複的按鈕拔掉、左右兩邊拉到 100% 齊高、兩邊都有雙微光滾動條，這視覺乾淨度簡直太治癒啦哈哈！」*
+*「活著很累，但比起 debug，全站所有的 Modal——包含換裝館、音樂大廳、暫停選單、新手教學到 A+B 譜面創作者，在手機上全都是 100% 滿版 fit，這 RWD 完整度太有成就感啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
