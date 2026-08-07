@@ -123,7 +123,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       )
     },
     {
-      stepTitle: '第 3 課：Hater 6666狗頭板與霸道鯊魚',
+      stepTitle: '第 3 課：障礙物閃避',
       badge: '⚠️ 障礙物閃避',
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', width: '100%' }}>
@@ -131,14 +131,14 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
             {/* Dog Board */}
             <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <img src="/assets/hater_dog_board.png" alt="6666狗頭板" style={{ height: '75px', objectFit: 'contain', marginBottom: '4px' }} />
-              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>6666 黑粉狗頭板</div>
+              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>6666 粉絲團長</div>
               <p style={{ fontSize: '0.78rem', color: '#aaa', marginTop: '4px' }}>撞擊將扣減 6% 選民支持度！</p>
             </div>
 
             {/* Shark */}
             <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <img src="/assets/hater_shark.png" alt="霸道鯊魚" style={{ height: '75px', objectFit: 'contain', marginBottom: '4px' }} />
-              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>霸道鯊魚障礙</div>
+              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>英俊鯊魚</div>
               <p style={{ fontSize: '0.78rem', color: '#aaa', marginTop: '4px' }}>切換至對側軌道即可成功閃避！</p>
             </div>
           </div>
