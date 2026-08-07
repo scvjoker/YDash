@@ -270,17 +270,17 @@ export class AudioEngine {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         if (type === 'hit') {
-          navigator.vibrate(14); // Crisp 14ms Hit Pulse
+          navigator.vibrate(16); // 16ms Crisp Hit Pulse
         } else if (type === 'dual') {
-          navigator.vibrate([20, 25, 20]); // Light Double Vibration
+          navigator.vibrate([22, 35, 22]); // Burst Double Vibration
         } else if (type === 'damage') {
-          navigator.vibrate([40, 50, 40]); // Warning Vibration
+          navigator.vibrate([45, 60, 45]); // Heavy Warning Vibration
         }
       } catch (e) {}
     }
   }
 
-  // Realistic Web Audio Synthesized Drum Beats (Gentle Volume & Clean Chime Dual Sound)
+  // Realistic Web Audio Synthesized Drum Beats (Snare, Kick/Tom, Crisp Dual Bell "Ding~")
   public playSFX(type: 'perfect' | 'swish' | 'cheer' | 'error'): void {
     if (!this.isSfxEnabled) return;
 
@@ -288,23 +288,23 @@ export class AudioEngine {
     const now = ctx.currentTime;
 
     if (type === 'perfect') {
-      // 🥁 PERFECT: Gentle Acoustic Snare Drum Snap (Reduced Volume: 0.22)
+      // 🥁 PERFECT: Gentle Soft Snare Drum Snap (Gain lowered to 0.22 for smooth BGM harmony)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.exponentialRampToValueAtTime(75, now + 0.10);
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.10);
 
       gain.gain.setValueAtTime(0.22, now);
-      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.10);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.10);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.10);
 
-      // Add Subtle Soft Noise Snap
-      const bufferSize = ctx.sampleRate * 0.05;
+      // Soft Noise Snap Layer
+      const bufferSize = ctx.sampleRate * 0.06;
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
@@ -313,24 +313,24 @@ export class AudioEngine {
       const noiseSource = ctx.createBufferSource();
       noiseSource.buffer = noiseBuffer;
       const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.08, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.005, now + 0.05);
+      noiseGain.gain.setValueAtTime(0.12, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
 
       noiseSource.connect(noiseGain);
       noiseGain.connect(ctx.destination);
       noiseSource.start(now);
 
     } else if (type === 'swish') {
-      // 🥁 GREAT: Soft Bass Drum Hit (Reduced Volume: 0.25)
+      // 🥁 GREAT: Soft Bass Kick / Tom Hit (Gain lowered to 0.25)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.12);
 
       gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -339,34 +339,40 @@ export class AudioEngine {
       osc.stop(now + 0.12);
 
     } else if (type === 'cheer') {
-      // 🔔 DUAL STRIKE: Simple Clean High Bell Chime ("叮~")
-      const osc = ctx.createOscillator();
+      // 🔔 DUAL STRIKE: Crisp Ultra-High Metallic "Ding~" Sound (E6 1318.5Hz ~ 2637Hz)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1318.5, now); // E6 High Pitch Bell
-      osc.frequency.exponentialRampToValueAtTime(2637.0, now + 0.15);
+      osc1.type = 'sine';
+      osc2.type = 'sine';
 
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.18);
+      osc1.frequency.setValueAtTime(1318.5, now); // E6 High Bell Pitch
+      osc2.frequency.setValueAtTime(2637.0, now); // E7 OverTone
 
-      osc.connect(gain);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
       gain.connect(ctx.destination);
 
-      osc.start(now);
-      osc.stop(now + 0.18);
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.28);
+      osc2.stop(now + 0.28);
 
     } else if (type === 'error') {
-      // ❌ DAMAGE MISS: Soft Error Buzz
+      // ❌ DAMAGE MISS: Soft Warning Buzz
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.linearRampToValueAtTime(55, now + 0.20);
+      osc.frequency.setValueAtTime(130, now);
+      osc.frequency.linearRampToValueAtTime(60, now + 0.20);
 
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.20);
+      gain.gain.setValueAtTime(0.30, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.20);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
