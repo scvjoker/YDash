@@ -132,6 +132,7 @@ export const App: React.FC = () => {
       if (canvasRef.current) {
         const renderEngine = new RenderEngine(canvasRef.current);
         renderEngine.resize(window.innerWidth, window.innerHeight);
+        renderEngine.setSongBgImage(song.bg); // Dynamic MP4 Video or Image Background!
 
         const loop = new GameLoop(
           renderEngine,

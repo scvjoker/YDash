@@ -19,9 +19,11 @@ export class RenderEngine {
   private ctx: CanvasRenderingContext2D;
   private particles: HitParticle[] = [];
 
-  // Assets Images
+  // Assets Images & MP4 Background Support
   private bgImage: HTMLImageElement | null = null;
   private defaultBgImage: HTMLImageElement | null = null;
+  private bgVideoElement: HTMLVideoElement | null = null;
+
   private yoakaMainImage: HTMLImageElement | null = null;
   private yoakaDefaultImage: HTMLImageElement | null = null;
   private yoakaOfficeImage: HTMLImageElement | null = null;
@@ -63,10 +65,32 @@ export class RenderEngine {
   }
 
   public setSongBgImage(bgUrl?: string): void {
+    // Stop any active video background
+    if (this.bgVideoElement) {
+      this.bgVideoElement.pause();
+      this.bgVideoElement = null;
+    }
+
     if (!bgUrl) {
       this.bgImage = this.defaultBgImage;
       return;
     }
+
+    // Check if background is an MP4/WebM Video
+    if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
+      const video = document.createElement('video');
+      video.src = bgUrl;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.play().catch(() => {});
+      this.bgVideoElement = video;
+      this.bgImage = null;
+      return;
+    }
+
+    // Otherwise load standard image background
     const customBg = this.loadSmartImage([bgUrl, '/cyber_runway_bg.png', '/cyber_runway_bg.jpg']);
     this.bgImage = customBg;
   }
@@ -121,7 +145,7 @@ export class RenderEngine {
 
     ctx.clearRect(0, 0, width, height);
 
-    // 1. Draw Seamless Parallax Background Loop (Multi-Tile Seamless for Ultra-wide Mobile)
+    // 1. Draw Seamless Parallax Background (Supports MP4 Video & Images with Multi-Tile Loop)
     this.drawBackground(ctx, width, height, currentTime, stats.isFeverActive);
 
     // Dynamic Responsive Positions
@@ -264,6 +288,26 @@ export class RenderEngine {
     time: number,
     isFever: boolean
   ): void {
+    // A. Priority 1: MP4 Dynamic Video Background (Muted Loop)
+    if (this.bgVideoElement && this.bgVideoElement.readyState >= 2) {
+      const vidW = this.bgVideoElement.videoWidth || 1920;
+      const vidH = this.bgVideoElement.videoHeight || 1080;
+      const bgW = Math.max(10, vidW * (height / vidH));
+      const speed = 85;
+      const scrollX = (time * speed) % bgW;
+
+      let currentX = -scrollX;
+      while (currentX < width) {
+        ctx.drawImage(this.bgVideoElement, currentX, 0, bgW + 1.5, height);
+        currentX += bgW;
+      }
+
+      ctx.fillStyle = isFever ? 'rgba(40, 0, 60, 0.4)' : 'rgba(5, 6, 18, 0.55)';
+      ctx.fillRect(0, 0, width, height);
+      return;
+    }
+
+    // B. Priority 2: Custom / Default Image Background
     const activeBg = (this.bgImage && this.bgImage.complete && this.bgImage.naturalWidth !== 0)
       ? this.bgImage
       : (this.defaultBgImage && this.defaultBgImage.complete && this.defaultBgImage.naturalWidth !== 0)
@@ -284,7 +328,7 @@ export class RenderEngine {
       // Tile images dynamically until full screen width + buffer is filled (100% Seamless Loop!)
       let currentX = -scrollX;
       while (currentX < width) {
-        ctx.drawImage(activeBg, currentX, 0, bgW + 1.5, height); // +1.5px eliminates subpixel gaps on mobile
+        ctx.drawImage(activeBg, currentX, 0, bgW + 1.5, height);
         currentX += bgW;
       }
 

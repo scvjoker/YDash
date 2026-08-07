@@ -160,7 +160,7 @@ export const SONG_REGISTRY: SongData[] = [
     bpm: 80,
     duration: 195,
     cover: '/assets/cover_whats_next.png',
-    bg: '/cyber_runway_bg.png',
+    bg: '/assets/bgs/bg_whats_next.mp4',
     audio: '/assets/audio/whats_next_ali_jaylin.mp3',
     storyStage: 'DLC',
     isRhapsody: true,

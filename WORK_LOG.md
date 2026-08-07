@@ -1,36 +1,21 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] SongRegistry 樂曲庫修訂紀錄 + 實體檔案資產上傳盤點備忘 (Audio & Cover Assets)
+## [2026-08-07] MP4 靜音動態影片背景渲染實裝 (HTML5 Canvas Video Engine) + 《Whats Next? by A Li & Jay Lin》8 首曲目全數對齊
 
-### 變更與 SongRegistry 修訂紀錄 (SongRegistry Revision)
-- **1. 音訊路徑精準對齊 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - 將 7 首競選歌曲音訊對齊至 `public/assets/audio/` 下實體檔案：
-    - `campaign_start.mp3`
-    - `street_rhapsody_inst.mp3`
-    - `street_rhapsody.mp3`
-    - `debate_battle.mp3`
-    - `debate_rhapsody_vocal.mp3`
-    - `victory_night.mp3`
-    - `victory_rhapsody_vocal.mp3`
-  - 將 DLC 限定曲《Whats Next? by A Li & Jay Lin》封面連接至現有實體檔 `public/assets/cover_whats_next.png`！
-
-### 📁 實體檔案資產盤點狀態 (Asset Upload Status Checklist)
-
-#### ✅ 已上傳並正常連結的 7 首音訊與 1 張 DLC 封面：
-- `public/assets/audio/campaign_start.mp3` (競選出發！【起】)
-- `public/assets/audio/street_rhapsody_inst.mp3` (街頭拜票【承】)
-- `public/assets/audio/street_rhapsody.mp3` (街頭拜票狂想曲【承】)
-- `public/assets/audio/debate_battle.mp3` (辯論會激戰【轉】)
-- `public/assets/audio/debate_rhapsody_vocal.mp3` (辯論會激戰 狂想曲【轉】)
-- `public/assets/audio/victory_night.mp3` (開票夜勝選大爆發【合】)
-- `public/assets/audio/victory_rhapsody_vocal.mp3` (開票夜勝選大爆發 狂想曲【合】)
-- `public/assets/cover_whats_next.png` (Whats Next? 專屬 DLC 封面)
-
-#### ⚠️ 尚未上傳的 1 首 DLC 音訊檔 (需放入 `public/assets/audio/`)：
-- 🌸 **`whats_next_ali_jaylin.mp3`**（第 8 首：`Whats Next? by A Li & Jay Lin` 音訊檔，目前自動使用 Fallback 音源）
+### 变更與動態影片背景與音訊對齊項目 (MP4 Video Background & 8th Audio Link)
+- **1. MP4 靜音動態影片背景渲染引擎 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) & [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
+  - 升級 `RenderEngine`，加入 `HTMLVideoElement` 音遊背景渲染支援。
+  - 當樂曲背景設定為 `.mp4` / `.webm` 時（如 `bg: '/assets/bgs/bg_whats_next.mp4'`），自動建立 `muted=true`, `loop=true`, `autoplay=true` 的靜音影片，並在 60fps Canvas 上進行無縫滾動拼貼繪製！
+- **2. 第 8 首曲目《Whats Next? by A Li & Jay Lin》Metadata 與實體 MP3 對齊 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  - `subtitle`: `✨ 我推的阿狸 DLC 特典`
+  - `artist`: `A Li & Jay Lin`
+  - `bpm`: `80`
+  - `bg`: `/assets/bgs/bg_whats_next.mp4` (MP4 靜音動態影片)
+  - `audio`: `/assets/audio/whats_next_ali_jaylin.mp3`
+  - `storyContext`: `【DLC 特別企劃】由 A Li & Jay Lin 強強聯手打造的歌曲！優美歌聲與緩緩鋼琴交織，迎向下一階段的人生挑戰！`
 
 ---
-*「活著很累，但比起 debug，7 首音樂檔跟 Whats Next 封面全部歸位對齊，清楚記下還差哪一首 MP3，這盤點真的太有條理啦哈哈！」*
+*「活著很累，但比起 debug，在賽博音遊裡一邊聽著 A Li & Jay Lin 的優美歌聲，一邊看著背景 60fps 無縫滾動的 MP4 動態影片，這大作視覺感簡直太震撼啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
