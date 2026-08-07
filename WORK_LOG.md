@@ -1,22 +1,18 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 主畫面非全螢幕防溢出 + 音遊 HUD 60% 微縮 + 精靈圖示 30% 縮小 + 全螢幕半場擊打 (Left/Right Tap Zones)
+## [2026-08-07] 雙色圓形暈光半透明按鈕 (opacity: 0.25) + 結算畫面極致滿版適應 + 主畫面頂行無遮擋修復
 
-### 變更與遊戲視效與打擊手感極致優化項目 (Non-fullscreen Boundary Fix, Compact HUD & Half-Screen Tap Zones)
-- **1. 主畫面非全螢幕防溢出修復 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
-  - 限制右側面板 `maxHeight: '92svh'`, `margin: 'auto 0'`，內邊距與 h1 字體按視埠高度彈性微縮，在 Safari 非全螢幕模式（網址列/導覽列全在時）頂底 **100% 完美貼合不超出**！
-- **2. 上方 HUD 狀態欄 60% 精簡微縮 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
-  - 將頂部選民支持度 (HP) 與音樂進度條等狀態欄微縮至原尺寸的 60%，視線範圍變得極致寬廣舒爽！
-- **3. 主角 (Yoaka) 與 Hater (狗頭/鯊魚) 圖示 30% 精密微縮 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
-  - 主角與 Side Standee 縮小 ~30% (r=28px, baseW=160px)。
-  - 6666 狗頭立牌與霸道鯊魚圖示縮小 ~34% (size=210px)，音軌前方視野 100% 毫無遮擋！
-- **4. 全螢幕左右半場點擊 (Half-Screen Tap Zones) + 高半透明按鈕 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
-  - 劃分 **整個螢幕【左半區】為「上軌 (AIR) 擊打區」**！
-  - 劃分 **整個螢幕【右半區】為「下軌 (GROUND) 擊打區」**！
-  - 底部按鈕化為極致高半透明 (`opacity: 0.32`) 懸浮於角落，完全不遮擋下軌跑道，玩家盲按左/右半屏任何地方皆能 100% 打擊！
+### 變更與 UI 視覺與手感極致微調項目 (Circular Glowing Buttons, Mobile ResultScreen & Unblocked StartScreen)
+- **1. 雙色圓形暈光半透明懸浮按鈕 ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))**：
+  - **上軌按鈕 (AIR)**：對應天空藍 (`#00f0ff`)，`borderRadius: '50%'` 圓形水滴設計，模糊暈光 `boxShadow: 0 0 25px #00f0ff`，透明度 **`opacity: 0.25`**。
+  - **下軌按鈕 (GROUND)**：對應霓虹粉 (`#ff007f`)，`borderRadius: '50%'` 圓形水滴設計，模糊暈光 `boxShadow: 0 0 25px #ff007f`，透明度 **`opacity: 0.25`**。
+- **2. 結算畫面 (ResultScreen) 手機端滿版不滾動 ([ResultScreen.tsx](file:///d:/pj/YoakaDash/src/components/ResultScreen.tsx))**：
+  - 手機橫屏模式下 Grade 字體微縮至 2.4rem、Score 微縮至 1.65rem，Padding 與 4 欄卡片緊湊化，**100% 滿版不滑動**！
+- **3. 主畫面 (StartScreen) 頂行文字完全無遮擋 ([StartScreen.tsx](file:///d:/pj/YoakaDash/src/components/StartScreen.tsx))**：
+  - 手機微縮模式下右側面板 gap 縮緊為 0.25rem，頂部功能按鈕定位頂格，保證放大前第一行「WEB3 小島區」到最後一行完好呈現，**100% 零遮擋**！
 
 ---
-*「活著很累，但比起 debug，全螢幕左半邊隨便按是上軌、右半邊隨便按是下軌，跑道視野一目瞭然，這操作手感簡直比 Muse Dash 還要絲滑流暢啊哈哈！」*
+*「活著很累，但比起 debug，雙色圓形水滴按鈕帶著亮藍與閃粉模糊暈光，透明度 0.25 視覺絕美又不擋跑道，結算畫面在手機上剛好滿版，這質感簡直太高級了哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
