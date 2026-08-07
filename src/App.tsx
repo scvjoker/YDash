@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, BeatmapData, CostumeId, GameStats } from './types/game';
 import { DEFAULT_BEATMAPS } from './game/Beatmaps';
-import { SongTrackData, BUILTIN_SONGS } from './game/SongRegistry';
+import { SONG_REGISTRY, SongData } from './game/SongRegistry';
 import { RenderEngine } from './game/RenderEngine';
 import { GameLoop } from './game/GameLoop';
 import { audioEngine } from './game/AudioEngine';
@@ -13,22 +13,19 @@ import { HUDOverlay } from './components/HUDOverlay';
 import { PauseModal } from './components/PauseModal';
 import { ResultScreen } from './components/ResultScreen';
 import { LandscapePrompt } from './components/LandscapePrompt';
-
 import { SongSelectModal } from './components/SongSelectModal';
-import { TutorialModal } from './components/TutorialOverlay';
+import { TutorialOverlay } from './components/TutorialOverlay';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [currentBeatmap, setCurrentBeatmap] = useState<BeatmapData>(DEFAULT_BEATMAPS[0]);
+  const [showSongSelect, setShowSongSelect] = useState<boolean>(false);
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
+
+  const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [currentNoteSpeed, setCurrentNoteSpeed] = useState<number>(1.0);
   const [selectedCostume, setSelectedCostume] = useState<CostumeId>('campaign_vest');
-
-  // Song Selector & Tutorial Modal State
-  const [selectedSongTrack, setSelectedSongTrack] = useState<SongTrackData>(BUILTIN_SONGS[0]);
-  const [isSongSelectOpen, setIsSongSelectOpen] = useState<boolean>(false);
-  const [isTutorialModalOpen, setIsTutorialModalOpen] = useState<boolean>(false);
 
   const [gameStats, setGameStats] = useState<GameStats>({
     score: 0,
@@ -62,7 +59,7 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Auto-Pause when switching apps, leaving tab, or locking screen
+  // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
   useEffect(() => {
     const triggerAutoPause = () => {
       if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
@@ -90,22 +87,16 @@ export const App: React.FC = () => {
   }, [gameState, isPaused]);
 
   const handleStartGame = (
-    beatmap: BeatmapData,
+    song: SongData,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
-    noteSpeed: number = 1.0,
-    songTrack?: SongTrackData
+    noteSpeed: number = 1.0
   ) => {
     if (gameLoopRef.current) {
       gameLoopRef.current.stop();
       gameLoopRef.current = null;
     }
 
-    const activeTrack = songTrack || selectedSongTrack;
-    if (songTrack) {
-      setSelectedSongTrack(songTrack);
-    }
-
-    // Force Reset Game Stats to Initial Values
+    // Force Reset Game Stats to Initial Fresh Values (Score = 0, SupportRate = 100%)
     const freshStats: GameStats = {
       score: 0,
       supportRate: 100,
@@ -120,11 +111,22 @@ export const App: React.FC = () => {
     };
     setGameStats(freshStats);
 
-    setCurrentBeatmap(beatmap);
+    setCurrentSong(song);
     setCurrentDifficulty(difficulty);
     setCurrentNoteSpeed(noteSpeed);
     setIsPaused(false);
+    setShowSongSelect(false);
     setGameState('playing');
+
+    const activeMap: BeatmapData = {
+      ...DEFAULT_BEATMAPS[0],
+      metadata: {
+        ...DEFAULT_BEATMAPS[0].metadata,
+        title: song.title,
+        artist: song.artist,
+        bpm: song.bpm
+      }
+    };
 
     setTimeout(() => {
       if (canvasRef.current) {
@@ -133,11 +135,10 @@ export const App: React.FC = () => {
 
         const loop = new GameLoop(
           renderEngine,
-          beatmap,
+          activeMap,
           selectedCostume,
           difficulty,
           noteSpeed,
-          activeTrack,
           stats => setGameStats({ ...stats }),
           finalStats => {
             setGameStats({ ...finalStats });
@@ -190,37 +191,36 @@ export const App: React.FC = () => {
       {/* 1. START SCREEN */}
       {gameState === 'menu' && (
         <StartScreen
-          onStartGame={(map, diff, speed, song) => handleStartGame(map, diff, speed, song)}
+          currentSong={currentSong}
+          selectedCostume={selectedCostume}
+          onStartGame={(song, diff, speed) => handleStartGame(song, diff, speed)}
+          onOpenSongSelect={() => setShowSongSelect(true)}
+          onOpenTutorial={() => setShowTutorial(true)}
           onOpenCostumes={() => setGameState('costumes')}
           onOpenEditor={() => setGameState('editor')}
-          onOpenSongSelect={() => setIsSongSelectOpen(true)}
-          onStartTutorial={() => setIsTutorialModalOpen(true)}
-          selectedCostume={selectedCostume}
-          selectedSongTrack={selectedSongTrack}
         />
       )}
 
-      {/* 2. TUTORIAL MODAL (Graphic Slide Guide) */}
-      {isTutorialModalOpen && (
-        <TutorialModal onClose={() => setIsTutorialModalOpen(false)} />
+      {/* 2. SONG SELECTION HALL MODAL */}
+      {showSongSelect && (
+        <SongSelectModal
+          currentSongId={currentSong.id}
+          currentDifficulty={currentDifficulty}
+          currentSpeed={currentNoteSpeed}
+          onSelectSong={(song, diff, speed) => {
+            setCurrentSong(song);
+            setCurrentDifficulty(diff);
+            setCurrentNoteSpeed(speed);
+            setShowSongSelect(false);
+          }}
+          onClose={() => setShowSongSelect(false)}
+        />
       )}
 
-      {/* 3. SONG SELECT MODAL */}
-      {isSongSelectOpen && (
-        <SongSelectModal
-          onSelectSong={song => {
-            setIsSongSelectOpen(false);
-            if (song.isTutorial) {
-              setIsTutorialModalOpen(true);
-            } else {
-              setSelectedSongTrack(song);
-            }
-          }}
-          onClose={() => setIsSongSelectOpen(false)}
-          onOpenEditor={() => {
-            setIsSongSelectOpen(false);
-            setGameState('editor');
-          }}
+      {/* 3. TUTORIAL OVERLAY MODAL */}
+      {showTutorial && (
+        <TutorialOverlay
+          onClose={() => setShowTutorial(false)}
         />
       )}
 
@@ -237,7 +237,24 @@ export const App: React.FC = () => {
       {gameState === 'editor' && (
         <BeatmapEditor
           onClose={() => setGameState('menu')}
-          onPlayCustomMap={customMap => handleStartGame(customMap, 'Normal', 1.0)}
+          onPlayCustomMap={customMap => {
+            const customSong: SongData = {
+              id: 'custom',
+              title: customMap.metadata.title,
+              subtitle: '玩家自製 A+B 譜面',
+              artist: customMap.metadata.artist,
+              bpm: customMap.metadata.bpm,
+              duration: 180,
+              cover: '/assets/yoaka_kpop.png',
+              bg: '/cyber_runway_bg.png',
+              audio: '/assets/audio/street_campaign_vocal.mp3',
+              storyStage: '合',
+              isRhapsody: true,
+              storyContext: '【A+B 自製譜面】玩家上傳音檔與 AI 自動抓拍譜面！',
+              difficultyRating: { Easy: 3, Normal: 4, Hard: 5 }
+            };
+            handleStartGame(customSong, 'Normal', 1.0);
+          }}
         />
       )}
 
@@ -266,9 +283,9 @@ export const App: React.FC = () => {
       {isPaused && (
         <PauseModal
           stats={gameStats}
-          beatmapTitle={`${selectedSongTrack.title} (${currentDifficulty})`}
+          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
           onResume={handleTogglePause}
-          onRestart={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack)}
+          onRestart={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setIsPaused(false);
@@ -281,8 +298,8 @@ export const App: React.FC = () => {
       {gameState === 'result' && (
         <ResultScreen
           stats={gameStats}
-          beatmapTitle={`${selectedSongTrack.title} (${currentDifficulty})`}
-          onReplay={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack)}
+          beatmapTitle={`${currentSong.title} (${currentDifficulty})`}
+          onReplay={() => handleStartGame(currentSong, currentDifficulty, currentNoteSpeed)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setGameState('menu');

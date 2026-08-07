@@ -1,19 +1,23 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎵 恢復經典高品質手編律動譜面 + ⚡ DUAL 雙擊 (DUAL STRIKE) 雙軌同步耀眼渲染修復
+## [2026-08-07] 圖文新手教學 (無通用 Icon, 5大主題) + 樂曲選擇大廳 (6首起承轉合/狂想曲曲目) 實裝
 
-### 變更與譜面律動感及雙擊音符修復項目 (Hand-crafted Beatmaps & Dual Track Sync DUAL)
-- **1. 徹底解決「譜面差異大」問題 ([Beatmaps.ts](file:///d:/pj/YoakaDash/src/game/Beatmaps.ts) & [GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
-  - 查明原因：先前程式碼粗暴地讓 AI 隨機抓拍覆蓋掉了 `DEFAULT_BEATMAPS` 中經典工整的手工節奏譜面，導致譜面稀疏混亂。
-  - 修復處置：恢復並升級 4 首競選主題曲（里長起手式、區長爭霸、市長電音夜、幫主巔峰）的**經典工整律動譜面**！只有在創作者上傳自訂 MP3 時才使用 AI 抓拍。
-- **2. 徹底解決「雙擊只會出現在一邊」問題 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts) & [RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
-  - 查明原因：先前生成的 `isDual: true` 音符只放置於單一軌道，造成單邊顯示。
-  - 修復處置：
-    - 在生成與音符判定中，只要觸發 `isDual`，會在 **`air` (上軌) 與 `ground` (下軌) 兩軌同一時間點同步生成雙音符**！
-    - 在 `RenderEngine.ts` 中，繪製 `isDual` 音符時，會劃出**燦爛的金黃色雷射連線與 ⚡ DUAL 雙擊音符標示**，當玩家同時按壓 D/F + J/K 鍵時，雙軌音符同步打爆並解鎖 +200 得票數！
+### 變更與兩大新功能實裝項目 (Tutorial & Song Selection Hall)
+- **1. 圖文新手指南實裝 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 涵蓋 5 大完整教學主題：**`Note (一般音符)`**、**`Dual Note (金黃雙擊)`**、**`Hater (6666狗頭+霸道鯊魚)`**、**`Fevertime (熱血爆發雙倍得分)`**、**`造型 (3大 Yoaka 技能)`**。
+  - **嚴格遵守無通用 Icon 規範**，全部以實體遊戲圖片卡片、向量展示與清晰字體繪製！
+- **2. 樂曲資料庫格式規範與起承轉合曲目大廳 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 嚴格規範樂曲格式（包含封面、背景圖片、音訊路徑、BPM、難度星級與故事背景描述）。
+  - 收錄 6 首帶有熱血戰鬥故事線的曲目清單：
+    1. 🎵 **《競選出發！》** (起 - 街頭拜票 有歌詞)
+    2. 🎵 **《街頭拜票狂想曲》** (承 - 街頭拜票狂想曲 純音樂 ⚡狂想曲)
+    3. 🎵 **《辯論會激戰》** (轉 - 辯論會激戰 標準版)
+    4. 🎵 **《辯論會激戰 (狂想曲)》** (轉 - 辯論會激戰 有歌詞 狂想曲 ⚡高難長曲)
+    5. 🎵 **《開票夜勝選大爆發》** (合 - 開票夜勝選大爆發 標準版)
+    6. 🎵 **《開票夜勝選大爆發 (狂想曲)》** (合 - 開票夜勝選大爆發 有歌詞 狂想曲 ⚡終極狂想)
 
 ---
-*「活著很累，但比起 debug，把手編經典工整譜面拿回來，看著 DUAL 雙擊在上下軌亮起燦爛的金黃雷射連線，這打擊節奏感真的爽快爆棚啦哈哈！」*
+*「活著很累，但比起 debug，看著 5 大圖文教學卡片完全沒用通用 Icon、配上起承轉合的狂想曲大廳，這音遊質感簡直拉滿了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

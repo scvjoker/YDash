@@ -1,312 +1,140 @@
 import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
-interface TutorialModalProps {
+interface TutorialOverlayProps {
   onClose: () => void;
 }
 
 export const TUTORIAL_SLIDES = [
   {
-    step: 1,
-    title: '第一課：雙軌拜票與傳單發送',
-    badge: '基礎操作',
-    color: '#00f0ff',
+    id: 'notes',
+    badge: '第一課：音符打擊 (NOTE)',
+    title: '空中與地面選民音符',
+    subtitle: '親切發放拜票衛生紙，獲得選民支持得票！',
+    img: '/assets/yoaka_default.png',
+    cardBorder: '#00f0ff',
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', textAlign: 'left' }}>
-        <p style={{ color: '#ccc', fontSize: '0.92rem', lineHeight: 1.5, margin: 0 }}>
-          《YoakaDash》是一款雙軌賽博跑道音遊！主角 Yoaka 將在賽道上勇敢前進，您的任務是手握傳單精準發送給選民！
-        </p>
-
-        {/* Lesson 1 Preview Image Box (預留 /assets/tutorial_lesson1.png 放置位置) */}
-        <div style={{
-          width: '100%',
-          height: '135px',
-          background: 'rgba(0,0,0,0.5)',
-          border: '1.5px solid #00f0ff',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative'
-        }}>
-          <img
-            src="/assets/tutorial_lesson1.png"
-            onError={(e) => {
-              // Smart Fallback if screenshot doesn't exist yet
-              (e.target as HTMLImageElement).src = '/assets/tissue_pack.png';
-            }}
-            alt="第一課示範圖 (預留 /assets/tutorial_lesson1.png)"
-            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
-          />
-          <span style={{
-            position: 'absolute',
-            bottom: '6px',
-            right: '8px',
-            background: 'rgba(0,240,255,0.2)',
-            border: '1px solid #00f0ff',
-            color: '#00f0ff',
-            fontSize: '0.7rem',
-            padding: '2px 8px',
-            borderRadius: '6px',
-            fontWeight: 800
-          }}>
-            預留圖檔: /assets/tutorial_lesson1.png
-          </span>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-          <div style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1.5px solid #00f0ff', borderRadius: '10px', padding: '0.7rem' }}>
-            <h4 style={{ color: '#00f0ff', fontSize: '0.95rem', fontWeight: 900, marginBottom: '4px' }}>
-              上軌 (空中投紙)
-            </h4>
-            <p style={{ fontSize: '0.78rem', color: '#aaa', marginBottom: '6px' }}>
-              當藍色音符抵達左側靶心時擊扣！
-            </p>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <span className="key-badge">D</span>
-              <span className="key-badge">F</span>
-              <span style={{ fontSize: '0.72rem', color: '#00f0ff', alignSelf: 'center' }}>或點擊左下藍紐</span>
-            </div>
-          </div>
-
-          <div style={{ background: 'rgba(255, 0, 127, 0.1)', border: '1.5px solid #ff007f', borderRadius: '10px', padding: '0.7rem' }}>
-            <h4 style={{ color: '#ff007f', fontSize: '0.95rem', fontWeight: 900, marginBottom: '4px' }}>
-              下軌 (地面發紙)
-            </h4>
-            <p style={{ fontSize: '0.78rem', color: '#aaa', marginBottom: '6px' }}>
-              當粉色音符抵達左側靶心時擊扣！
-            </p>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <span className="key-badge">J</span>
-              <span className="key-badge">K</span>
-              <span style={{ fontSize: '0.72rem', color: '#ff007f', alignSelf: 'center' }}>或點擊右下粉紐</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    step: 2,
-    title: '第二課：雙擊音符與票數倍增',
-    badge: '高分技巧',
-    color: '#ffe600',
-    content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', textAlign: 'left' }}>
-        <p style={{ color: '#ccc', fontSize: '0.92rem', lineHeight: 1.5, margin: 0 }}>
-          賽道上會出現帶有 DUAL 光芒的金黃音符！這代表上下兩軌同時出現重要選民支持者！
-        </p>
-
-        {/* Lesson 2 Preview Image Box (預留 /assets/tutorial_lesson2.png 放置位置) */}
-        <div style={{
-          width: '100%',
-          height: '135px',
-          background: 'rgba(0,0,0,0.5)',
-          border: '1.5px solid #ffe600',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative'
-        }}>
-          <img
-            src="/assets/tutorial_lesson2.png"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/tissue_pack.png';
-            }}
-            alt="第二課示範圖 (預留 /assets/tutorial_lesson2.png)"
-            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
-          />
-          <span style={{
-            position: 'absolute',
-            bottom: '6px',
-            right: '8px',
-            background: 'rgba(255,230,0,0.2)',
-            border: '1px solid #ffe600',
-            color: '#ffe600',
-            fontSize: '0.7rem',
-            padding: '2px 8px',
-            borderRadius: '6px',
-            fontWeight: 800
-          }}>
-            預留圖檔: /assets/tutorial_lesson2.png
-          </span>
-        </div>
-
-        <div style={{ background: 'rgba(255, 230, 0, 0.12)', border: '1.5px solid #ffe600', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-          <h4 style={{ color: '#ffe600', fontSize: '1.05rem', fontWeight: 900, marginBottom: '4px' }}>
-            雙手同時按壓 (DUAL STRIKE)
-          </h4>
-          <p style={{ fontSize: '0.82rem', color: '#fff', margin: '0 0 6px 0' }}>
-            同時按下【上軌 (D/F)】與【下軌 (J/K)】鍵，觸發金黃雙管齊下！
+      <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
+        <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid #00f0ff', marginBottom: '1rem' }}>
+          <p style={{ color: '#00f0ff', fontWeight: 900, fontSize: '1.05rem', marginBottom: '4px' }}>
+            ☁️ 上軌空中音符 (AIR VOTER)
           </p>
-          <div style={{ display: 'inline-flex', gap: '8px', background: 'rgba(0,0,0,0.5)', padding: '4px 14px', borderRadius: '20px' }}>
-            <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.88rem' }}>+200 得票數加倍！</span>
-          </div>
+          <p>按下鍵盤 <strong>[D]</strong> 或 <strong>[F]</strong> 鍵（手機點擊左側藍色按紐），跳起空中向高處選民發放拜票紙巾！</p>
+        </div>
+
+        <div style={{ background: 'rgba(255, 0, 127, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid #ff007f' }}>
+          <p style={{ color: '#ff007f', fontWeight: 900, fontSize: '1.05rem', marginBottom: '4px' }}>
+            🏃 下軌地面音符 (GROUND VOTER)
+          </p>
+          <p>按下鍵盤 <strong>[J]</strong> 或 <strong>[K]</strong> 鍵（手機點擊右側粉色按紐），在地面奔跑發放拜票紙巾！</p>
         </div>
       </div>
     )
   },
   {
-    step: 3,
-    title: '第三課：閃避黑粉與支持度 (HP)',
-    badge: '生存防禦',
-    color: '#ff0055',
+    id: 'dual_note',
+    badge: '第二課：金黃雙擊 (DUAL NOTE)',
+    title: '⚡ 雙軌同時重音打擊',
+    subtitle: '上下軌同時出現金黃光芒音符，獲得 2 倍超高票數！',
+    img: '/assets/tissue_pack.png',
+    cardBorder: '#ffe600',
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', textAlign: 'left' }}>
-        <p style={{ color: '#ccc', fontSize: '0.88rem', lineHeight: 1.4, margin: 0 }}>
-          競選路上會有【狗頭舉牌板】與【賽博巨型鯊魚】黑粉攔路！
-        </p>
-
-        {/* Large Hater Images Showcase */}
-        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', border: '1.5px solid #ff0055', padding: '0.8rem', borderRadius: '12px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <img src="/assets/hater_dog_board.png" alt="狗頭黑粉" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
-            <p style={{ fontSize: '0.78rem', color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>狗頭舉牌黑粉</p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <img src="/assets/hater_shark.png" alt="鯊魚黑粉" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
-            <p style={{ fontSize: '0.78rem', color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>賽博巨型鯊魚</p>
-          </div>
-        </div>
-
-        <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '10px', padding: '0.7rem 0.9rem' }}>
-          <h4 style={{ color: '#ff0055', fontSize: '0.95rem', fontWeight: 900, marginBottom: '4px' }}>
-            軌道切換閃避 (DODGE)
-          </h4>
-          <p style={{ fontSize: '0.82rem', color: '#fff', margin: 0 }}>
-            黑粉在下軌請切換至【上軌】；黑粉在上軌請切換至【下軌】！正面撞擊黑粉將扣減【選民支持度 (HP)】！
+      <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
+        <div style={{ background: 'rgba(255, 230, 0, 0.12)', padding: '1rem 1.2rem', borderRadius: '12px', border: '1.5px solid #ffe600', marginBottom: '1rem' }}>
+          <p style={{ color: '#ffe600', fontWeight: 900, fontSize: '1.1rem', marginBottom: '6px' }}>
+            ⚡ 雙手同時按壓 (DUAL STRIKE)
+          </p>
+          <p>當上下軌同時出現帶有閃電金光的音符時，請<strong>同時按下左手 [D/F] 與右手 [J/K]</strong>（或手機左右按紐同時按壓）！</p>
+          <p style={{ color: '#ffe600', fontWeight: 800, marginTop: '6px' }}>
+            解鎖完美雙擊判定，一次直接入帳 200+ 得票數與金色電光特效！
           </p>
         </div>
       </div>
     )
   },
   {
-    step: 4,
-    title: '第四課：FEVER 熱血雙倍爆發',
-    badge: '熱血爆發',
-    color: '#ff007f',
+    id: 'hater',
+    badge: '第三課：黑粉障礙物 (HATER)',
+    title: '⚠️ 6666 狗頭板與霸道鯊魚',
+    subtitle: '小心路上的黑粉與立牌，即時切換軌道閃避！',
+    img: '/assets/hater_dog_board.png',
+    cardBorder: '#ff0055',
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', textAlign: 'left' }}>
-        <p style={{ color: '#ccc', fontSize: '0.92rem', lineHeight: 1.5, margin: 0 }}>
-          連續精準擊中音符將迅速積累【FEVER 熱血值】！
-        </p>
+      <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <div style={{ background: 'rgba(255, 0, 85, 0.15)', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ff0055', textAlign: 'center' }}>
+            <img src="/assets/hater_dog_board.png" alt="6666 狗頭立牌" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>6666 狗頭立牌</p>
+          </div>
 
-        {/* Lesson 4 Preview Image Box (預留 /assets/tutorial_lesson4.png 放置位置) */}
-        <div style={{
-          width: '100%',
-          height: '135px',
-          background: 'rgba(0,0,0,0.5)',
-          border: '1.5px solid #ff007f',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative'
-        }}>
-          <img
-            src="/assets/tutorial_lesson4.png"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/assets/tissue_pack.png';
-            }}
-            alt="第四課示範圖 (預留 /assets/tutorial_lesson4.png)"
-            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
-          />
-          <span style={{
-            position: 'absolute',
-            bottom: '6px',
-            right: '8px',
-            background: 'rgba(255,0,127,0.2)',
-            border: '1px solid #ff007f',
-            color: '#ff007f',
-            fontSize: '0.7rem',
-            padding: '2px 8px',
-            borderRadius: '6px',
-            fontWeight: 800
-          }}>
-            預留圖檔: /assets/tutorial_lesson4.png
-          </span>
+          <div style={{ background: 'rgba(255, 0, 85, 0.15)', padding: '0.8rem', borderRadius: '12px', border: '1px solid #ff0055', textAlign: 'center' }}>
+            <img src="/assets/hater_shark.png" alt="霸道黑粉鯊魚" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+            <p style={{ color: '#ff0055', fontWeight: 900, marginTop: '4px' }}>霸道黑粉鯊魚</p>
+          </div>
         </div>
 
-        <div style={{ background: 'rgba(255, 0, 127, 0.12)', border: '1.5px solid #ff007f', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-          <h4 style={{ color: '#ff007f', fontSize: '1.05rem', fontWeight: 900, marginBottom: '4px' }}>
-            FEVER MODE 雙倍票數狂歡
-          </h4>
-          <p style={{ fontSize: '0.82rem', color: '#fff', margin: '0 0 6px 0' }}>
-            熱血值填滿後自動進入 FEVER 狀態！6 秒內獲得的【得票數全部乘以 2 倍】！
-          </p>
-          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 14px', borderRadius: '20px', display: 'inline-block' }}>
-            <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.85rem' }}>搭配高 Combo 瞬間衝上競選榜首！</span>
-          </div>
+        <div style={{ background: 'rgba(255, 0, 85, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid #ff0055' }}>
+          <p style={{ color: '#ff0055', fontWeight: 900, marginBottom: '4px' }}>⚠️ 撞擊懲罰：</p>
+          <p>若未及時切換軌道閃避，撞上黑粉將會<strong>扣除 6% 選民支持度 (HP)</strong> 並中斷 Combo！支持度降至 0% 競選將告失敗！</p>
         </div>
       </div>
     )
   },
   {
-    step: 5,
-    title: '第五課：3 大競選戰袍技能指南',
-    badge: '換裝戰力',
-    color: '#00ff87',
+    id: 'fevertime',
+    badge: '第四課：熱血爆發 (FEVER TIME)',
+    title: '🔥 FEVER 雙倍票數熱血狂歡',
+    subtitle: '連續完美 Hit 累積熱血能量，觸發全場雙倍得分！',
+    img: '/assets/yoaka_kpop.png',
+    cardBorder: '#ffe600',
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', textAlign: 'left' }}>
-        <p style={{ color: '#ccc', fontSize: '0.85rem', margin: 0 }}>
-          在主選單的【選民拜票換裝館】可隨時更換 Yoaka 的戰鬥姿態，每套皆具備專屬技能：
-        </p>
+      <div style={{ lineHeight: 1.6, fontSize: '0.95rem', color: '#e0e0e0' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(255,0,127,0.2), rgba(255,230,0,0.2))', padding: '1rem 1.2rem', borderRadius: '12px', border: '1.5px solid #ffe600', marginBottom: '1rem' }}>
+          <p style={{ color: '#ffe600', fontWeight: 900, fontSize: '1.1rem', marginBottom: '6px' }}>
+            🔥 狂歡熱血全開！
+          </p>
+          <p>每次成功擊中音符都會累積能量。當能量條達到 100% 時，自動解鎖 <strong>FEVER MODE (6 秒)</strong>！</p>
+          <p style={{ color: '#ff007f', fontWeight: 900, marginTop: '6px' }}>
+            全場背景進入熱血紫色霓虹光，所有獲取的票數直接翻倍 (2X SCORE)！
+          </p>
+        </div>
+      </div>
+    )
+  },
+  {
+    id: 'costumes',
+    badge: '第五課：造型技能 (COSTUMES)',
+    title: '👑 3 大 Yoaka 戰力特化加成',
+    subtitle: '前往「選民拜票換裝館」，裝備專屬競選戰袍！',
+    img: '/assets/yoaka_office.png',
+    cardBorder: '#00f0ff',
+    content: (
+      <div style={{ lineHeight: 1.5, fontSize: '0.88rem', color: '#e0e0e0', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #00f0ff' }}>
+          <span style={{ color: '#00f0ff', fontWeight: 900 }}>👑 競選 Yoaka：</span> 失誤或撞到黑粉時，支持度扣血減少 33% (防護保命)。
+        </div>
 
-        {/* Large Standee Characters Showcase */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1.5px solid #00f0ff', borderRadius: '10px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/yoaka_default.png" alt="競選 Yoaka" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '8px' }} />
-            <div style={{ flex: 1 }}>
-              <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: '0.9rem' }}>競選 Yoaka</span>
-              <p style={{ color: '#fff', fontSize: '0.78rem', margin: 0 }}>技能: Miss 扣血傷害減少 33% (新手保底)</p>
-            </div>
-          </div>
+        <div style={{ background: 'rgba(255, 230, 0, 0.1)', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #ffe600' }}>
+          <span style={{ color: '#ffe600', fontWeight: 900 }}>👓 學霸 Yoaka：</span> 理智高分特化，每次發紙獲票數額外 +20% 得票加成！
+        </div>
 
-          <div style={{ background: 'rgba(255, 230, 0, 0.1)', border: '1.5px solid #ffe600', borderRadius: '10px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/yoaka_office.png" alt="學霸 Yoaka" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '8px' }} />
-            <div style={{ flex: 1 }}>
-              <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.9rem' }}>學霸 Yoaka</span>
-              <p style={{ color: '#fff', fontSize: '0.78rem', margin: 0 }}>技能: 總獲票數 (Score) 獲得額外 +20% 加成</p>
-            </div>
-          </div>
-
-          <div style={{ background: 'rgba(255, 0, 127, 0.1)', border: '1.5px solid #ff007f', borderRadius: '10px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/yoaka_kpop.png" alt="偶像 Yoaka" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '8px' }} />
-            <div style={{ flex: 1 }}>
-              <span style={{ color: '#ff007f', fontWeight: 900, fontSize: '0.9rem' }}>偶像 Yoaka</span>
-              <p style={{ color: '#fff', fontSize: '0.78rem', margin: 0 }}>技能: FEVER 熱血爆發積累速度翻倍</p>
-            </div>
-          </div>
+        <div style={{ background: 'rgba(255, 0, 127, 0.1)', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #ff007f' }}>
+          <span style={{ color: '#ff007f', fontWeight: 900 }}>✨ 偶像 Yoaka：</span> 魅力全開，FEVER 熱血能量積累速度翻倍！
         </div>
       </div>
     )
   }
 ];
 
-export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
+export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
 
   const currentSlide = TUTORIAL_SLIDES[currentSlideIndex];
-  const isFirst = currentSlideIndex === 0;
-  const isLast = currentSlideIndex === TUTORIAL_SLIDES.length - 1;
-
-  const handleNext = () => {
-    if (!isLast) setCurrentSlideIndex(prev => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (!isFirst) setCurrentSlideIndex(prev => prev - 1);
-  };
 
   return (
     <div style={{
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(7, 8, 20, 0.94)',
+      backgroundColor: 'rgba(5, 7, 18, 0.94)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
@@ -315,91 +143,103 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
       padding: '1rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '720px',
+        width: '840px',
         maxWidth: '95vw',
-        maxHeight: '95vh',
-        padding: '1.8rem 2.2rem',
+        maxHeight: '94vh',
+        overflowY: 'auto',
+        padding: '1.6rem 2rem',
         position: 'relative',
-        border: `2px solid ${currentSlide.color}`,
-        boxShadow: `0 0 35px ${currentSlide.color}55`,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
+        border: `2px solid ${currentSlide.cardBorder}`,
+        boxShadow: `0 0 35px ${currentSlide.cardBorder}55`
       }}>
-        {/* Clean Close Button */}
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            background: 'rgba(255, 0, 127, 0.2)',
-            border: '1.5px solid #ff007f',
-            color: '#fff',
-            borderRadius: '50%',
-            width: '38px',
-            height: '38px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)',
-            zIndex: 10
-          }}
-        >
-          <X size={20} />
-        </button>
-
-        {/* Modal Header */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.4rem' }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+          <div>
             <span style={{
-              background: currentSlide.color,
+              background: currentSlide.cardBorder,
               color: '#000',
               fontWeight: 900,
-              padding: '3px 12px',
-              borderRadius: '14px',
-              fontSize: '0.78rem'
+              padding: '3px 14px',
+              borderRadius: '20px',
+              fontSize: '0.85rem',
+              letterSpacing: '1px'
             }}>
-              {currentSlide.badge} ({currentSlideIndex + 1}/{TUTORIAL_SLIDES.length})
+              {currentSlide.badge}
             </span>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.8rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
-              color: currentSlide.color,
-              textShadow: `0 0 12px ${currentSlide.color}66`,
-              margin: 0
+              color: '#fff',
+              marginTop: '6px'
             }}>
               {currentSlide.title}
             </h2>
+            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>{currentSlide.subtitle}</p>
           </div>
+
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255, 0, 85, 0.2)',
+              border: '1.5px solid #ff0055',
+              color: '#fff',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              fontWeight: 900,
+              fontSize: '1.2rem',
+              cursor: 'pointer'
+            }}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Slide Content Body */}
-        <div style={{ margin: '0.8rem 0', minHeight: '230px' }}>
-          {currentSlide.content}
+        {/* Slide Body: Image + Content */}
+        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '1.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+          {/* Real Game Image Showcase */}
+          <div style={{
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: '16px',
+            padding: '1rem',
+            border: `1.5px solid ${currentSlide.cardBorder}66`,
+            textAlign: 'center',
+            height: '240px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <img
+              src={currentSlide.img}
+              alt={currentSlide.title}
+              style={{
+                maxHeight: '100%',
+                maxWidth: '100%',
+                objectFit: 'contain',
+                borderRadius: '12px'
+              }}
+            />
+          </div>
+
+          {/* Interactive Lesson Explanation Content */}
+          <div>{currentSlide.content}</div>
         </div>
 
-        {/* Slide Footer Navigation */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderTop: '1px solid rgba(255,255,255,0.12)',
-          paddingTop: '0.9rem'
-        }}>
+        {/* Bottom Pagination & Navigation Controls */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           {/* Step Dots */}
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {TUTORIAL_SLIDES.map((_, idx) => (
-              <div
-                key={idx}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {TUTORIAL_SLIDES.map((slide, idx) => (
+              <button
+                key={slide.id}
                 onClick={() => setCurrentSlideIndex(idx)}
                 style={{
-                  width: idx === currentSlideIndex ? '24px' : '8px',
-                  height: '8px',
-                  borderRadius: '4px',
-                  background: idx === currentSlideIndex ? currentSlide.color : 'rgba(255,255,255,0.2)',
+                  width: idx === currentSlideIndex ? '28px' : '10px',
+                  height: '10px',
+                  borderRadius: '5px',
+                  background: idx === currentSlideIndex ? currentSlide.cardBorder : 'rgba(255,255,255,0.2)',
+                  border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.25s'
                 }}
@@ -407,44 +247,33 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
             ))}
           </div>
 
-          {/* Action Buttons */}
+          {/* Prev / Next Buttons */}
           <div style={{ display: 'flex', gap: '0.8rem' }}>
-            {!isFirst && (
+            {currentSlideIndex > 0 && (
               <button
-                onClick={handlePrev}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#fff',
-                  borderRadius: '12px',
-                  padding: '6px 16px',
-                  fontWeight: 900,
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
+                className="muse-btn muse-btn-cyan"
+                onClick={() => setCurrentSlideIndex(prev => prev - 1)}
+                style={{ padding: '0.55rem 1.4rem', fontSize: '0.95rem' }}
               >
-                <ChevronLeft size={16} /> 上一頁
+                <span>上一課</span>
               </button>
             )}
 
-            {!isLast ? (
+            {currentSlideIndex < TUTORIAL_SLIDES.length - 1 ? (
               <button
                 className="muse-btn"
-                onClick={handleNext}
-                style={{ fontSize: '0.95rem', padding: '0.55rem 1.4rem' }}
+                onClick={() => setCurrentSlideIndex(prev => prev + 1)}
+                style={{ padding: '0.55rem 1.4rem', fontSize: '0.95rem' }}
               >
-                <span>下一頁 <ChevronRight size={18} /></span>
+                <span>下一課 ▸</span>
               </button>
             ) : (
               <button
                 className="muse-btn muse-btn-yellow"
                 onClick={onClose}
-                style={{ fontSize: '0.95rem', padding: '0.55rem 1.4rem' }}
+                style={{ padding: '0.55rem 1.4rem', fontSize: '0.95rem' }}
               >
-                <span><CheckCircle size={18} /> 我懂了！開始競選拜票</span>
+                <span>學會了，開啟拜票！</span>
               </button>
             )}
           </div>

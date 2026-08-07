@@ -1,7 +1,6 @@
 import { Note, BeatmapData, GameStats, CostumeId } from '../types/game';
 import { audioEngine } from './AudioEngine';
 import { RenderEngine } from './RenderEngine';
-import { SongTrackData } from './SongRegistry';
 
 export class GameLoop {
   private renderEngine: RenderEngine;
@@ -9,7 +8,6 @@ export class GameLoop {
   private costume: CostumeId;
   private difficulty: 'Easy' | 'Normal' | 'Hard';
   private speedMultiplier: number;
-  private songTrack?: SongTrackData;
   private animFrameId: number | null = null;
   private isPausedState: boolean = false;
 
@@ -42,7 +40,6 @@ export class GameLoop {
     costume: CostumeId,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
     speedMultiplier: number = 1.0,
-    songTrack?: SongTrackData,
     onStatsChange?: (stats: GameStats) => void,
     onGameOver?: (stats: GameStats) => void
   ) {
@@ -51,7 +48,6 @@ export class GameLoop {
     this.costume = costume;
     this.difficulty = difficulty;
     this.speedMultiplier = speedMultiplier;
-    this.songTrack = songTrack;
     this.onStatsChange = onStatsChange;
     this.onGameOver = onGameOver;
 
@@ -60,12 +56,10 @@ export class GameLoop {
   }
 
   public async start(): Promise<void> {
-    const audioUrl = this.songTrack?.audioUrl || '';
-    const audioBuf = await audioEngine.loadAudioFromUrl(audioUrl);
+    const bgmBuf = await audioEngine.loadDefaultBGM();
     
-    // Only detect notes automatically if beatmap notes were empty
-    if (audioBuf && (!this.notes || this.notes.length === 0)) {
-      const detected = audioEngine.detectBeatsFromBuffer(audioBuf, this.difficulty);
+    if (bgmBuf) {
+      const detected = audioEngine.detectBeatsFromBuffer(bgmBuf, this.difficulty);
       if (detected.length > 0) {
         this.notes = detected;
         this.stats.totalNotesCount = this.notes.filter(n => n.type !== 'obstacle').length;
@@ -132,7 +126,7 @@ export class GameLoop {
       if (track === 'ground') this.inputState.groundActive = false;
     }, 120);
 
-    const windowSec = 0.25;
+    const windowSec = 0.21;
     let closestNote: Note | null = null;
     let minDiff = Infinity;
 
@@ -148,21 +142,10 @@ export class GameLoop {
 
     if (closestNote) {
       closestNote.hit = true;
-
-      // If it's a DUAL note, mark its sister DUAL note on the opposite track as hit too!
-      if (closestNote.isDual) {
-        const oppTrack = track === 'air' ? 'ground' : 'air';
-        const sisterNote = this.notes.find(n => !n.hit && n.isDual && n.track === oppTrack && Math.abs(n.time - closestNote.time) < 0.15);
-        if (sisterNote) {
-          sisterNote.hit = true;
-          sisterNote.judgement = closestNote.judgement || 'perfect';
-        }
-      }
-
       let judgement: 'perfect' | 'great' = 'great';
       let scoreAdd = 60;
 
-      if (minDiff <= 0.075) {
+      if (minDiff <= 0.065) {
         judgement = 'perfect';
         scoreAdd = 100;
       }
@@ -201,7 +184,7 @@ export class GameLoop {
       }
 
       const hitX = this.renderEngine['canvas'].width * 0.22;
-      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
+      const hitY = track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
       const hitText = closestNote.isDual ? `⚡ DUAL! +${scoreAdd} 票` : `+${scoreAdd} 票`;
       this.renderEngine.triggerHitEffect(hitX, hitY, hitText, judgement);
 
@@ -227,7 +210,7 @@ export class GameLoop {
 
     const currentTime = audioEngine.getHardwareTime();
 
-    // Render 5.0s Lead-In / Unpause Countdown Text (h * 0.24)
+    // Render 5.0s Lead-In / Unpause Countdown Text (Adjusted Y to h * 0.24)
     if (this.resumeCountdown > 0) {
       this.renderEngine.render(
         currentTime,
@@ -242,7 +225,7 @@ export class GameLoop {
       const ctx = this.renderEngine['ctx'];
       const w = this.renderEngine['canvas'].width;
       const h = this.renderEngine['canvas'].height;
-      const scale = Math.min(1.8, Math.max(0.60, h / 640));
+      const scale = Math.min(1.25, Math.max(0.45, h / 720));
 
       ctx.save();
       ctx.fillStyle = 'rgba(7, 8, 20, 0.65)';
@@ -273,7 +256,7 @@ export class GameLoop {
             audioEngine.playSFX('error');
 
             const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
             this.renderEngine.triggerHitEffect(hitX, hitY, `❌ HIT!`, 'damage');
 
             if (this.stats.supportRate <= 0) {
@@ -283,7 +266,7 @@ export class GameLoop {
             }
           } else {
             const hitX = this.renderEngine['canvas'].width * 0.22;
-            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.36 : this.renderEngine['canvas'].height * 0.70;
+            const hitY = note.track === 'air' ? this.renderEngine['canvas'].height * 0.35 : this.renderEngine['canvas'].height * 0.70;
             this.renderEngine.triggerHitEffect(hitX, hitY, `✨ DODGE!`, 'dodge');
           }
           if (this.onStatsChange) this.onStatsChange({ ...this.stats });
@@ -291,7 +274,7 @@ export class GameLoop {
       }
       
       // 2. Process Missed Voter Notes
-      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.25) {
+      else if (!note.hit && note.type !== 'obstacle' && (currentTime - note.time) > 0.21) {
         note.hit = true;
         note.judgement = 'miss';
         this.stats.missCount++;
@@ -324,8 +307,7 @@ export class GameLoop {
     );
 
     const lastNote = this.notes[this.notes.length - 1];
-    // Real end condition: either all notes passed by 3 seconds or full song length finished
-    if (lastNote && currentTime > lastNote.time + 3.0) {
+    if (lastNote && currentTime > lastNote.time + 2.5) {
       this.stop();
       if (this.onGameOver) this.onGameOver({ ...this.stats });
       return;

@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize, GraduationCap, Music } from 'lucide-react';
+import { Play, Sparkles, Wand2, Disc, Flame, Gauge, Maximize, HelpCircle, Music2 } from 'lucide-react';
 import { BeatmapData, CostumeId } from '../types/game';
-import { DEFAULT_BEATMAPS, COSTUMES_DATA } from '../game/Beatmaps';
-import { SongTrackData, BUILTIN_SONGS } from '../game/SongRegistry';
+import { COSTUMES_DATA } from '../game/Beatmaps';
+import { SongData } from '../game/SongRegistry';
 
 interface StartScreenProps {
-  onStartGame: (beatmap: BeatmapData, difficulty: 'Easy' | 'Normal' | 'Hard', noteSpeed: number, songTrack?: SongTrackData) => void;
+  currentSong: SongData;
+  selectedCostume: CostumeId;
+  onStartGame: (song: SongData, difficulty: 'Easy' | 'Normal' | 'Hard', noteSpeed: number) => void;
+  onOpenSongSelect: () => void;
+  onOpenTutorial: () => void;
   onOpenCostumes: () => void;
   onOpenEditor: () => void;
-  onOpenSongSelect: () => void;
-  onStartTutorial: () => void;
-  selectedCostume: CostumeId;
-  selectedSongTrack: SongTrackData;
 }
 
 export const StartScreen: React.FC<StartScreenProps> = ({
-  onStartGame,
-  onOpenCostumes,
-  onOpenEditor,
-  onOpenSongSelect,
-  onStartTutorial,
+  currentSong,
   selectedCostume,
-  selectedSongTrack
+  onStartGame,
+  onOpenSongSelect,
+  onOpenTutorial,
+  onOpenCostumes,
+  onOpenEditor
 }) => {
-  const [selectedMap] = useState<BeatmapData>(DEFAULT_BEATMAPS[0]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [selectedNoteSpeed, setSelectedNoteSpeed] = useState<number>(1.0);
   const [paperSprinkles, setPaperSprinkles] = useState<number[]>([]);
@@ -112,31 +111,59 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
       ))}
 
-      {/* TOP RIGHT FULLSCREEN BUTTON */}
-      <button
-        onClick={handleFullscreen}
-        style={{
-          position: 'absolute',
-          top: '1.2rem',
-          right: '1.5rem',
-          zIndex: 10,
-          background: 'rgba(255, 230, 0, 0.15)',
-          border: '1.5px solid #ffe600',
-          color: '#ffe600',
-          borderRadius: '20px',
-          padding: '6px 16px',
-          fontFamily: 'Chakra Petch, sans-serif',
-          fontWeight: 900,
-          fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          cursor: 'pointer',
-          boxShadow: '0 0 15px rgba(255,230,0,0.4)'
-        }}
-      >
-        <Maximize size={16} /> 全螢幕 (FULLSCREEN)
-      </button>
+      {/* TOP RIGHT FUNCTION BUTTONS GROUP */}
+      <div style={{
+        position: 'absolute',
+        top: '1.2rem',
+        right: '1.5rem',
+        zIndex: 10,
+        display: 'flex',
+        gap: '0.8rem'
+      }}>
+        {/* TUTORIAL BUTTON */}
+        <button
+          onClick={onOpenTutorial}
+          style={{
+            background: 'rgba(0, 240, 255, 0.15)',
+            border: '1.5px solid #00f0ff',
+            color: '#00f0ff',
+            borderRadius: '20px',
+            padding: '6px 16px',
+            fontFamily: 'Chakra Petch, sans-serif',
+            fontWeight: 900,
+            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            boxShadow: '0 0 15px rgba(0,240,255,0.4)'
+          }}
+        >
+          <HelpCircle size={16} /> ❓ 新手指南
+        </button>
+
+        {/* FULLSCREEN BUTTON */}
+        <button
+          onClick={handleFullscreen}
+          style={{
+            background: 'rgba(255, 230, 0, 0.15)',
+            border: '1.5px solid #ffe600',
+            color: '#ffe600',
+            borderRadius: '20px',
+            padding: '6px 16px',
+            fontFamily: 'Chakra Petch, sans-serif',
+            fontWeight: 900,
+            fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            boxShadow: '0 0 15px rgba(255,230,0,0.4)'
+          }}
+        >
+          <Maximize size={16} /> 全螢幕 (FULLSCREEN)
+        </button>
+      </div>
 
       {/* LEFT HALF (50vw): Borderless Clean Hero Character Artwork Showcase */}
       <div style={{
@@ -204,7 +231,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
       </div>
 
-      {/* RIGHT HALF (50vw): Menu Container */}
+      {/* RIGHT HALF (50vw): Desktop Restored Grand Size Menu Container */}
       <div style={{
         width: '50vw',
         height: '100vh',
@@ -213,47 +240,24 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         justifyContent: 'center',
         padding: isMobileScreen ? '0.4rem 2.5vw 0.4rem 0.5vw' : '0 4vw 0 1vw',
         zIndex: 2,
-        gap: isMobileScreen ? '0.4rem' : '0.9rem',
+        gap: isMobileScreen ? '0.5rem' : '1.1rem',
         overflowY: 'auto'
       }}>
-        {/* Top Campaign Badge Pill & Tutorial Shortcut Button */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{
-            background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
-            padding: isMobileScreen ? '3px 14px' : '5px 22px',
-            borderRadius: '30px',
-            boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
-            <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
-              WEB3 小島區里長熱血大選！
-            </span>
-          </div>
-
-          {/* 🎓 TUTORIAL ENTRY BUTTON */}
-          <button
-            onClick={onStartTutorial}
-            style={{
-              background: 'linear-gradient(135deg, #ffe600 0%, #ffb703 100%)',
-              border: '1.5px solid #fff',
-              color: '#000',
-              borderRadius: '20px',
-              padding: isMobileScreen ? '3px 12px' : '6px 18px',
-              fontFamily: 'Chakra Petch, sans-serif',
-              fontWeight: 900,
-              fontSize: isMobileScreen ? '0.78rem' : '0.92rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 0 16px rgba(255,230,0,0.6)'
-            }}
-          >
-            <GraduationCap size={isMobileScreen ? 14 : 18} /> 🎓 新手競選培訓
-          </button>
+        {/* Top Campaign Badge Pill */}
+        <div style={{
+          alignSelf: 'flex-start',
+          background: 'linear-gradient(90deg, #ff007f 0%, #00f0ff 100%)',
+          padding: isMobileScreen ? '3px 14px' : '5px 22px',
+          borderRadius: '30px',
+          boxShadow: '0 0 25px rgba(0, 240, 255, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Flame size={isMobileScreen ? 14 : 18} color="#ffe600" />
+          <span style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', fontWeight: 900, color: '#000', letterSpacing: '2px' }}>
+            WEB3 小島區里長熱血大選！
+          </span>
         </div>
 
         {/* Main Neon Title & Slogan Catchphrase Group */}
@@ -290,46 +294,54 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
         </div>
 
-        {/* Track Selection Card with Difficulty & Speed Switch & SONG SELECTOR ENTRY */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.3rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.5rem' }}>
+        {/* Selected Track Display Card */}
+        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.7rem 0.9rem' : '1.4rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobileScreen ? '0.2rem' : '0.6rem' }}>
             <span style={{ color: '#00f0ff', fontWeight: 900, fontSize: isMobileScreen ? '0.78rem' : '0.9rem', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Disc size={isMobileScreen ? 14 : 18} /> 當前選定戰歌
+              <Disc size={isMobileScreen ? 14 : 18} /> 當前競選戰歌 【{currentSong.storyStage}】
             </span>
             
             <button
               onClick={onOpenSongSelect}
               style={{
-                background: 'rgba(0, 240, 255, 0.15)',
+                background: 'rgba(0, 240, 255, 0.2)',
                 border: '1.5px solid #00f0ff',
                 color: '#00f0ff',
+                padding: isMobileScreen ? '2px 10px' : '4px 14px',
                 borderRadius: '16px',
-                padding: '2px 10px',
-                fontSize: isMobileScreen ? '0.72rem' : '0.82rem',
                 fontWeight: 900,
+                fontSize: isMobileScreen ? '0.75rem' : '0.85rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
-              <Music size={13} /> 🎵 換歌選單 ({BUILTIN_SONGS.length}首)
+              <Music2 size={14} /> 🎵 切換樂曲
             </button>
           </div>
 
-          <h3 style={{ fontSize: isMobileScreen ? '1.2rem' : '1.8rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
-            {selectedSongTrack.title}
+          <h3 style={{ fontSize: isMobileScreen ? '1.25rem' : '2rem', fontWeight: 900, marginBottom: '0.2rem', color: '#fff', textShadow: '0 0 15px rgba(255,230,0,0.5)' }}>
+            {currentSong.title}
+            {currentSong.isRhapsody && (
+              <span style={{ fontSize: '0.8rem', color: '#ffe600', marginLeft: '10px', border: '1px solid #ffe600', padding: '2px 8px', borderRadius: '8px' }}>
+                ⚡ 狂想曲 (高難/長曲)
+              </span>
+            )}
           </h3>
+          <p style={{ color: '#aaa', fontSize: isMobileScreen ? '0.78rem' : '0.9rem', marginBottom: '0.6rem' }}>
+            {currentSong.subtitle} • BPM {currentSong.bpm}
+          </p>
 
           {/* Difficulty Switch Pills */}
-          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.7rem' }}>
+          <div style={{ display: 'flex', gap: isMobileScreen ? '0.4rem' : '0.6rem', marginTop: isMobileScreen ? '0.4rem' : '0.8rem' }}>
             {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
                 style={{
                   flex: 1,
-                  padding: isMobileScreen ? '0.35rem' : '0.5rem',
+                  padding: isMobileScreen ? '0.35rem' : '0.55rem',
                   background: selectedDifficulty === diff ? (diff === 'Hard' ? 'linear-gradient(135deg, #ff007f, #d80068)' : diff === 'Normal' ? 'linear-gradient(135deg, #00f0ff, #0077b6)' : 'linear-gradient(135deg, #ffe600, #ffb703)') : 'rgba(255,255,255,0.05)',
                   border: selectedDifficulty === diff ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
                   borderRadius: '10px',
@@ -340,15 +352,15 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                   transition: 'all 0.25s'
                 }}
               >
-                {diff === 'Easy' && (isMobileScreen ? 'Easy' : '🌱 Easy (休閒)')}
-                {diff === 'Normal' && (isMobileScreen ? 'Normal' : '🔥 Normal (熱血)')}
-                {diff === 'Hard' && (isMobileScreen ? 'Hard' : '⚡ Hard (極限)')}
+                {diff === 'Easy' && (isMobileScreen ? 'Easy' : '🌱 Easy')}
+                {diff === 'Normal' && (isMobileScreen ? 'Normal' : '🔥 Normal')}
+                {diff === 'Hard' && (isMobileScreen ? 'Hard' : '⚡ Hard')}
               </button>
             ))}
           </div>
 
           {/* Note Speed Multiplier Selection Bar */}
-          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.45rem 0.8rem', borderRadius: '10px' }}>
+          <div style={{ marginTop: isMobileScreen ? '0.4rem' : '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.4)', padding: isMobileScreen ? '0.3rem 0.6rem' : '0.5rem 0.8rem', borderRadius: '10px' }}>
             <span style={{ fontSize: isMobileScreen ? '0.72rem' : '0.82rem', color: '#aaa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
               <Gauge size={isMobileScreen ? 12 : 16} color="#ffe600" /> 音符流速 (SPEED):
             </span>
@@ -378,42 +390,21 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         {/* Start Game Button */}
         <button
           className="muse-btn"
-          onClick={() => onStartGame(selectedMap, selectedDifficulty, selectedNoteSpeed, selectedSongTrack)}
-          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.4rem', padding: isMobileScreen ? '0.65rem' : '0.9rem' }}
+          onClick={() => onStartGame(currentSong, selectedDifficulty, selectedNoteSpeed)}
+          style={{ width: '100%', fontSize: isMobileScreen ? '1.15rem' : '1.45rem', padding: isMobileScreen ? '0.65rem' : '1rem' }}
         >
           <span><Play fill="#fff" size={isMobileScreen ? 18 : 24} /> 開啟競選拜票 (START - {selectedNoteSpeed.toFixed(2)}x)</span>
         </button>
 
         {/* Sub Option Buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobileScreen ? '0.4rem' : '0.8rem' }}>
-          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.75rem' }}>
+          <button className="muse-btn muse-btn-cyan" onClick={onOpenCostumes} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
             <span><Sparkles size={isMobileScreen ? 14 : 18} /> 造型: {costumeObj.name}</span>
           </button>
 
-          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.75rem' }}>
+          <button className="muse-btn muse-btn-yellow" onClick={onOpenEditor} style={{ fontSize: isMobileScreen ? '0.8rem' : '1rem', padding: isMobileScreen ? '0.5rem' : '0.8rem' }}>
             <span><Wand2 size={isMobileScreen ? 14 : 18} /> A+B 譜面創作者</span>
           </button>
-        </div>
-
-        {/* Key Guide Box */}
-        <div className="cyber-panel" style={{ padding: isMobileScreen ? '0.4rem 0.8rem' : '0.7rem 1.2rem', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.7rem' : '0.8rem', color: '#00f0ff', fontWeight: 800, marginBottom: '4px' }}>上軌 (空中投紙/閃避)</p>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <span className="key-badge">D</span>
-              <span className="key-badge">F</span>
-            </div>
-          </div>
-
-          <div style={{ width: '1px', height: isMobileScreen ? '20px' : '32px', background: 'rgba(255,255,255,0.15)' }} />
-
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: isMobileScreen ? '0.7rem' : '0.8rem', color: '#ff007f', fontWeight: 800, marginBottom: '4px' }}>下軌 (地面發紙/閃避)</p>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <span className="key-badge">J</span>
-              <span className="key-badge">K</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

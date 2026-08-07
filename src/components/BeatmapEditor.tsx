@@ -1,166 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Play, Wand2, Trash2, ArrowDown, Maximize, Zap, Disc, Download, Music, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Upload, Wand2, Play, Music, AlertCircle, Maximize, ArrowDown } from 'lucide-react';
 import { BeatmapData, Note } from '../types/game';
 import { audioEngine } from '../game/AudioEngine';
 
 interface BeatmapEditorProps {
   onClose: () => void;
-  onPlayCustomMap: (beatmap: BeatmapData) => void;
+  onPlayCustomMap: (map: BeatmapData) => void;
 }
 
 export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
   onClose,
   onPlayCustomMap
 }) => {
-  const [songTitle, setSongTitle] = useState<string>('我的自訂創作曲');
-  const [bpm, setBpm] = useState<number>(130);
-  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [decodedBuffer, setDecodedBuffer] = useState<AudioBuffer | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [songTitle, setSongTitle] = useState<string>('我的自創拜票神曲');
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-
-  // Playback & Live Tap Recording State
-  const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
-  const [isTapRecording, setIsTapRecording] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [generatedNotes, setGeneratedNotes] = useState<Note[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // File Upload Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setAudioFile(file);
-    setSongTitle(file.name.replace(/\.[^/.]+$/, ''));
-    setIsAnalyzing(true);
-
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      const arrayBuffer = evt.target?.result as ArrayBuffer;
-      if (arrayBuffer) {
-        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        const tempCtx = new AudioCtx();
-        if (tempCtx.state === 'suspended') {
-          await tempCtx.resume();
-        }
-
-        try {
-          const decoded = await tempCtx.decodeAudioData(arrayBuffer);
-          setDecodedBuffer(decoded);
-          audioEngine.setCustomAudioBuffer(decoded);
-
-          const autoNotes = audioEngine.detectBeatsFromBuffer(decoded, difficulty);
-          setNotes(autoNotes);
-          setIsAnalyzing(false);
-        } catch {
-          setIsAnalyzing(false);
-        }
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  // Step A: Auto AI Beat Detection with Selected Density Difficulty
-  const handleReDetectBeats = (targetDiff: 'Easy' | 'Normal' | 'Hard' = difficulty) => {
-    const activeBuf = decodedBuffer || audioEngine['bgmBuffer'];
-    if (!activeBuf) {
-      alert('請先點擊上傳 MP3 / WAV 音樂檔！');
-      return;
-    }
-    setIsAnalyzing(true);
-    setDifficulty(targetDiff);
-    setTimeout(() => {
-      const autoNotes = audioEngine.detectBeatsFromBuffer(activeBuf, targetDiff);
-      setNotes(autoNotes);
-      setIsAnalyzing(false);
-    }, 150);
-  };
-
-  // Step B: Live Tap Recording Mode Toggle
-  const handleToggleTapRecord = () => {
-    if (isTapRecording) {
-      setIsTapRecording(false);
-      setIsPlayingPreview(false);
-      audioEngine.stopBGM();
-    } else {
-      const activeBuf = decodedBuffer || audioEngine['bgmBuffer'];
-      if (!activeBuf) {
-        alert('請先點擊上傳 MP3 / WAV 音樂檔以進行打拍錄製！');
-        return;
-      }
-      setIsTapRecording(true);
-      setIsPlayingPreview(true);
-      audioEngine.playBGM(0);
-    }
-  };
-
-  // Keyboard Tap Listener for Live Recording Mode (D/F for Air, J/K for Ground)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isTapRecording || !isPlayingPreview) return;
-
-      const key = e.key.toLowerCase();
-      const timeSec = parseFloat(audioEngine.getHardwareTime().toFixed(3));
-
-      if (key === 'd' || key === 'f') {
-        // Air Note
-        const newNote: Note = {
-          id: `tap_air_${Date.now()}_${Math.random()}`,
-          time: timeSec,
-          track: 'air',
-          type: 'voter',
-          entity: 'voter_student'
-        };
-        setNotes(prev => [...prev, newNote].sort((a, b) => a.time - b.time));
-        audioEngine.playSFX('perfect');
-      } else if (key === 'j' || key === 'k') {
-        // Ground Note
-        const newNote: Note = {
-          id: `tap_ground_${Date.now()}_${Math.random()}`,
-          time: timeSec,
-          track: 'ground',
-          type: 'voter',
-          entity: 'voter_office'
-        };
-        setNotes(prev => [...prev, newNote].sort((a, b) => a.time - b.time));
-        audioEngine.playSFX('great');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isTapRecording, isPlayingPreview]);
-
-  // Export JSON Beatmap File
-  const handleExportJSON = () => {
-    if (notes.length === 0) {
-      alert('尚無音符資料可供匯出！');
-      return;
-    }
-
-    const exportData: BeatmapData = {
-      metadata: {
-        id: `custom_${Date.now()}`,
-        title: songTitle,
-        artist: 'Yoaka Community Beatmaker',
-        bpm,
-        offset: 0,
-        difficulty,
-        coverColor: '#ffe600'
-      },
-      notes
-    };
-
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `${songTitle}_beatmap.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -170,64 +29,62 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
     }
   };
 
-  const handleTogglePreview = () => {
-    if (isPlayingPreview) {
-      audioEngine.stopBGM();
-      setIsPlayingPreview(false);
-      setIsTapRecording(false);
-    } else {
-      audioEngine.playBGM(0);
-      setIsPlayingPreview(true);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAudioFile(file);
+    setSongTitle(file.name.replace(/\.[^/.]+$/, ''));
+    setIsAnalyzing(true);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const tempCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const decodedBuf = await tempCtx.decodeAudioData(arrayBuffer);
+      setAudioBuffer(decodedBuf);
+
+      audioEngine.setCustomAudioBuffer(decodedBuf);
+
+      const notes = audioEngine.detectBeatsFromBuffer(decodedBuf, difficulty);
+      setGeneratedNotes(notes);
+    } catch (err) {
+      console.error('Audio decode failed:', err);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (isPlayingPreview) {
-      interval = setInterval(() => {
-        setCurrentTime(audioEngine.getHardwareTime());
-      }, 100);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPlayingPreview]);
-
-  const handleAddNote = (track: 'air' | 'ground', type: 'voter' | 'obstacle') => {
-    const timeSec = parseFloat(currentTime.toFixed(3));
-    const newNote: Note = {
-      id: `custom_${Date.now()}_${Math.random()}`,
-      time: timeSec,
-      track,
-      type,
-      entity: type === 'obstacle' ? 'hater_dog_board' : track === 'air' ? 'voter_student' : 'voter_office'
-    };
-    setNotes(prev => [...prev, newNote].sort((a, b) => a.time - b.time));
+  const handleReanalyze = () => {
+    if (!audioBuffer) return;
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      audioEngine.setCustomAudioBuffer(audioBuffer);
+      const notes = audioEngine.detectBeatsFromBuffer(audioBuffer, difficulty);
+      setGeneratedNotes(notes);
+      setIsAnalyzing(false);
+    }, 200);
   };
 
-  const handleDeleteNote = (id: string) => {
-    setNotes(prev => prev.filter(n => n.id !== id));
-  };
+  const handleStartPlay = () => {
+    if (generatedNotes.length === 0) return;
 
-  const handlePlayMap = () => {
-    if (isPlayingPreview) {
-      audioEngine.stopBGM();
-      setIsPlayingPreview(false);
-      setIsTapRecording(false);
+    if (audioBuffer) {
+      audioEngine.setCustomAudioBuffer(audioBuffer);
     }
 
     const customMap: BeatmapData = {
       metadata: {
         id: `custom_${Date.now()}`,
         title: songTitle,
-        artist: '自訂上傳創作者',
-        bpm,
+        artist: '自訂譜面創作者',
+        bpm: 135,
         offset: 0,
         difficulty,
-        coverColor: '#ffe600'
+        coverColor: '#00f0ff'
       },
-      notes
+      notes: generatedNotes
     };
+
     onPlayCustomMap(customMap);
   };
 
@@ -244,400 +101,243 @@ export const BeatmapEditor: React.FC<BeatmapEditorProps> = ({
       padding: '0.8rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '900px',
+        width: '820px',
         maxWidth: '96vw',
-        height: '92vh',
-        maxHeight: '92vh',
-        padding: '1.4rem 1.8rem',
+        maxHeight: '96vh',
+        overflowY: 'auto',
+        padding: '1rem 1.4rem',
         position: 'relative',
         border: '2px solid #ffe600',
-        boxShadow: '0 0 35px rgba(255, 230, 0, 0.4)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
+        boxShadow: '0 0 35px rgba(255, 230, 0, 0.4)'
       }}>
-        {/* Header Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Top Control Action Buttons (Fullscreen & Close) */}
+        <div style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', display: 'flex', gap: '8px', zIndex: 10 }}>
+          <button
+            onClick={handleFullscreen}
+            style={{
+              background: 'rgba(255, 230, 0, 0.15)',
+              border: '1.5px solid #ffe600',
+              color: '#ffe600',
+              borderRadius: '16px',
+              padding: '4px 12px',
+              fontFamily: 'Chakra Petch, sans-serif',
+              fontWeight: 900,
+              fontSize: '0.78rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(255,230,0,0.4)'
+            }}
+          >
+            <Maximize size={14} /> 全螢幕
+          </button>
+
+          <button
+            onClick={() => {
+              audioEngine.clearCustomAudioBuffer();
+              onClose();
+            }}
+            style={{
+              background: 'rgba(255, 0, 127, 0.2)',
+              border: '1.5px solid #ff007f',
+              color: '#fff',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(255, 0, 127, 0.5)'
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Title Header with Scroll Hint Badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+          <div>
             <h2 style={{
-              fontSize: '1.75rem',
+              fontSize: '1.5rem',
               fontFamily: 'Chakra Petch, sans-serif',
               fontWeight: 900,
               color: '#ffe600',
-              textShadow: '0 0 12px rgba(255,230,0,0.6)',
-              margin: 0
+              textShadow: '0 0 12px rgba(255,230,0,0.6)'
             }}>
-              Wand2 A+B 譜面創作者 (BEAT PRODUCER)
+              ⚡ A+B 智慧譜面創作者 (BEAT PRODUCER)
             </h2>
-
-            <div style={{
-              background: 'rgba(255, 230, 0, 0.12)',
-              border: '1.5px solid rgba(255, 230, 0, 0.4)',
-              color: '#ffe600',
-              borderRadius: '12px',
-              padding: '3px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
-              <ArrowDown size={14} /> ↕️ 可上下滑動完整編輯
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            {/* Export JSON Button */}
-            <button
-              onClick={handleExportJSON}
-              disabled={notes.length === 0}
-              style={{
-                background: notes.length > 0 ? 'rgba(0, 240, 255, 0.2)' : 'rgba(255,255,255,0.05)',
-                border: notes.length > 0 ? '1.5px solid #00f0ff' : '1px solid rgba(255,255,255,0.2)',
-                color: notes.length > 0 ? '#00f0ff' : '#888',
-                borderRadius: '16px',
-                padding: '4px 12px',
-                fontWeight: 900,
-                fontSize: '0.78rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                cursor: notes.length > 0 ? 'pointer' : 'not-allowed'
-              }}
-            >
-              <Download size={14} /> 📥 匯出 JSON 譜面
-            </button>
-
-            {/* Fullscreen Button */}
-            <button
-              onClick={handleFullscreen}
-              style={{
-                background: 'rgba(255, 230, 0, 0.15)',
-                border: '1.5px solid #ffe600',
-                color: '#ffe600',
-                borderRadius: '16px',
-                padding: '4px 12px',
-                fontWeight: 900,
-                fontSize: '0.78rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <Maximize size={14} /> 全螢幕
-            </button>
-
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              style={{
-                background: 'rgba(255, 0, 127, 0.2)',
-                border: '1.5px solid #ff007f',
-                color: '#fff',
-                borderRadius: '50%',
-                width: '36px',
-                height: '36px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Scrollable Content Body */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          paddingRight: '6px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.9rem'
-        }}>
-          {/* File Upload Box */}
-          <div style={{
-            background: 'rgba(0,0,0,0.4)',
-            border: '2px dashed #ffe600',
-            borderRadius: '14px',
-            padding: '0.8rem',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }} onClick={() => fileInputRef.current?.click()}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="audio/*"
-              style={{ display: 'none' }}
-              onChange={handleFileUpload}
-            />
-
-            <Upload size={28} color="#ffe600" style={{ margin: '0 auto 4px auto' }} />
-
-            <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
-              {audioFile ? `🎵 ${audioFile.name}` : '點擊上傳 MP3 / WAV 樂曲檔'}
-            </h3>
-            <p style={{ fontSize: '0.78rem', color: '#aaa', margin: 0 }}>
-              {isAnalyzing ? '⚡ AI 波形節奏抓拍分析中...' : 'Web Audio API 即時波峰抓拍，自動生成節奏譜面！'}
+            <p style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '2px' }}>
+              上傳您最喜愛的 MP3 歌曲，AI 演算法自動抓拍並生成專屬音遊譜面！
             </p>
           </div>
 
-          {/* STEP A & STEP B Creation Control Section */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-            {/* Step A: AI Auto Beat Detection with Difficulty Density Pills */}
-            <div style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid #00f0ff', borderRadius: '12px', padding: '0.7rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.85rem', color: '#00f0ff', fontWeight: 900 }}>
-                  Step A: AI 自動波峰抓拍 (抓拍密度)
-                </span>
-                <button
-                  onClick={() => handleReDetectBeats(difficulty)}
-                  style={{
-                    background: '#00f0ff',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.75rem',
-                    fontWeight: 900,
-                    cursor: 'pointer'
-                  }}
-                >
-                  ⚡ 一鍵抓拍
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', gap: '6px' }}>
-                {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
-                  <button
-                    key={diff}
-                    onClick={() => handleReDetectBeats(diff)}
-                    style={{
-                      flex: 1,
-                      padding: '4px',
-                      background: difficulty === diff ? '#00f0ff' : 'rgba(255,255,255,0.05)',
-                      color: difficulty === diff ? '#000' : '#fff',
-                      border: difficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
-                      borderRadius: '6px',
-                      fontWeight: 900,
-                      fontSize: '0.78rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {diff}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Step B: Live Keyboard Tap Recording */}
-            <div style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid #ff007f', borderRadius: '12px', padding: '0.7rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.85rem', color: '#ff007f', fontWeight: 900 }}>
-                  Step B: 手動 Tap 鍵盤錄製 (D/F/J/K)
-                </span>
-              </div>
-
-              <button
-                onClick={handleToggleTapRecord}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: isTapRecording ? '#ff007f' : 'rgba(255, 0, 127, 0.15)',
-                  color: '#fff',
-                  border: '1.5px solid #ff007f',
-                  borderRadius: '6px',
-                  fontWeight: 900,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  boxShadow: isTapRecording ? '0 0 16px rgba(255, 0, 127, 0.6)' : 'none'
-                }}
-              >
-                <Disc size={16} className={isTapRecording ? 'spin-anim' : ''} />
-                {isTapRecording ? '🔴 Tap 錄製中！請按 D/F/J/K 鍵打拍' : '🎙️ 開啟手動 Tap 鍵盤即時錄製'}
-              </button>
-            </div>
+          {/* Scroll Hint Badge */}
+          <div style={{
+            background: 'rgba(0, 240, 255, 0.12)',
+            border: '1px solid rgba(0, 240, 255, 0.4)',
+            color: '#00f0ff',
+            borderRadius: '12px',
+            padding: '3px 10px',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginRight: '120px'
+          }}>
+            <ArrowDown size={13} /> ↕️ 上下滑動檢視
           </div>
+        </div>
 
-          {/* Song Info Controls */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-            <div>
-              <label style={{ fontSize: '0.78rem', color: '#aaa', fontWeight: 700 }}>樂曲標題:</label>
+        {/* Upload Audio File Area (Compact for Mobile) */}
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            border: '2px dashed #00f0ff',
+            borderRadius: '14px',
+            padding: '1rem 1.2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            backgroundColor: 'rgba(0, 240, 255, 0.05)',
+            marginBottom: '1rem',
+            transition: 'all 0.25s'
+          }}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept="audio/*"
+            style={{ display: 'none' }}
+          />
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <Upload size={28} color="#00f0ff" />
+            <p style={{ fontSize: '0.95rem', fontWeight: 900, color: '#fff' }}>
+              {audioFile ? `已選擇音樂: ${audioFile.name}` : '點擊或拖曳上傳 MP3 / WAV 歌曲檔'}
+            </p>
+            <p style={{ fontSize: '0.75rem', color: '#888' }}>
+              支援主流音訊格式，自動解析節奏並配對選民音符
+            </p>
+          </div>
+        </div>
+
+        {/* Song Info & Difficulty Settings (Mobile Adaptive Layout) */}
+        {audioBuffer && (
+          <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '12px', padding: '0.8rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{ color: '#ffe600', fontWeight: 900, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Music size={15} /> 歌曲名稱 (TITLE):
+              </span>
               <input
                 type="text"
                 value={songTitle}
                 onChange={e => setSongTitle(e.target.value)}
                 style={{
-                  width: '100%',
-                  background: 'rgba(0,0,0,0.6)',
+                  background: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#ffe600',
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: '8px',
-                  fontWeight: 900,
-                  fontSize: '0.92rem',
-                  marginTop: '2px'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ fontSize: '0.78rem', color: '#aaa', fontWeight: 700 }}>BPM 節奏:</label>
-              <input
-                type="number"
-                value={bpm}
-                onChange={e => setBpm(Number(e.target.value))}
-                style={{
-                  width: '100%',
-                  background: 'rgba(0,0,0,0.6)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#00f0ff',
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: '8px',
-                  fontWeight: 900,
-                  fontSize: '0.92rem',
-                  marginTop: '2px'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Music Playback & Manual Add Note Bar */}
-          <div style={{
-            background: 'rgba(0, 240, 255, 0.08)',
-            border: '1px solid #00f0ff',
-            borderRadius: '12px',
-            padding: '0.7rem 1rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '1rem'
-          }}>
-            <button
-              className={isPlayingPreview ? 'muse-btn muse-btn-yellow' : 'muse-btn'}
-              onClick={handleTogglePreview}
-              style={{ fontSize: '0.85rem', padding: '0.45rem 0.9rem' }}
-            >
-              <span>{isPlayingPreview ? '⏸ 暫停試聽' : '▶ 播放音樂'}</span>
-            </button>
-
-            <span style={{ fontSize: '1rem', fontFamily: 'Chakra Petch, sans-serif', color: '#ffe600', fontWeight: 900 }}>
-              時間: {currentTime.toFixed(2)}s
-            </span>
-
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                onClick={() => handleAddNote('air', 'voter')}
-                style={{
-                  background: '#00f0ff',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '4px 10px',
-                  fontWeight: 900,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer'
-                }}
-              >
-                + 上軌音符
-              </button>
-
-              <button
-                onClick={() => handleAddNote('ground', 'voter')}
-                style={{
-                  background: '#ff007f',
+                  borderRadius: '6px',
                   color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '4px 10px',
-                  fontWeight: 900,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer'
+                  padding: '3px 10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  width: '220px',
+                  textAlign: 'right'
                 }}
-              >
-                + 下軌音符
-              </button>
-            </div>
-          </div>
-
-          {/* Notes List & Timeline Preview */}
-          <div style={{
-            background: 'rgba(0,0,0,0.5)',
-            borderRadius: '12px',
-            padding: '0.8rem 1rem',
-            border: '1px solid rgba(255,255,255,0.15)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 800 }}>
-                📍 已生成譜面點位 (共 {notes.length} 個音符 Note):
-              </span>
+              />
             </div>
 
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              overflowX: 'auto',
-              paddingBottom: '8px',
-              minHeight: '55px',
-              alignItems: 'center'
-            }}>
-              {notes.map(note => (
-                <div
-                  key={note.id}
+            {/* Difficulty Pills Switch */}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ color: '#aaa', fontWeight: 800, fontSize: '0.8rem' }}>抓拍密度:</span>
+              {(['Easy', 'Normal', 'Hard'] as const).map(diff => (
+                <button
+                  key={diff}
+                  onClick={() => setDifficulty(diff)}
                   style={{
-                    flexShrink: 0,
-                    background: note.type === 'obstacle' ? 'rgba(255,0,85,0.2)' : note.track === 'air' ? 'rgba(0,240,255,0.2)' : 'rgba(255,0,127,0.2)',
-                    border: `1px solid ${note.type === 'obstacle' ? '#ff0055' : note.track === 'air' ? '#00f0ff' : '#ff007f'}`,
-                    borderRadius: '8px',
-                    padding: '4px 8px',
-                    fontSize: '0.75rem',
-                    color: '#fff',
-                    textAlign: 'center',
-                    position: 'relative'
+                    flex: 1,
+                    padding: '0.4rem',
+                    background: difficulty === diff ? '#00f0ff' : 'rgba(255,255,255,0.05)',
+                    color: difficulty === diff ? '#000' : '#fff',
+                    border: difficulty === diff ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '6px',
+                    fontWeight: 900,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
                   }}
                 >
-                  <span style={{ fontWeight: 900, color: note.track === 'air' ? '#00f0ff' : '#ff007f' }}>
-                    {note.track === 'air' ? '☁️ 上' : '🏃 下'}
-                  </span>
-                  <div style={{ fontSize: '0.7rem', color: '#aaa' }}>{note.time.toFixed(2)}s</div>
-
-                  <button
-                    onClick={() => handleDeleteNote(note.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#ff0055',
-                      cursor: 'pointer',
-                      padding: 0,
-                      marginTop: '2px'
-                    }}
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
+                  {diff}
+                </button>
               ))}
+
+              <button
+                onClick={handleReanalyze}
+                disabled={isAnalyzing}
+                style={{
+                  background: 'rgba(255, 0, 127, 0.3)',
+                  border: '1px solid #ff007f',
+                  color: '#fff',
+                  borderRadius: '6px',
+                  padding: '0.4rem 0.8rem',
+                  fontWeight: 900,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Wand2 size={14} /> 重新抓拍
+              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Bottom Play Map Action Footer */}
-        <div style={{ paddingTop: '0.8rem', flexShrink: 0, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
-          <button
-            className="muse-btn"
-            onClick={handlePlayMap}
-            style={{ width: '100%', fontSize: '1.25rem', padding: '0.85rem' }}
-          >
-            <span>▶ 試玩自製譜面 (PLAY CUSTOM MAP)</span>
-          </button>
-        </div>
+        {/* Note Statistics & Trial Start Button */}
+        {generatedNotes.length > 0 && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              background: 'rgba(0, 240, 255, 0.1)',
+              border: '1px solid rgba(0, 240, 255, 0.3)',
+              borderRadius: '10px',
+              padding: '0.5rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-around',
+              alignItems: 'center'
+            }}>
+              <div>
+                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>抓拍音符: </span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffe600' }}>{generatedNotes.length} 個 Note</span>
+              </div>
+
+              <div>
+                <span style={{ fontSize: '0.78rem', color: '#aaa' }}>音訊時長: </span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#00f0ff' }}>
+                  {audioBuffer ? `${Math.floor(audioBuffer.duration)} 秒` : '--'}
+                </span>
+              </div>
+            </div>
+
+            <button
+              className="muse-btn"
+              onClick={handleStartPlay}
+              style={{ width: '100%', fontSize: '1.2rem', padding: '0.8rem' }}
+            >
+              <span><Play fill="#fff" size={20} /> ▶ 試玩自製譜面 (PLAY MAP - 使用上傳曲目)</span>
+            </button>
+          </div>
+        )}
+
+        {/* Info Hint */}
+        {!audioBuffer && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', color: '#888', fontSize: '0.8rem', marginTop: '0.6rem' }}>
+            <AlertCircle size={14} />
+            <span>請上傳音樂檔案解鎖 ▶ 試玩自製譜面功能</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,61 +1,136 @@
-export interface SongTrackData {
+export interface SongData {
   id: string;
   title: string;
   subtitle: string;
   artist: string;
-  audioUrl: string;
-  coverImg: string;
-  bgImg?: string;
-  videoUrl?: string;
   bpm: number;
-  isTutorial?: boolean;
-  tags: string[];
-  description: string;
+  duration: number; // Approximate seconds
+  cover: string;
+  bg: string;
+  audio: string;
+  storyStage: '起' | '承' | '轉' | '合';
+  isRhapsody: boolean; // True if it's an extended high-difficulty Rhapsody track
+  storyContext: string;
+  difficultyRating: {
+    Easy: number;   // Star rating 1~5
+    Normal: number;
+    Hard: number;
+  };
 }
 
-export const BUILTIN_SONGS: SongTrackData[] = [
+export const SONG_REGISTRY: SongData[] = [
   {
-    id: 'track1_chief',
-    title: '1. 巷弄拜票：里長起手式',
-    subtitle: 'ALLEY CAMPAIGN (120 BPM - 基層起跑)',
-    artist: 'Yoaka Campaign Team',
-    audioUrl: '/assets/audio/track1_chief.mp3',
-    coverImg: '/assets/yoaka_default.png',
-    bpm: 120,
-    tags: ['里長參選', '基層拜票', '輕鬆熱身'],
-    description: 'Yoaka 競選的第一步！走入大街小巷發放面紙傳單，累積基層里民的最純粹支持度！放置路徑: public/assets/audio/track1_chief.mp3'
+    id: 'campaign_start',
+    title: '競選出發！',
+    subtitle: '街頭拜票 (有歌詞)',
+    artist: 'Yoaka 競選樂團',
+    bpm: 132,
+    duration: 140,
+    cover: '/assets/yoaka_default.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/street_campaign_vocal.mp3',
+    storyStage: '起',
+    isRhapsody: false,
+    storyContext: '【起】號角吹響！Yoaka 踏上 Web3 小島競選之旅，親切走入街頭，展開熱血拜票開場曲！',
+    difficultyRating: {
+      Easy: 2,
+      Normal: 3,
+      Hard: 4
+    }
   },
   {
-    id: 'track2_district',
-    title: '2. 區長爭霸：賽博政見會',
-    subtitle: 'DISTRICT SHOWDOWN (138 BPM - 激戰選戰)',
-    artist: 'Yoaka Office Lab',
-    audioUrl: '/assets/audio/track2_district.mp3',
-    coverImg: '/assets/yoaka_office.png',
-    bpm: 138,
-    tags: ['區長競選', '賽博政見', '學霸加成'],
-    description: '挺進區長大選！穿上學霸秘書戰袍，在賽博政見發表會上展現精準魄力！放置路徑: public/assets/audio/track2_district.mp3'
-  },
-  {
-    id: 'track3_mayor',
-    title: '3. 市長大選：小島電音夜',
-    subtitle: 'MAYOR ELECTION (152 BPM - 全島狂歡)',
-    artist: 'Yoaka Beats',
-    audioUrl: '/assets/audio/track3_mayor.mp3',
-    coverImg: '/assets/yoaka_kpop.png',
+    id: 'street_rhapsody',
+    title: '街頭拜票狂想曲',
+    subtitle: '街頭拜票狂想曲 (純音樂)',
+    artist: 'Yoaka 競選樂團',
     bpm: 152,
-    tags: ['市長大選', '賽博電音', '偶像魅力'],
-    description: '全島矚目的市長級熱血大選！搭配賽博偶像戰袍與 152 BPM 電音掀起全島熱潮！放置路徑: public/assets/audio/track3_mayor.mp3'
+    duration: 185,
+    cover: '/assets/yoaka_office.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/street_rhapsody_inst.mp3',
+    storyStage: '承',
+    isRhapsody: true,
+    storyContext: '【承】走進熱鬧夜市與街道！狂想曲版本拍點層次豐富、切分音連擊密集，市民熱情響應！',
+    difficultyRating: {
+      Easy: 3,
+      Normal: 4,
+      Hard: 5
+    }
   },
   {
-    id: 'track4_master',
-    title: '4. 幫主登場：最高政壇巔峰',
-    subtitle: 'GUILD MASTER (168 BPM - 頂峰對決)',
-    artist: 'Yoaka Supreme',
-    audioUrl: '/assets/audio/track4_master.mp3',
-    coverImg: '/yoaka_main.jpg',
-    bpm: 168,
-    tags: ['最高巔峰', '幫主登場', '極限音遊'],
-    description: '榮登 Web3 小島最高政壇幫主！168 BPM 超高速密集拍點，考驗真正的競選王者！放置路徑: public/assets/audio/track4_master.mp3'
+    id: 'debate_battle',
+    title: '辯論會激戰',
+    subtitle: '辯論會激戰 (標準版)',
+    artist: 'Yoaka 競選樂團',
+    bpm: 172,
+    duration: 160,
+    cover: '/assets/hater_dog_board.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/debate_battle.mp3',
+    storyStage: '轉',
+    isRhapsody: false,
+    storyContext: '【轉】政見發表會強勢對決！對手與黑粉猛烈攻防，需要敏捷反應與快速軌道閃避！',
+    difficultyRating: {
+      Easy: 3,
+      Normal: 4,
+      Hard: 5
+    }
+  },
+  {
+    id: 'debate_rhapsody',
+    title: '辯論會激戰 (狂想曲)',
+    subtitle: '辯論會激戰 (有歌詞 狂想曲)',
+    artist: 'Yoaka 競選樂團',
+    bpm: 178,
+    duration: 210,
+    cover: '/assets/hater_shark.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/debate_rhapsody_vocal.mp3',
+    storyStage: '轉',
+    isRhapsody: true,
+    storyContext: '【轉 - 狂想高難版】延長版高難度辯論大決戰！歌詞與極速切分音交織，考驗手速極限！',
+    difficultyRating: {
+      Easy: 4,
+      Normal: 5,
+      Hard: 5
+    }
+  },
+  {
+    id: 'victory_night',
+    title: '開票夜勝選大爆發',
+    subtitle: '開票夜勝選大爆發 (標準版)',
+    artist: 'Yoaka 競選樂團',
+    bpm: 185,
+    duration: 165,
+    cover: '/assets/yoaka_kpop.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/victory_night.mp3',
+    storyStage: '合',
+    isRhapsody: false,
+    storyContext: '【合】票數一路遙遙領先！全場歡呼熱血全開，雙倍得票與 Fever 爆發迎接勝選時刻！',
+    difficultyRating: {
+      Easy: 3,
+      Normal: 4,
+      Hard: 5
+    }
+  },
+  {
+    id: 'victory_rhapsody',
+    title: '開票夜勝選大爆發 (狂想曲)',
+    subtitle: '開票夜勝選大爆發 (有歌詞 狂想曲)',
+    artist: 'Yoaka 競選樂團',
+    bpm: 190,
+    duration: 230,
+    cover: '/assets/yoaka_kpop.png',
+    bg: '/cyber_runway_bg.png',
+    audio: '/assets/audio/victory_rhapsody_vocal.mp3',
+    storyStage: '合',
+    isRhapsody: true,
+    storyContext: '【合 - 終極狂想曲】全曲長度最長、難度最高的高潮勝選終曲！狂歡音浪無限爆發！',
+    difficultyRating: {
+      Easy: 4,
+      Normal: 5,
+      Hard: 5
+    }
   }
 ];
