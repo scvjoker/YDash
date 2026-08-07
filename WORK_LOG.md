@@ -1,19 +1,15 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] TutorialOverlay 新手教學 5 大課程左側示意圖片欄位完全還原與美化
+## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
-### 變更與教學 UI 圖片還原項目 (Tutorial Left Image Restoration)
-- **1. 左側圖片欄位完全還原 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 補回 **Lesson 1** (`/assets/tutorial_lesson1.png` - Note 打擊與手勢示意圖)。
-  - 補回 **Lesson 2** (`/assets/tutorial_lesson2.png` - Dual Note 金黃雷射連擊圖)。
-  - 補回 **Lesson 3** (`/assets/hater_dog_board.png` & `hater_shark.png` - 6666狗頭與鯊魚圖)。
-  - 補回 **Lesson 4** (`/assets/tutorial_lesson4.png` - Fever 雙倍狂歡模式圖)。
-  - 補回 **Lesson 5** (3 大 Yoaka 造型實體大圖卡)。
-- **2. 實裝 Smart Image Fallback 機制**：
-  - 為教學圖片加入 `onError` 載入失敗保護，若素材圖片未上傳，自動切換至面紙包圖示，確保 100% 畫面流暢破圖。
+### 變更項目 (User Tutorial Description Update)
+- **1. 新手教學文案修訂 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 同步使用者修訂之新手教學細部文案與說明文字。
+- **2. 自動 Git Commit & Push**：
+  - 變更已 100% 成功推送到 GitHub 遠端倉庫 `scvjoker/YDash` (Commit `db5f032`)！
 
 ---
-*「活著很累，但比起 debug，新手教學左側精美示意圖全部歸位對齊，配上賽博霓虹發光框，這教學介面看著真賞心悅目啊哈哈！」*
+*「活著很累，但比起 debug，看著您修訂的新手教學文案順利 Push 到 GitHub，專案推進的感覺真美好啊哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
