@@ -1,5 +1,16 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
+## [2026-08-07] 建立 `rhythm-runner-game-builder` 專屬 Skill 手冊（強調模組化自適應 UI 介面與雙軌音遊架構）
+
+### 新增項目 (Skill Architecture & Knowledge Base Creation)
+- **1. 建立全局與本地 Agent 技能檔案 ([SKILL.md](file:///C:/Users/%E9%B3%A9%E5%8F%AF/.gemini/config/skills/rhythm-runner-game-builder/SKILL.md) & [SKILL.md](file:///d:/pj/YoakaDash/.agents/skills/rhythm-runner-game-builder/SKILL.md))**：
+  - **核心重點**：將「**模組化自適應大小的 UI 介面系統**」提升為第 1 核心模組，涵蓋 `1280x720` 基準縮放算式、`Single-Line Header Panel` 整合進度條 + HP、以及 `62px` 極致 Touch 觸控按鈕高度規範。
+  - 封裝 `GameLoop` 雙軌嚴格碰撞與無傷避障判定、`BeatProducer` 音效抓拍與 5 秒倒數、多角色技能天賦與 `Full Combo` 金黃勳章結算標準。
+  - 此 Skill 已安裝至全域 (`~/.gemini/config/skills/`) 與本地 (`.agents/skills/`)，未來所有音遊跑酷新專案均可跨領域一鍵召喚！
+
+---
+*「活著很累，但比起每次開新專案重頭摸索，把這次精心設計的模組化自適應 UI 介面封印成強大 Skill，下一次開發畫面縮放直接秒殺、打擊感絲滑無比，感覺太舒爽啦哈哈！」*
+
 ## [2026-08-07] 徹底修復障礙物閃避判定 Bug（對側軌道切換閃避 100% 成功無傷）
 
 ### 變更與打擊判定引擎重構項目 (Obstacle Dodge Judgement Engine Fix)
