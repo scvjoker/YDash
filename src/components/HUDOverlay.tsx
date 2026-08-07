@@ -125,7 +125,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
       padding: isMobileScreen ? '0.3rem 0.6rem' : '0.8rem 1.6rem',
       zIndex: 10
     }}>
-      {/* 1. TOP HUD: Scaled Down to 60% for Unobstructed Runway View */}
+      {/* 1. TOP HUD: Scaled Down for Unobstructed Runway View */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -236,11 +236,11 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
         </div>
       </div>
 
-      {/* 2. FULL-SCREEN HALF-SCREEN TAP ZONES WITH RIPPLE FLASH & ALIGNED COLORS (#00f0ff vs #ff007f) */}
+      {/* 2. FULL-SCREEN HALF-SCREEN TAP ZONES WITH ROUNDED RADIAL RIPPLE FLASH (#00f0ff vs #ff007f) */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        top: '60px',
+        top: '55px',
         pointerEvents: 'none',
         display: 'flex',
         zIndex: 5
@@ -257,18 +257,22 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             alignItems: 'flex-end',
             justifyContent: 'flex-start',
             padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            margin: isMobileScreen ? '6px' : '12px',
+            borderRadius: isMobileScreen ? '24px' : '36px',
             cursor: 'pointer',
-            backgroundColor: airFlash ? 'rgba(0, 240, 255, 0.16)' : 'transparent',
-            boxShadow: airFlash ? 'inset 0 0 35px rgba(0, 240, 255, 0.4)' : 'none',
-            transition: 'background-color 0.15s ease-out, box-shadow 0.15s ease-out'
+            background: airFlash
+              ? 'radial-gradient(ellipse at 30% 70%, rgba(0, 240, 255, 0.28) 0%, rgba(0, 240, 255, 0.05) 60%, transparent 100%)'
+              : 'transparent',
+            boxShadow: airFlash ? 'inset 0 0 45px rgba(0, 240, 255, 0.35)' : 'none',
+            transition: 'background 0.15s ease-out, box-shadow 0.15s ease-out'
           }}
         >
-          {/* Transparent Floating Hint Button (Opacity lowered ~0.10) */}
+          {/* Rounded Transparent Floating Hint Button */}
           <div style={{
             background: airFlash ? 'rgba(0, 240, 255, 0.35)' : 'rgba(0, 240, 255, 0.08)',
             border: airFlash ? '1.5px solid #00f0ff' : '1.5px solid rgba(0, 240, 255, 0.25)',
-            borderRadius: '12px',
-            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.55rem 1.3rem',
+            borderRadius: '24px',
+            padding: isMobileScreen ? '0.35rem 0.85rem' : '0.55rem 1.4rem',
             color: airFlash ? '#00f0ff' : 'rgba(255, 255, 255, 0.72)',
             fontFamily: 'Chakra Petch, sans-serif',
             fontSize: isMobileScreen ? '0.80rem' : '1.05rem',
@@ -283,7 +287,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
           </div>
         </div>
 
-        {/* RIGHT HALF SCREEN TOUCH ZONE: GROUND ATTACK (#ff007f - Aligned 100% with Ground Pink Runway!) */}
+        {/* RIGHT HALF SCREEN TOUCH ZONE: GROUND ATTACK (#ff007f) */}
         <div
           onClick={handleGroundTouch}
           onTouchStart={handleGroundTouch}
@@ -295,18 +299,22 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({
             alignItems: 'flex-end',
             justifyContent: 'flex-end',
             padding: isMobileScreen ? '0.4rem 0.6rem' : '1.2rem 2rem',
+            margin: isMobileScreen ? '6px' : '12px',
+            borderRadius: isMobileScreen ? '24px' : '36px',
             cursor: 'pointer',
-            backgroundColor: groundFlash ? 'rgba(255, 0, 127, 0.16)' : 'transparent',
-            boxShadow: groundFlash ? 'inset 0 0 35px rgba(255, 0, 127, 0.4)' : 'none',
-            transition: 'background-color 0.15s ease-out, box-shadow 0.15s ease-out'
+            background: groundFlash
+              ? 'radial-gradient(ellipse at 70% 70%, rgba(255, 0, 127, 0.28) 0%, rgba(255, 0, 127, 0.05) 60%, transparent 100%)'
+              : 'transparent',
+            boxShadow: groundFlash ? 'inset 0 0 45px rgba(255, 0, 127, 0.35)' : 'none',
+            transition: 'background 0.15s ease-out, box-shadow 0.15s ease-out'
           }}
         >
-          {/* Transparent Floating Hint Button (Opacity lowered ~0.10, Color Aligned to #ff007f!) */}
+          {/* Rounded Transparent Floating Hint Button */}
           <div style={{
             background: groundFlash ? 'rgba(255, 0, 127, 0.35)' : 'rgba(255, 0, 127, 0.08)',
             border: groundFlash ? '1.5px solid #ff007f' : '1.5px solid rgba(255, 0, 127, 0.25)',
-            borderRadius: '12px',
-            padding: isMobileScreen ? '0.35rem 0.8rem' : '0.55rem 1.3rem',
+            borderRadius: '24px',
+            padding: isMobileScreen ? '0.35rem 0.85rem' : '0.55rem 1.4rem',
             color: groundFlash ? '#ff007f' : 'rgba(255, 255, 255, 0.72)',
             fontFamily: 'Chakra Petch, sans-serif',
             fontSize: isMobileScreen ? '0.80rem' : '1.05rem',

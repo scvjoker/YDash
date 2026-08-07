@@ -1,24 +1,18 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 結算畫面滿版零滾動 + 主畫面頂行零遮擋 + 左右打擊波紋與對齊下軌桃粉 (#ff007f)
+## [2026-08-07] 暫停選單再次微縮 + 歌曲切換大廳手機 RWD 適應 + 打擊波紋圓角化 (Radial Ripple Flash)
 
-### 變更與遊戲 UI 微縮與點擊視覺反饋項目 (Result Zero-Scroll & Tap Ripple Wave Refinements)
-- **1. 換裝館 (CostumeModal.tsx) 與 暫停選單 (PauseModal.tsx) 手機端無微縮小**：
-  - 手機橫屏上卡片高度、 padding 與字體全面微縮精簡，94svh 高度下 **100% 精緻滿版 fit 不拉長**！
-- **2. 結算畫面 (ResultScreen.tsx) 手機端滿版零滾動**：
-  - Grade 評價字體微縮至 **`2.4rem`**。
-  - 總得票數 (Final Score) 微縮至 **`1.65rem`**。
-  - 4 欄統計卡片 Padding 精簡，在任何手機橫屏上記錄全景一覽無遺，**100% 滿版無須滑動**！
-- **3. 主畫面 (StartScreen.tsx) 放大前頂行文字 100% 零遮擋**：
-  - 右上角功能按鈕組緊貼頂格 (`calc(env(safe-area-inset-top) + 0.25rem)`)。
-  - 面板元素 gap 縮緊至 `0.25rem`，從「WEB3 小島區」標籤到底部按鈕 **100% 零遮擋完整呈現場景**！
-- **4. 全螢幕點擊打擊波紋 (Tap Wave) + 下軌顏色 100% 對齊 (#ff007f)**：
-  - 當玩家點擊左/右半屏時，觸發短暫半屏霓虹波紋閃爍 (`airFlash` / `groundFlash`) 打擊感爆棚！
-  - 懸浮按鈕底色與邊框透明度再**下調降 0.10** (`opacity: 0.72` 柔和半透明)。
-  - 右邊按鈕顏色、波紋發光 100% 與**下軌跑道 (GROUND) 的霓虹桃粉 (#ff007f)** 完全對齊一致！
+### 變更與 UI 精密微縮與質感波紋項目 (Pause Menu Scale Down, Song Select RWD & Rounded Radial Ripple)
+- **1. 暫停選單 (PauseModal.tsx) 手機端再次微縮**：
+  - 小螢幕下 `width: 360px`, `maxHeight: '92svh'`, `padding: '0.8rem 1.0rem'`，標題字體精簡至 `1.3rem`，在手機上顯得無比輕盈簡潔！
+- **2. 歌曲切換大廳 (SongSelectModal.tsx) 手機自適應 RWD 滿版縮放**：
+  - 8 首競選曲庫卡片、封面縮圖與右側 Preview 卡片 Padding/字體全面適應手機橫屏，94svh 限制下 **100% 滿版無縫 Fit，試聽與難度/流速選單一目瞭然**！
+- **3. 全螢幕打擊波紋圓角化 (Rounded Radial Tap Wave)** ([HUDOverlay.tsx](file:///d:/pj/YoakaDash/src/components/HUDOverlay.tsx))：
+  - 擺脫傳統方形邊框！加入大弧度圓角 `borderRadius: 24px~36px` 與漸層橢圓內發光 (`radial-gradient`)。
+  - 當玩家點擊左/右半屏時，呈現如水滴般擴散的柔軟圓潤高質感脈衝，打擊視覺質感大升級！
 
 ---
-*「活著很累，但比起 debug，結算成績一眼看全、主畫面第一行毫無遮擋、右半屏一按瞬間閃爍下軌桃粉波紋，這介面細節爽度直接拉滿了哈哈！」*
+*「活著很累，但比起 debug，暫停選單變小巧、歌曲大廳在手機上完美貼合、左右按下去是圓潤漸層的水滴脈衝波紋，這視覺質感真的太優雅啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 
