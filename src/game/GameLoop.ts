@@ -1,10 +1,12 @@
 import { Note, BeatmapData, GameStats, CostumeId } from '../types/game';
+import { SONG_REGISTRY, SongData } from './SongRegistry';
 import { audioEngine } from './AudioEngine';
 import { RenderEngine } from './RenderEngine';
 
 export class GameLoop {
   private renderEngine: RenderEngine;
   private currentBeatmap: BeatmapData;
+  private songData: SongData;
   private costume: CostumeId;
   private difficulty: 'Easy' | 'Normal' | 'Hard';
   private speedMultiplier: number;
@@ -40,11 +42,13 @@ export class GameLoop {
     costume: CostumeId,
     difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal',
     speedMultiplier: number = 1.0,
+    songData?: SongData,
     onStatsChange?: (stats: GameStats) => void,
     onGameOver?: (stats: GameStats) => void
   ) {
     this.renderEngine = renderEngine;
     this.currentBeatmap = beatmap;
+    this.songData = songData || SONG_REGISTRY[0];
     this.costume = costume;
     this.difficulty = difficulty;
     this.speedMultiplier = speedMultiplier;
@@ -56,7 +60,8 @@ export class GameLoop {
   }
 
   public async start(): Promise<void> {
-    const bgmBuf = await audioEngine.loadDefaultBGM();
+    const audioUrl = this.songData.audio || '/assets/audio/campaign_start.mp3';
+    const bgmBuf = await audioEngine.loadAudioFromUrl(audioUrl);
     
     if (bgmBuf) {
       const detected = audioEngine.detectBeatsFromBuffer(bgmBuf, this.difficulty);

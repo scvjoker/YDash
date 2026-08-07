@@ -1,21 +1,17 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] MP4 靜音動態影片背景渲染實裝 (HTML5 Canvas Video Engine) + 《Whats Next? by A Li & Jay Lin》8 首曲目全數對齊
+## [2026-08-07] 切換樂曲無反應與預設歌曲問題修復 + 選曲大廳自動 15 秒音樂試聽 (Audio Engine Upgrade)
 
-### 变更與動態影片背景與音訊對齊項目 (MP4 Video Background & 8th Audio Link)
-- **1. MP4 靜音動態影片背景渲染引擎 ([RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts) & [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx))**：
-  - 升級 `RenderEngine`，加入 `HTMLVideoElement` 音遊背景渲染支援。
-  - 當樂曲背景設定為 `.mp4` / `.webm` 時（如 `bg: '/assets/bgs/bg_whats_next.mp4'`），自動建立 `muted=true`, `loop=true`, `autoplay=true` 的靜音影片，並在 60fps Canvas 上進行無縫滾動拼貼繪製！
-- **2. 第 8 首曲目《Whats Next? by A Li & Jay Lin》Metadata 與實體 MP3 對齊 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
-  - `subtitle`: `✨ 我推的阿狸 DLC 特典`
-  - `artist`: `A Li & Jay Lin`
-  - `bpm`: `80`
-  - `bg`: `/assets/bgs/bg_whats_next.mp4` (MP4 靜音動態影片)
-  - `audio`: `/assets/audio/whats_next_ali_jaylin.mp3`
-  - `storyContext`: `【DLC 特別企劃】由 A Li & Jay Lin 強強聯手打造的歌曲！優美歌聲與緩緩鋼琴交織，迎向下一階段的人生挑戰！`
+### 變更與音響切換修復項目 (Dynamic Song Switch & Hall Preview)
+- **1. 遊戲開局樂曲 100% 正確連動 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts) & [AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
+  - 升級 `AudioEngine.loadAudioFromUrl(url)`，在遊戲開局與選取歌曲時，全面動態下載解碼該歌曲的實體 MP3/WAV 檔。
+  - 解決了過去固定讀取預設 `/theme_song.mp3` 的問題。現在選哪首，進入遊戲 100% 正確播放選定的戰歌與即時抓拍音符！
+- **2. 選曲大廳點擊卡片自動 15 秒試聽 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 在音樂大廳點擊切換樂曲時，自動觸發 `audioEngine.playPreviewFromUrl(song.audio)` 播放該曲目的副歌試聽片段！
+  - 關閉彈窗或點擊「▶ 播放開局」時自動靜音停止試聽，轉入遊戲主音訊，體驗流暢順滑！
 
 ---
-*「活著很累，但比起 debug，在賽博音遊裡一邊聽著 A Li & Jay Lin 的優美歌聲，一邊看著背景 60fps 無縫滾動的 MP4 動態影片，這大作視覺感簡直太震撼啦哈哈！」*
+*「活著很累，但比起 debug，在選曲大廳點哪首就立刻試聽哪首，進入遊戲音浪 100% 正確播放，這音響順暢度真的太舒服啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

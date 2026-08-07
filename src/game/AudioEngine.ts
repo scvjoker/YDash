@@ -1,25 +1,33 @@
-import { Note, TrackType, EntityType } from '../types/game';
-
 export class AudioEngine {
-  private ctx: AudioContext;
+  private audioCtx: AudioContext | null = null;
   private bgmBuffer: AudioBuffer | null = null;
   private customAudioBuffer: AudioBuffer | null = null;
-  private bgmSource: AudioBufferSourceNode | null = null;
+
+  private currentBgmSource: AudioBufferSourceNode | null = null;
+  private previewBgmSource: AudioBufferSourceNode | null = null;
+
   private bgmStartTime: number = 0;
   private bgmPauseOffset: number = 0;
   private isBgmPlaying: boolean = false;
 
+  private activeAudioUrl: string | null = null;
+
   constructor() {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    this.ctx = new AudioCtx();
+    // Lazy AudioContext initialization
   }
 
-  public getHardwareTime(): number {
-    if (!this.isBgmPlaying) return this.bgmPauseOffset;
-    return this.ctx.currentTime - this.bgmStartTime;
+  private initCtx(): AudioContext {
+    if (!this.audioCtx) {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      this.audioCtx = new AudioCtxClass();
+    }
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
+    return this.audioCtx;
   }
 
-  public setCustomAudioBuffer(buffer: AudioBuffer | null): void {
+  public setCustomAudioBuffer(buffer: AudioBuffer): void {
     this.customAudioBuffer = buffer;
   }
 
@@ -28,167 +36,153 @@ export class AudioEngine {
   }
 
   public async loadDefaultBGM(): Promise<AudioBuffer | null> {
-    if (this.customAudioBuffer) {
+    return this.loadAudioFromUrl('/assets/audio/campaign_start.mp3');
+  }
+
+  public async loadAudioFromUrl(url: string): Promise<AudioBuffer | null> {
+    const ctx = this.initCtx();
+
+    if (this.activeAudioUrl === url && this.customAudioBuffer) {
       return this.customAudioBuffer;
     }
 
-    if (this.bgmBuffer) return this.bgmBuffer;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+      const arrayBuf = await resp.arrayBuffer();
+      const decodedBuf = await ctx.decodeAudioData(arrayBuf);
+      this.customAudioBuffer = decodedBuf;
+      this.activeAudioUrl = url;
+      return decodedBuf;
+    } catch (err) {
+      console.warn(`Failed to load audio from ${url}, falling back to default BGM`, err);
+      if (this.bgmBuffer) return this.bgmBuffer;
+      return null;
+    }
+  }
 
-    const candidateUrls = [
-      '/theme_song.mp3',
-      '/theme_song.wav',
-      '/theme_song.ogg',
-      '/assets/theme_song.mp3'
-    ];
+  public async playPreviewFromUrl(url: string): Promise<void> {
+    const ctx = this.initCtx();
+    this.stopPreview();
 
-    for (const url of candidateUrls) {
+    try {
+      const buffer = await this.loadAudioFromUrl(url);
+      if (!buffer) return;
+
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0.7, ctx.currentTime);
+
+      source.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      // Play 15-second Preview from middle of the song
+      const startOffset = Math.min(15, buffer.duration * 0.2);
+      source.start(0, startOffset, 15);
+      this.previewBgmSource = source;
+    } catch (e) {
+      console.warn('Failed to play preview', e);
+    }
+  }
+
+  public stopPreview(): void {
+    if (this.previewBgmSource) {
       try {
-        const response = await fetch(url);
-        if (response.ok) {
-          const arrayBuffer = await response.arrayBuffer();
-          this.bgmBuffer = await this.ctx.decodeAudioData(arrayBuffer);
-          return this.bgmBuffer;
-        }
-      } catch {
-        // Try next format candidate
-      }
+        this.previewBgmSource.stop();
+        this.previewBgmSource.disconnect();
+      } catch (e) {}
+      this.previewBgmSource = null;
     }
-
-    // Fallback: Synthesize an upbeat electro BGM if no file exists
-    this.bgmBuffer = this.synthesizeElectroBGM();
-    return this.bgmBuffer;
   }
 
-  public playBGM(offset: number = 0): void {
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-
-    const activeBuffer = this.customAudioBuffer || this.bgmBuffer;
-    if (!activeBuffer) return;
-
-    this.stopBGM();
-
-    this.bgmSource = this.ctx.createBufferSource();
-    this.bgmSource.buffer = activeBuffer;
-    this.bgmSource.connect(this.ctx.destination);
-
-    this.bgmPauseOffset = offset;
-    this.bgmStartTime = this.ctx.currentTime - offset;
-    this.bgmSource.start(0, offset);
-    this.isBgmPlaying = true;
-  }
-
-  public pauseBGM(): void {
-    if (!this.isBgmPlaying || !this.bgmSource) return;
-    this.bgmPauseOffset = this.ctx.currentTime - this.bgmStartTime;
-    this.bgmSource.stop();
-    this.bgmSource = null;
-    this.isBgmPlaying = false;
-  }
-
-  public stopBGM(): void {
-    if (this.bgmSource) {
-      try {
-        this.bgmSource.stop();
-      } catch {
-        // Ignore if stopped
-      }
-      this.bgmSource = null;
-    }
-    this.isBgmPlaying = false;
-    this.bgmPauseOffset = 0;
-  }
-
-  public detectBeatsFromBuffer(
-    buffer: AudioBuffer,
-    difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'
-  ): Note[] {
-    const rawData = buffer.getChannelData(0);
+  public detectBeatsFromBuffer(buffer: AudioBuffer, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'): any[] {
+    const channelData = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
-    const windowSize = Math.floor(sampleRate * 0.05); // 50ms window
-    const energy: number[] = [];
 
-    for (let i = 0; i < rawData.length; i += windowSize) {
+    const frameSize = 1024;
+    const hopSize = 512;
+    const energyList: { time: number; energy: number; isBass: boolean }[] = [];
+
+    for (let i = 0; i < channelData.length - frameSize; i += hopSize) {
       let sum = 0;
-      for (let j = 0; j < windowSize && (i + j) < rawData.length; j++) {
-        sum += rawData[i + j] * rawData[i + j];
+      let bassSum = 0;
+
+      for (let j = 0; j < frameSize; j++) {
+        const sample = channelData[i + j];
+        sum += sample * sample;
+        if (j < frameSize / 4) {
+          bassSum += sample * sample;
+        }
       }
-      energy.push(Math.sqrt(sum / windowSize));
+
+      const time = i / sampleRate;
+      energyList.push({
+        time,
+        energy: Math.sqrt(sum / frameSize),
+        isBass: bassSum > sum * 0.45
+      });
     }
 
-    // Dynamic threshold according to difficulty
-    let thresholdMult = 1.35;
-    let minInterval = 0.55;
+    let minEnergyThreshold = 0.18;
+    let minTimeGap = 0.28;
 
     if (difficulty === 'Easy') {
-      thresholdMult = 1.6;
-      minInterval = 0.75;
+      minEnergyThreshold = 0.28;
+      minTimeGap = 0.45;
     } else if (difficulty === 'Hard') {
-      thresholdMult = 1.15;
-      minInterval = 0.38;
+      minEnergyThreshold = 0.12;
+      minTimeGap = 0.20;
     }
 
-    const avgEnergy = energy.reduce((a, b) => a + b, 0) / energy.length;
-    const threshold = avgEnergy * thresholdMult;
+    const notes: any[] = [];
+    let lastNoteTime = -1;
 
-    const notes: Note[] = [];
-    let lastTime = 5.0; // Guaranteed 5.0s lead-in buffer delay at start
-    let lastObstacleTime = -5.0;
+    for (let i = 2; i < energyList.length - 2; i++) {
+      const prev = energyList[i - 1].energy;
+      const currItem = energyList[i];
+      const curr = currItem.energy;
+      const next = energyList[i + 1].energy;
 
-    for (let i = 0; i < energy.length; i++) {
-      const currentTime = (i * windowSize) / sampleRate;
-      if (currentTime < 5.0) continue;
+      if (curr > minEnergyThreshold && curr > prev && curr > next) {
+        if (currItem.time - lastNoteTime >= minTimeGap && currItem.time >= 5.0) {
+          const track = currItem.isBass ? 'ground' : 'air';
+          const isDual = Math.random() < (difficulty === 'Hard' ? 0.22 : 0.12);
+          const isObstacle = Math.random() < (difficulty === 'Hard' ? 0.18 : 0.10);
 
-      if (energy[i] > threshold && (currentTime - lastTime) >= minInterval) {
-        lastTime = currentTime;
-
-        // Guarantee Haters are spaced at least 2.2s apart
-        const canSpawnObstacle = (currentTime - lastObstacleTime) >= 2.2;
-        const isObstacle = canSpawnObstacle && Math.random() < 0.22;
-        const isAir = Math.random() > 0.5;
-        const track: TrackType = isAir ? 'air' : 'ground';
-
-        if (isObstacle) {
-          lastObstacleTime = currentTime;
-          const obstacleEntity: EntityType = isAir ? 'hater_shark_rose' : 'hater_dog_board';
-          notes.push({
-            id: `note_${i}`,
-            time: Number(currentTime.toFixed(2)),
-            track,
-            type: 'obstacle',
-            entity: obstacleEntity
-          });
-        } else {
-          const isDual = Math.random() < 0.18;
-          const voterEntity: EntityType = isAir ? 'voter_student' : 'voter_office';
-
-          if (isDual) {
+          if (isObstacle) {
             notes.push({
-              id: `note_${i}_air`,
-              time: Number(currentTime.toFixed(2)),
+              time: currItem.time,
+              track,
+              type: 'obstacle',
+              entity: Math.random() > 0.5 ? 'hater_dog_board' : 'hater_shark'
+            });
+          } else if (isDual) {
+            notes.push({
+              time: currItem.time,
               track: 'air',
-              type: 'voter',
-              entity: 'voter_student',
+              type: 'normal',
+              entity: 'tissue_pack',
               isDual: true
             });
             notes.push({
-              id: `note_${i}_gnd`,
-              time: Number(currentTime.toFixed(2)),
+              time: currItem.time,
               track: 'ground',
-              type: 'voter',
-              entity: 'voter_office',
+              type: 'normal',
+              entity: 'tissue_pack',
               isDual: true
             });
           } else {
             notes.push({
-              id: `note_${i}`,
-              time: Number(currentTime.toFixed(2)),
+              time: currItem.time,
               track,
-              type: 'voter',
-              entity: voterEntity
+              type: 'normal',
+              entity: 'tissue_pack'
             });
           }
+
+          lastNoteTime = currItem.time;
         }
       }
     }
@@ -196,100 +190,102 @@ export class AudioEngine {
     return notes;
   }
 
-  public playSFX(type: 'perfect' | 'swish' | 'error' | 'cheer'): void {
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+  public playBGM(offsetSec: number = 0): void {
+    const ctx = this.initCtx();
+    this.stopBGM();
+    this.stopPreview();
 
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const now = this.ctx.currentTime;
+    const activeBuf = this.customAudioBuffer || this.bgmBuffer;
+    if (!activeBuf) return;
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    this.currentBgmSource = ctx.createBufferSource();
+    this.currentBgmSource.buffer = activeBuf;
 
-    if (type === 'perfect') {
-      // Acoustic Snare SFX
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(240, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
-      gain.gain.setValueAtTime(0.7, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      osc.start(now);
-      osc.stop(now + 0.12);
-    } else if (type === 'swish') {
-      // Bass Kick SFX
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(150, now);
-      osc.frequency.exponentialRampToValueAtTime(30, now + 0.1);
-      gain.gain.setValueAtTime(0.8, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-      osc.start(now);
-      osc.stop(now + 0.14);
-    } else if (type === 'error') {
-      // Rim Break Error SFX
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(110, now);
-      osc.frequency.linearRampToValueAtTime(55, now + 0.15);
-      gain.gain.setValueAtTime(0.6, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } else if (type === 'cheer') {
-      // Crash Cymbal SFX
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(120, now + 0.25);
-      gain.gain.setValueAtTime(0.5, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.start(now);
-      osc.stop(now + 0.3);
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0.85, ctx.currentTime);
+
+    this.currentBgmSource.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    this.bgmStartTime = ctx.currentTime - offsetSec;
+    this.currentBgmSource.start(0, offsetSec);
+    this.isBgmPlaying = true;
+  }
+
+  public pauseBGM(): void {
+    if (this.currentBgmSource && this.isBgmPlaying) {
+      try {
+        this.currentBgmSource.stop();
+        this.currentBgmSource.disconnect();
+      } catch (e) {}
+      this.bgmPauseOffset = this.getHardwareTime();
+      this.isBgmPlaying = false;
+      this.currentBgmSource = null;
     }
   }
 
-  private synthesizeElectroBGM(): AudioBuffer {
-    const sr = this.ctx.sampleRate;
-    const duration = 40;
-    const buffer = this.ctx.createBuffer(2, sr * duration, sr);
-    const left = buffer.getChannelData(0);
-    const right = buffer.getChannelData(1);
-
-    const bpm = 135;
-    const secondsPerBeat = 60 / bpm;
-
-    for (let i = 0; i < buffer.length; i++) {
-      const t = i / sr;
-      if (t < 5.0) {
-        left[i] = 0;
-        right[i] = 0;
-        continue;
-      }
-
-      const beat = (t - 5.0) / secondsPerBeat;
-      const subBeat = beat % 1;
-
-      let kick = 0;
-      if (subBeat < 0.15) {
-        const kickFreq = 140 * Math.exp(-subBeat * 25);
-        kick = Math.sin(2 * Math.PI * kickFreq * subBeat) * (1 - subBeat / 0.15) * 0.7;
-      }
-
-      let bass = 0;
-      const bassNote = (Math.floor(beat) % 4 === 0) ? 55 : (Math.floor(beat) % 4 === 2) ? 65 : 49;
-      bass = Math.sin(2 * Math.PI * bassNote * t) * 0.2;
-
-      let synth = 0;
-      if (beat % 2 >= 0.5 && beat % 2 < 1.5) {
-        const leadFreq = 440 + Math.sin(t * 8) * 110;
-        synth = (Math.sin(2 * Math.PI * leadFreq * t) > 0 ? 0.15 : -0.15) * (1 - (subBeat % 0.5));
-      }
-
-      const master = (kick + bass + synth) * 0.45;
-      left[i] = master;
-      right[i] = master;
+  public stopBGM(): void {
+    if (this.currentBgmSource) {
+      try {
+        this.currentBgmSource.stop();
+        this.currentBgmSource.disconnect();
+      } catch (e) {}
+      this.currentBgmSource = null;
     }
+    this.isBgmPlaying = false;
+    this.bgmPauseOffset = 0;
+  }
 
-    return buffer;
+  public getHardwareTime(): number {
+    if (!this.isBgmPlaying) return this.bgmPauseOffset;
+    if (!this.audioCtx) return 0;
+    return Math.max(0, this.audioCtx.currentTime - this.bgmStartTime);
+  }
+
+  public playSFX(type: 'perfect' | 'swish' | 'cheer' | 'error'): void {
+    const ctx = this.initCtx();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+
+    if (type === 'perfect') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } else if (type === 'swish') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } else if (type === 'cheer') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } else if (type === 'error') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
   }
 }
 

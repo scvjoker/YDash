@@ -140,6 +140,7 @@ export const App: React.FC = () => {
           selectedCostume,
           difficulty,
           noteSpeed,
+          song,
           stats => setGameStats({ ...stats }),
           finalStats => {
             setGameStats({ ...finalStats });

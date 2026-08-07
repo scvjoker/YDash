@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SONG_REGISTRY, SongData } from '../game/SongRegistry';
+import { audioEngine } from '../game/AudioEngine';
 
 interface SongSelectModalProps {
   currentSongId: string;
@@ -23,8 +24,22 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
   const [speed, setSpeed] = useState<number>(currentSpeed);
   const [coverErrors, setCoverErrors] = useState<{ [id: string]: boolean }>({});
 
+  // Auto-play audio preview when clicking a song card
+  useEffect(() => {
+    audioEngine.playPreviewFromUrl(selectedSong.audio);
+    return () => {
+      audioEngine.stopPreview();
+    };
+  }, [selectedSong]);
+
   const handleConfirmPlay = () => {
+    audioEngine.stopPreview();
     onSelectSong(selectedSong, difficulty, speed);
+  };
+
+  const handleClose = () => {
+    audioEngine.stopPreview();
+    onClose();
   };
 
   const getStageBadgeColor = (stage: '起' | '承' | '轉' | '合' | 'DLC') => {
@@ -68,7 +83,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
       }}>
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           style={{
             position: 'absolute',
             top: '1rem',
@@ -100,7 +115,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             🎵 競選音樂大廳 (8 首精選曲庫)
           </h2>
           <p style={{ color: '#aaa', fontSize: '0.92rem' }}>
-            體驗起承轉合 8 首熱血故事線與阿狸 DLC 限定企劃神曲！
+            點擊切換樂曲即可自動試聽！體驗起承轉合 8 首熱血故事線與阿狸 DLC 限定企劃神曲。
           </p>
         </div>
 
@@ -207,7 +222,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                 />
                 <div>
                   <span style={{ background: '#ffe600', color: '#000', fontWeight: 900, padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem' }}>
-                    【{selectedSong.storyStage}】階段曲目
+                    【{selectedSong.storyStage}】階段曲目 (🔊 試聽中)
                   </span>
                   <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', marginTop: '4px' }}>
                     {selectedSong.title}
