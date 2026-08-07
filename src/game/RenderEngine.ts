@@ -21,6 +21,7 @@ export class RenderEngine {
 
   // Assets Images
   private bgImage: HTMLImageElement | null = null;
+  private defaultBgImage: HTMLImageElement | null = null;
   private yoakaMainImage: HTMLImageElement | null = null;
   private yoakaDefaultImage: HTMLImageElement | null = null;
   private yoakaOfficeImage: HTMLImageElement | null = null;
@@ -44,7 +45,9 @@ export class RenderEngine {
   }
 
   private loadAssets(): void {
-    this.bgImage = this.loadSmartImage(['/cyber_runway_bg.png', '/cyber_runway_bg.jpg', '/cyber_runway_bg.jpeg', '/cyber_runway_bg.webp']);
+    this.defaultBgImage = this.loadSmartImage(['/cyber_runway_bg.png', '/cyber_runway_bg.jpg', '/cyber_runway_bg.jpeg', '/cyber_runway_bg.webp']);
+    this.bgImage = this.defaultBgImage;
+
     this.yoakaMainImage = this.loadSmartImage(['/yoaka_main.png', '/yoaka_main.jpg', '/yoaka_main.jpeg', '/yoaka_main.webp']);
 
     // 3 Costume Images Dedicated Loader
@@ -57,6 +60,15 @@ export class RenderEngine {
     this.haterDogImage = this.loadSmartImage(['/assets/hater_dog_board.png', '/assets/hater_dog_board.jpg', '/assets/hater_dog_board.jpeg', '/assets/hater_dog_board.webp']);
     this.haterSharkImage = this.loadSmartImage(['/assets/hater_shark.png', '/assets/hater_shark.jpg', '/assets/hater_shark.jpeg', '/assets/hater_shark.webp']);
     this.tissuePackImage = this.loadSmartImage(['/assets/tissue_pack.png', '/assets/tissue_pack.jpg', '/assets/tissue_pack.jpeg', '/assets/tissue_pack.webp', '/assets/tissue_target.png', '/assets/tissue_target.jpg']);
+  }
+
+  public setSongBgImage(bgUrl?: string): void {
+    if (!bgUrl) {
+      this.bgImage = this.defaultBgImage;
+      return;
+    }
+    const customBg = this.loadSmartImage([bgUrl, '/cyber_runway_bg.png', '/cyber_runway_bg.jpg']);
+    this.bgImage = customBg;
   }
 
   private loadSmartImage(candidateUrls: string[]): HTMLImageElement {
@@ -252,10 +264,16 @@ export class RenderEngine {
     time: number,
     isFever: boolean
   ): void {
-    if (this.bgImage && this.bgImage.complete && this.bgImage.naturalWidth !== 0) {
+    const activeBg = (this.bgImage && this.bgImage.complete && this.bgImage.naturalWidth !== 0)
+      ? this.bgImage
+      : (this.defaultBgImage && this.defaultBgImage.complete && this.defaultBgImage.naturalWidth !== 0)
+      ? this.defaultBgImage
+      : null;
+
+    if (activeBg) {
       const speed = 85;
-      const naturalW = this.bgImage.naturalWidth || this.bgImage.width;
-      const naturalH = this.bgImage.naturalHeight || this.bgImage.height;
+      const naturalW = activeBg.naturalWidth || activeBg.width;
+      const naturalH = activeBg.naturalHeight || activeBg.height;
 
       // Aspect-ratio scaled background width
       const bgW = Math.max(10, naturalW * (height / naturalH));
@@ -266,7 +284,7 @@ export class RenderEngine {
       // Tile images dynamically until full screen width + buffer is filled (100% Seamless Loop!)
       let currentX = -scrollX;
       while (currentX < width) {
-        ctx.drawImage(this.bgImage, currentX, 0, bgW + 1.5, height); // +1.5px eliminates subpixel gaps on mobile
+        ctx.drawImage(activeBg, currentX, 0, bgW + 1.5, height); // +1.5px eliminates subpixel gaps on mobile
         currentX += bgW;
       }
 

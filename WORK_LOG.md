@@ -1,15 +1,23 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] DLC 特典樂曲 《Whats Next? by A Li & Jay Lin》實裝與選曲點擊入口指引
+## [2026-08-07] 精確 8 首樂曲清單對齊 + 阿狸 DLC 特別企劃《Whats Next?》 + 封面/背景 Smart Fallback 備用機制
 
-### 變更與 DLC 樂曲擴充項目 (DLC Track & Selection Guidance)
-- **1. 新增 DLC 特典樂曲 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 新增 DLC 限定神曲 **《Whats Next?》**（創作者：`A Li & Jay Lin`，BPM 168），帶有【DLC】專屬紫金霓虹徽章，收錄在「競選音樂大廳」！
-- **2. 樂曲切換點擊入口指引**：
-  - **點擊位置**：在主畫面（StartScreen）右側中段的「當前競選戰歌」卡片右上角，點擊藍色霓虹按鈕 **`🎵 切換樂曲`** 即可彈出音樂大廳選歌！
+### 變更與樂曲庫與資產 Fallback 優化項目 (8 Exact Songs & Smart Fallback)
+- **1. 精確 8 首樂曲對齊 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  1. 🎵 **《競選出發！》**【起】 (街頭拜票 有歌詞)
+  2. ⚡ **《街頭拜票》**【承】 (街頭拜票狂想曲 純音樂)
+  3. ⚡ **《街頭拜票狂想曲》**【承】 (街頭拜票狂想曲 高難長曲)
+  4. 🎵 **《辯論會激戰》**【轉】 (辯論會激戰 標準版)
+  5. ⚡ **《辯論會激戰 (狂想曲)》**【轉】 (辯論會激戰 有歌詞 狂想曲)
+  6. 🎵 **《開票夜勝選大爆發》**【合】 (開票夜勝選大爆發 標準版)
+  7. ⚡ **《開票夜勝選大爆發 (狂想曲)》**【合】 (開票夜勝選大爆發 有歌詞 狂想曲)
+  8. 🔥 **《Whats Next?》**【DLC】 (副標題：`✨ 我推的阿狸 DLC 特典`，演出：`A Li & Jay Lin`，BPM 80)
+- **2. 專屬封面與背景 Smart Fallback 備用機制 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx) & [RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
+  - **封面 Fallback**：若樂曲未設定專屬封面或載入失敗，100% 自動退回使用 `/assets/tissue_pack.png` 當作備用封面！
+  - **背景 Fallback**：若樂曲未設定專屬背景或載入失敗，100% 自動退回使用 `/cyber_runway_bg.png` 當作備用賽道背景！
 
 ---
-*「活著很累，但比起 debug，點擊『🎵 切換樂曲』就能打開音樂大廳，還能玩到 A Li & Jay Lin 的神曲《Whats Next?》，這音遊爽度真的太高了哈哈！」*
+*「活著很累，但比起 debug，8 首樂曲清單齊齊整整，封面缺省用衛生紙包，背景缺省用賽博跑道，這備用機制真的太穩太貼心啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 

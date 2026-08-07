@@ -21,6 +21,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
   );
   const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>(currentDifficulty);
   const [speed, setSpeed] = useState<number>(currentSpeed);
+  const [coverErrors, setCoverErrors] = useState<{ [id: string]: boolean }>({});
 
   const handleConfirmPlay = () => {
     onSelectSong(selectedSong, difficulty, speed);
@@ -36,6 +37,13 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
     }
   };
 
+  const getSmartCover = (song: SongData) => {
+    if (coverErrors[song.id] || !song.cover) {
+      return '/assets/tissue_pack.png';
+    }
+    return song.cover;
+  };
+
   return (
     <div style={{
       position: 'absolute',
@@ -49,7 +57,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
       padding: '1.2rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '1020px',
+        width: '1040px',
         maxWidth: '96vw',
         maxHeight: '94vh',
         overflowY: 'auto',
@@ -89,20 +97,21 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             textShadow: '0 0 15px rgba(0,240,255,0.6)',
             marginBottom: '4px'
           }}>
-            🎵 競選音樂大廳 (SONG SELECTION)
+            🎵 競選音樂大廳 (8 首精選曲庫)
           </h2>
           <p style={{ color: '#aaa', fontSize: '0.92rem' }}>
-            體驗起承轉合熱血競選故事線與 DLC 限定神曲！狂想曲版本長度更長、拍點難度更具挑戰性。
+            體驗起承轉合 8 首熱血故事線與阿狸 DLC 限定企劃神曲！
           </p>
         </div>
 
         {/* Main Grid: Left Track List vs Right Selected Song Preview */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem', marginBottom: '1.2rem' }}>
-          {/* LEFT: 7 Songs Selection Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '52vh', overflowY: 'auto', paddingRight: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: '1.5rem', marginBottom: '1.2rem' }}>
+          {/* LEFT: 8 Songs Selection Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '54vh', overflowY: 'auto', paddingRight: '6px' }}>
             {SONG_REGISTRY.map(song => {
               const isSelected = selectedSong.id === song.id;
               const stageBadge = getStageBadgeColor(song.storyStage);
+              const songCoverSrc = getSmartCover(song);
 
               return (
                 <div
@@ -122,6 +131,21 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Small Cover Thumbnail with Fallback */}
+                    <img
+                      src={songCoverSrc}
+                      onError={() => setCoverErrors(prev => ({ ...prev, [song.id]: true }))}
+                      alt={song.title}
+                      style={{
+                        width: '45px',
+                        height: '45px',
+                        borderRadius: '8px',
+                        objectFit: 'contain',
+                        background: '#07091e',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                      }}
+                    />
+
                     {/* Stage Badge Pill */}
                     <span style={{
                       background: stageBadge.bg,
@@ -137,7 +161,7 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
 
                     <div>
                       <h4 style={{
-                        fontSize: '1.15rem',
+                        fontSize: '1.1rem',
                         fontWeight: 900,
                         color: isSelected ? '#00f0ff' : '#fff',
                         marginBottom: '2px'
@@ -149,8 +173,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
                           </span>
                         )}
                       </h4>
-                      <p style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                        {song.subtitle} • {song.artist}
+                      <p style={{ fontSize: '0.78rem', color: '#aaa' }}>
+                        {song.subtitle} • BPM {song.bpm}
                       </p>
                     </div>
                   </div>
@@ -168,7 +192,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             <div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
                 <img
-                  src={selectedSong.cover}
+                  src={getSmartCover(selectedSong)}
+                  onError={() => setCoverErrors(prev => ({ ...prev, [selectedSong.id]: true }))}
                   alt={selectedSong.title}
                   style={{
                     width: '90px',
