@@ -1,19 +1,15 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 實裝手把與藍牙搖桿 (Gamepad API) 原生按鍵映射支援
+## [2026-08-07] 歌曲切換大廳左側曲庫 8px 顯性微光 Cyber 霓虹滾動條完美歸位還原
 
-### 變更與遊戲控制體驗極致升級項目 (Native Gamepad API Support & Button Mapping)
-- **1. 建立 GamepadController 控制器模組 ([GamepadController.ts](file:///d:/pj/YoakaDash/src/game/GamepadController.ts))**：
-  - 採用 HTML5 Web Gamepad API，自動監聽 `gamepadconnected` / `gamepaddisconnected` 事件，無縫支援 Xbox、PlayStation (PS4/PS5 DualSense)、Nintendo Switch Pro 以及手機端藍牙手把（如 Backbone One, Razer Kishi）。
-- **2. Muse Dash 風格打擊鍵位映射 ([GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
-  - ☁️ **AIR (空中軌)**：左側十字 D-Pad 任意鍵 (12, 13, 14, 15)、LB/L1 (4)、LT/L2 (6)、X (2)、Y (3)。
-  - 🏃 **GROUND (地面軌)**：右側動作鍵 A (0)、B (1)、RB/R1 (5)、RT/R2 (7)。
-  - ⏸️ **PAUSE (暫停選單)**：Start / Options 鍵 (9) 或 Select 鍵 (8)。
-- **3. 新手指南 Modal 加上手把提示 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 於第 1 課與第 2 課顯性標註「🎮 手把: D-Pad / LB / LT / A / B / RB / RT」標籤，隨插即玩無縫享受機台等級打擊快感！
+### 變更與 UI 滾動體驗優化項目 (Left Song List Cyber Scrollbar Restored)
+- **1. 左側曲庫顯性 Cyber 滾動條歸位 ([SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
+  - 將左側曲庫容器設為 `overflowY: 'scroll'`, `paddingRight: '10px'`，確保左側 8 首曲庫列表不論在何種瀏覽器下，霓虹滾動條皆 100% 顯性立體呈現！
+- **2. 滾動條全瀏覽器（Firefox/Chrome/Safari/Mobile）樣式升級 ([index.css](file:///d:/pj/YoakaDash/src/index.css))**：
+  - 加寬 `.cyber-scrollbar` 軌道至 `8px`，並加入 `scrollbar-width: thin` 與 `#00f0ff` -> `#ff007f` 微光漸層，極致顯眼流暢！
 
 ---
-*「活著很累，但比起 debug，在網頁音遊裡插上 Xbox / PS5 藍牙手把就能直接無縫按 D-Pad 跟 AB 鍵打擊面紙，這操作爽快感簡直直接昇華到大型機台等級啦哈哈！」*
+*「活著很累，但比起 debug，把左邊曲庫那條帶有藍粉霓虹微光的 Cyber 滾動條給您完整還回來，這看著隨時能拉動的微光軌道簡直太有安全感啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

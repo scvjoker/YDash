@@ -180,8 +180,8 @@ export const SongSelectModal: React.FC<SongSelectModalProps> = ({
             gap: isMobileScreen ? '0.35rem' : '0.65rem',
             height: isMobileScreen ? '58vh' : '56vh',
             maxHeight: isMobileScreen ? '58vh' : '56vh',
-            overflowY: 'auto',
-            paddingRight: '6px'
+            overflowY: 'scroll',
+            paddingRight: '10px'
           }} className="cyber-scrollbar">
             {SONG_REGISTRY.map(song => {
               const isSelected = selectedSong.id === song.id;
