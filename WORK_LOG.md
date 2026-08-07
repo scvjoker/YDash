@@ -1,19 +1,20 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎓 圖文教學 Modal 排版極致淨化 (移除 Icon + 135px 放大示範圖框 + 預留 Lesson 1/2 截圖路徑)
+## [2026-08-07] 🎵 音源路徑更新為 `/assets/audio/*.mp3` + 🛠️ BeatProducer 電腦版 Flex 獨立滾動與置底試玩按鈕修復
 
-### 變更與圖文教學視窗視覺優化 (Clean Layout & Enlarged Tutorial Image Boxes)
-- **1. 全面移除 Icon 與雜混圖示 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 移除了簡報標題與內文中的圖示 Emoji/Icons，排版極致大器乾淨，純文字與黑框卡片質感爆棚！
-- **2. 示範圖片區塊大化 (135px) 與預留 Lesson 1 / 2 截圖放置路徑**：
-  - **第 1 課示範圖片預留路徑**：`public/assets/tutorial_lesson1.png` (或 `.jpg`)
-  - **第 2 課示範圖片預留路徑**：`public/assets/tutorial_lesson2.png` (或 `.jpg`)
-  - **第 4 課示範圖片預留路徑**：`public/assets/tutorial_lesson4.png` (或 `.jpg`)
-  - **第 3 課 & 第 5 課**：展示大比例實體黑粉 (`hater_dog_board.png` 90px) 與 3 大 Yoaka 換裝頭像！
-  - 內建智慧 Fallback 保護：若截圖尚未上傳，自動顯示傳單與主角圖案備用，畫面質感大器！
+### 變更與音訊目錄及 BeatProducer 電腦版 UX 修復項目 (Audio Assets Path & BeatProducer Desktop Scroll)
+- **1. 音源檔案路徑更新為 `/assets/audio/*.mp3` ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  - 將 4 首競選升遷主題歌曲的音訊載入路徑更新為：
+    1. `public/assets/audio/track1_chief.mp3` ➔ 1. 巷弄拜票：里長起手式
+    2. `public/assets/audio/track2_district.mp3` ➔ 2. 區長爭霸：賽博政見會
+    3. `public/assets/audio/track3_mayor.mp3` ➔ 3. 市長大選：小島電音夜
+    4. `public/assets/audio/track4_master.mp3` ➔ 4. 幫主登場：最高政壇巔峰
+- **2. BeatProducer (A+B 創作者) 電腦版彈窗獨立 Y 軸滾動條 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
+  - 徹底解決電腦版在非全螢幕下，AI 抓拍大量音符後無法滾動、最下方「▶ 試玩自製譜面 (PLAY CUSTOM MAP)」按鈕被截斷無法點擊的問題！
+  - 使用 Flex 彈性容器與獨立 `overflowY: 'auto'` 滾動層，並將試玩按鈕強制置底，確保任何解析度與全螢幕/視窗模式下 100% 滑動暢通、完美可點！
 
 ---
-*「活著很累，但比起 debug，把 Icon 拿掉、圖片放大成 135px 專屬框，還預留好圖片檔名，這排版精緻度看起來真的太舒服了哈哈！」*
+*「活著很累，但比起 debug，音源放到 /assets/audio/，BeatProducer 電腦版滾動條寫成獨立 Flex 層，滑到底點擊試玩一氣呵成，這滑動手感真的太讚了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
