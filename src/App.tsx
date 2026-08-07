@@ -15,7 +15,7 @@ import { ResultScreen } from './components/ResultScreen';
 import { LandscapePrompt } from './components/LandscapePrompt';
 
 import { SongSelectModal } from './components/SongSelectModal';
-import { TutorialOverlay, TutorialPhaseInfo, TUTORIAL_PHASES_DATA } from './components/TutorialOverlay';
+import { TutorialModal } from './components/TutorialOverlay';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
@@ -25,20 +25,10 @@ export const App: React.FC = () => {
   const [currentNoteSpeed, setCurrentNoteSpeed] = useState<number>(1.0);
   const [selectedCostume, setSelectedCostume] = useState<CostumeId>('campaign_vest');
 
-  // Song Selector & Tutorial State
+  // Song Selector & Tutorial Modal State
   const [selectedSongTrack, setSelectedSongTrack] = useState<SongTrackData>(BUILTIN_SONGS[1]);
   const [isSongSelectOpen, setIsSongSelectOpen] = useState<boolean>(false);
-
-  const [isTutorialMode, setIsTutorialMode] = useState<boolean>(false);
-  const [tutorialInfo, setTutorialInfo] = useState<TutorialPhaseInfo>({
-    phase: 1,
-    title: TUTORIAL_PHASES_DATA[0].title,
-    instruction: TUTORIAL_PHASES_DATA[0].instruction,
-    keyHint: TUTORIAL_PHASES_DATA[0].keyHint,
-    targetCount: TUTORIAL_PHASES_DATA[0].targetCount,
-    currentCount: 0
-  });
-  const [isTutorialCompleted, setIsTutorialCompleted] = useState<boolean>(false);
+  const [isTutorialModalOpen, setIsTutorialModalOpen] = useState<boolean>(false);
 
   const [gameStats, setGameStats] = useState<GameStats>({
     score: 0,
@@ -114,9 +104,6 @@ export const App: React.FC = () => {
       setSelectedSongTrack(songTrack);
     }
 
-    setIsTutorialMode(false);
-    setIsTutorialCompleted(false);
-
     // Force Reset Game Stats to Initial Values
     const freshStats: GameStats = {
       score: 0,
@@ -153,60 +140,6 @@ export const App: React.FC = () => {
           finalStats => {
             setGameStats({ ...finalStats });
             setGameState('result');
-          },
-          false
-        );
-        gameLoopRef.current = loop;
-        loop.start();
-      }
-    }, 100);
-  };
-
-  // Start Tutorial Stage Mode (5-Phase Interactive Guide with Phase Repeat Audio)
-  const handleStartTutorial = () => {
-    if (gameLoopRef.current) {
-      gameLoopRef.current.stop();
-      gameLoopRef.current = null;
-    }
-
-    setIsTutorialMode(true);
-    setIsTutorialCompleted(false);
-    setIsPaused(false);
-
-    setGameStats({
-      score: 0,
-      supportRate: 100,
-      combo: 0,
-      maxCombo: 0,
-      perfectCount: 0,
-      greatCount: 0,
-      missCount: 0,
-      feverGauge: 0,
-      isFeverActive: false,
-      totalNotesCount: 0
-    });
-
-    setGameState('playing');
-
-    setTimeout(() => {
-      if (canvasRef.current) {
-        const renderEngine = new RenderEngine(canvasRef.current);
-        renderEngine.resize(window.innerWidth, window.innerHeight);
-
-        const loop = new GameLoop(
-          renderEngine,
-          DEFAULT_BEATMAPS[0],
-          selectedCostume,
-          'Normal',
-          1.0,
-          stats => setGameStats({ ...stats }),
-          () => {},
-          true, // isTutorialMode = true
-          info => {
-            setTutorialInfo(info);
-            if (gameLoopRef.current?.isTutorialCompleted) {
-              setIsTutorialCompleted(true);
-            }
           }
         );
         gameLoopRef.current = loop;
@@ -259,19 +192,24 @@ export const App: React.FC = () => {
           onOpenCostumes={() => setGameState('costumes')}
           onOpenEditor={() => setGameState('editor')}
           onOpenSongSelect={() => setIsSongSelectOpen(true)}
-          onStartTutorial={handleStartTutorial}
+          onStartTutorial={() => setIsTutorialModalOpen(true)}
           selectedCostume={selectedCostume}
           selectedSongTrack={selectedSongTrack}
         />
       )}
 
-      {/* 2. SONG SELECT MODAL */}
+      {/* 2. TUTORIAL MODAL (Graphic Slide Guide) */}
+      {isTutorialModalOpen && (
+        <TutorialModal onClose={() => setIsTutorialModalOpen(false)} />
+      )}
+
+      {/* 3. SONG SELECT MODAL */}
       {isSongSelectOpen && (
         <SongSelectModal
           onSelectSong={song => {
             setIsSongSelectOpen(false);
             if (song.isTutorial) {
-              handleStartTutorial();
+              setIsTutorialModalOpen(true);
             } else {
               setSelectedSongTrack(song);
             }
@@ -284,7 +222,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 3. COSTUME MODAL */}
+      {/* 4. COSTUME MODAL */}
       {gameState === 'costumes' && (
         <CostumeModal
           selectedCostume={selectedCostume}
@@ -293,7 +231,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 4. BEATMAP EDITOR MODAL */}
+      {/* 5. BEATMAP EDITOR MODAL */}
       {gameState === 'editor' && (
         <BeatmapEditor
           onClose={() => setGameState('menu')}
@@ -301,7 +239,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 5. CANVAS RHYTHM GAMEPLAY */}
+      {/* 6. CANVAS RHYTHM GAMEPLAY */}
       <canvas
         ref={canvasRef}
         style={{
@@ -310,21 +248,6 @@ export const App: React.FC = () => {
           height: '100%'
         }}
       />
-
-      {/* 6. TUTORIAL OVERLAY (When in Tutorial Mode) */}
-      {gameState === 'playing' && isTutorialMode && (
-        <TutorialOverlay
-          phaseInfo={tutorialInfo}
-          onNextStep={() => gameLoopRef.current?.nextTutorialPhase()}
-          isCompleted={isTutorialCompleted}
-          onCompleteTutorial={() => {
-            if (gameLoopRef.current) gameLoopRef.current.stop();
-            setIsTutorialMode(false);
-            setIsTutorialCompleted(false);
-            setGameState('menu');
-          }}
-        />
-      )}
 
       {/* 7. HUD OVERLAY */}
       {gameState === 'playing' && (
@@ -343,14 +266,10 @@ export const App: React.FC = () => {
           stats={gameStats}
           beatmapTitle={`${selectedSongTrack.title} (${currentDifficulty})`}
           onResume={handleTogglePause}
-          onRestart={() => {
-            if (isTutorialMode) handleStartTutorial();
-            else handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack);
-          }}
+          onRestart={() => handleStartGame(currentBeatmap, currentDifficulty, currentNoteSpeed, selectedSongTrack)}
           onHome={() => {
             if (gameLoopRef.current) gameLoopRef.current.stop();
             setIsPaused(false);
-            setIsTutorialMode(false);
             setGameState('menu');
           }}
         />

@@ -1,22 +1,20 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🎓 新手競選培訓關卡 (Phase Repeat 無縫重複音效 + 手動下一步) + 🎵 多曲選擇選單 Carousel
+## [2026-08-07] 🎓 新手競選培訓精美圖文引導 Modal + 🎵 4 首戰歌 MP3 格式與目錄結構說明
 
-### 變更與音遊全新系統實裝項目 (Tutorial Stage & Song Selection Carousel)
-- **1. 🎓 互動式新手競選培訓關卡 ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
-  - 實裝 5 大階段親切引導（1.上軌投紙 ➔ 2.下軌發紙 ➔ 3.雙擊 ➔ 4.閃避黑粉 ➔ 5.FEVER爆發）。
-  - 頂端提示牌特地實裝 **`⏭️ 手動下一步 (NEXT STEP)`** 金黃亮色按鈕，玩家既可親自擊中按鍵通關，也可點擊按鈕彈性手動前進！
-  - 培訓完成後彈出尊榮親切的 **🎓 競選培訓合格證書** 頒發彈窗！
-- **2. 🔁 階段式 Repeat 樂段音效 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts))**：
-  - 在 `isTutorial` 模式下，每個教學階段皆有 Web Audio API 即時合成的 4 小節 120 BPM 專屬樂段，在該階段**自動無縫重複循環 (Repeat Loop)**，提供零時間壓力的反覆練習！
-- **3. 🎵 規範化歌曲資料標準與多曲選單 Carousel ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts) & [SongSelectModal.tsx](file:///d:/pj/YoakaDash/src/components/SongSelectModal.tsx))**：
-  - 建立標準化 `SongTrackData` 介面，支援曲目背景與 MP4 影片擴充！
-  - 內建 4 首熱血賽博戰歌（含新手培訓、主打歌、155 BPM 高速電音夜、118 BPM 秘書學霸演說曲）。
-- **4. 🛡️ 零刪減原則與 100% 相容**：
-  - 保持主畫面與既有所有功能按鈕完全原封不動，`npm run build` 通過 0 錯誤編譯。
+### 變更與圖文教學 Modal 及音訊目錄說明 (Graphic Tutorial Modal & Audio Specs)
+- **1. 🎓 新手競選培訓改版為精美圖文簡報 Modal ([TutorialOverlay.tsx](file:///d:/pj/YoakaDash/src/components/TutorialOverlay.tsx))**：
+  - 將新手教學獨立為 5 大課堂互動圖文簡報（1.雙軌拜票與傳單發送 ➔ 2.雙擊音符與票數倍增 ➔ 3.閃避黑粉與支持度 HP ➔ 4.FEVER 熱血雙倍爆發 ➔ 5.3 大競選戰袍技能指南）。
+  - 提供左右分頁切換、進度點點與「我懂了！開始競選拜票」按鈕，讀圖讀文直觀清晰！
+- **2. 📁 4 首內建音樂檔案格式 (.mp3) 與 public/audio/ 放置位置 ([SongRegistry.ts](file:///d:/pj/YoakaDash/src/game/SongRegistry.ts))**：
+  - 音樂檔案格式統一為：**`.mp3`**（或 `.wav`），放置於專案根目錄下的 **`public/audio/`**：
+    1. `public/audio/tutorial_theme.mp3` ➔ 🎓 新手競選培訓主題曲
+    2. `public/audio/election_journey.mp3` ➔ 🎵 yoaka競選之旅 (主打歌)
+    3. `public/audio/cyber_night.mp3` ➔ ⚡ 賽博小島電音夜
+    4. `public/audio/secretary_speech.mp3` ➔ 👓 秘書學霸演說曲
 
 ---
-*「活著很累，但比起 debug，看著新手教學可以一段段 repeat 練習，隨時還能點『手動下一步』，這音遊關卡設計得簡直太溫馨太專業了哈哈！」*
+*「活著很累，但比起 debug，圖文新手教學一目了然，音樂檔直接放 public/audio/*.mp3，這設計整理得太清晰舒服了哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
