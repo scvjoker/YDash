@@ -121,7 +121,7 @@ export class AudioEngine {
   }
 
   /**
-   * 🎼 AI Automatic Beatmap Recognition with Balanced Tiered Difficulty & Smart Track Alternate Distribution
+   * 🎼 AI Automatic Beatmap Recognition with Balanced Tiered Difficulty & Obstacle Safety Pacing
    */
   public detectBeatsFromBuffer(buffer: AudioBuffer, difficulty: 'Easy' | 'Normal' | 'Hard' = 'Normal'): any[] {
     const channelData = buffer.getChannelData(0);
@@ -151,11 +151,11 @@ export class AudioEngine {
       });
     }
 
-    // 🎯 Quantized AI Difficulty Rules
+    // 🎯 Smoothed Quantized AI Difficulty Rules
     let minEnergyThreshold = 0.20;
     let minTimeGap = 0.32;
     let dualChance = 0.10;
-    let obstacleChance = 0.10;
+    let obstacleChance = 0.08;
     let maxSameTrackStreak = 2; // Force alternate if same track appears more than N times
 
     if (difficulty === 'Easy') {
@@ -165,17 +165,21 @@ export class AudioEngine {
       obstacleChance = 0.05;
       maxSameTrackStreak = 1; // Strict 1:1 alternate
     } else if (difficulty === 'Hard') {
-      minEnergyThreshold = 0.12;
-      minTimeGap = 0.20; // High speed ~5 notes per second
-      dualChance = 0.20;
-      obstacleChance = 0.16;
+      minEnergyThreshold = 0.15;
+      minTimeGap = 0.25; // Smoothed Hard gap (4.0 notes/sec instead of 5.0)
+      dualChance = 0.15; // Smoothed dual chance
+      obstacleChance = 0.12; // Smoothed obstacle chance
       maxSameTrackStreak = 2;
     }
 
     const notes: any[] = [];
     let lastNoteTime = -1;
+    let lastObstacleTime = -10.0;
     let lastTrack: 'air' | 'ground' = 'ground';
     let sameTrackStreak = 0;
+
+    // Minimum Obstacle Safety Window: At least 2.5x minimum beat gap (and >= 0.75s)
+    const minObstacleSafetyGap = Math.max(0.75, minTimeGap * 2.5);
 
     for (let i = 2; i < energyList.length - 2; i++) {
       const prev = energyList[i - 1].energy;
@@ -203,7 +207,10 @@ export class AudioEngine {
           lastTrack = track;
 
           const isDual = Math.random() < dualChance;
-          const isObstacle = Math.random() < obstacleChance;
+
+          // 🛡️ Safe Obstacle Pacing: Must be separated by at least 2.5x min beat gap!
+          const isObstacleAllowed = (currItem.time - lastObstacleTime >= minObstacleSafetyGap);
+          const isObstacle = isObstacleAllowed && (Math.random() < obstacleChance);
 
           if (isObstacle) {
             notes.push({
@@ -212,6 +219,7 @@ export class AudioEngine {
               type: 'obstacle',
               entity: Math.random() > 0.5 ? 'hater_dog_board' : 'hater_shark'
             });
+            lastObstacleTime = currItem.time;
           } else if (isDual) {
             notes.push({
               time: currItem.time,
