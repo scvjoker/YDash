@@ -63,7 +63,8 @@ export class GameLoop {
     const audioUrl = this.songTrack?.audioUrl || '';
     const audioBuf = await audioEngine.loadAudioFromUrl(audioUrl);
     
-    if (audioBuf) {
+    // Only detect notes automatically if beatmap notes were empty
+    if (audioBuf && (!this.notes || this.notes.length === 0)) {
       const detected = audioEngine.detectBeatsFromBuffer(audioBuf, this.difficulty);
       if (detected.length > 0) {
         this.notes = detected;
@@ -147,6 +148,17 @@ export class GameLoop {
 
     if (closestNote) {
       closestNote.hit = true;
+
+      // If it's a DUAL note, mark its sister DUAL note on the opposite track as hit too!
+      if (closestNote.isDual) {
+        const oppTrack = track === 'air' ? 'ground' : 'air';
+        const sisterNote = this.notes.find(n => !n.hit && n.isDual && n.track === oppTrack && Math.abs(n.time - closestNote.time) < 0.15);
+        if (sisterNote) {
+          sisterNote.hit = true;
+          sisterNote.judgement = closestNote.judgement || 'perfect';
+        }
+      }
+
       let judgement: 'perfect' | 'great' = 'great';
       let scoreAdd = 60;
 

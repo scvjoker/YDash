@@ -262,14 +262,31 @@ export class AudioEngine {
             type: 'obstacle',
             entity: Math.random() > 0.5 ? 'hater_dog_board' : 'hater_shark'
           });
+        } else if (isDual) {
+          // Genuine DUAL STRIKE: Placed on BOTH Air & Ground tracks simultaneously!
+          notes.push({
+            id: `detect_dual_air_${timeSec}`,
+            time: timeSec,
+            track: 'air',
+            type: 'voter',
+            entity: 'voter_student',
+            isDual: true
+          });
+          notes.push({
+            id: `detect_dual_ground_${timeSec}`,
+            time: timeSec,
+            track: 'ground',
+            type: 'voter',
+            entity: 'voter_office',
+            isDual: true
+          });
         } else {
           notes.push({
             id: `detect_note_${timeSec}`,
             time: timeSec,
             track,
             type: 'voter',
-            entity: track === 'air' ? 'voter_student' : 'voter_office',
-            isDual
+            entity: track === 'air' ? 'voter_student' : 'voter_office'
           });
         }
       }

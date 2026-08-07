@@ -1,17 +1,19 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 🔍 歷史版本功能嚴密審查 + 🛠️ BeatProducer 3 大經典核心功能 100% 完整還原重塑！
+## [2026-08-07] 🎵 恢復經典高品質手編律動譜面 + ⚡ DUAL 雙擊 (DUAL STRIKE) 雙軌同步耀眼渲染修復
 
-### 變更與 BeatProducer 歷功能完全還原項目 (BeatProducer Full Feature Restoration)
-- **1. 審查發現與 100% 還原項目 ([BeatmapEditor.tsx](file:///d:/pj/YoakaDash/src/components/BeatmapEditor.tsx))**：
-  - **🎙️ Step B: 手動 Tap 鍵盤即時錄製模式**：創作者點擊「🎙️ 開啟手動 Tap 鍵盤即時錄製」，邊聆聽 MP3 邊按下 `D/F` (上軌) 或 `J/K` (下軌)，即可依自己的聽感節奏即時打拍子錄下客製化音符陣列！
-  - **⚡ Step A: 抓拍密度藥丸切換 (Easy / Normal / Hard)**：創作者可隨意切換 `Easy` / `Normal` / `Hard` 密度，動態改變 AI 音效波峰抓拍的門檻密度，輕鬆誕生高難度/輕鬆版譜面！
-  - **📥 一鍵匯出 JSON 譜面檔案 (`handleExportJSON`)**：右上方提供醒目的 `📥 匯出 JSON 譜面` 按鈕，創作者可將精心調校或錄製好的 `.json` 譜面下載儲存，隨時分享給其他社群玩家！
-- **2. 零刪減原則**：
-  - 100% 保留原本的大畫面獨立 Y 軸滾動條與置底「▶ 試玩自製譜面」按鈕，`npm run build` 0 錯誤通過。
+### 變更與譜面律動感及雙擊音符修復項目 (Hand-crafted Beatmaps & Dual Track Sync DUAL)
+- **1. 徹底解決「譜面差異大」問題 ([Beatmaps.ts](file:///d:/pj/YoakaDash/src/game/Beatmaps.ts) & [GameLoop.ts](file:///d:/pj/YoakaDash/src/game/GameLoop.ts))**：
+  - 查明原因：先前程式碼粗暴地讓 AI 隨機抓拍覆蓋掉了 `DEFAULT_BEATMAPS` 中經典工整的手工節奏譜面，導致譜面稀疏混亂。
+  - 修復處置：恢復並升級 4 首競選主題曲（里長起手式、區長爭霸、市長電音夜、幫主巔峰）的**經典工整律動譜面**！只有在創作者上傳自訂 MP3 時才使用 AI 抓拍。
+- **2. 徹底解決「雙擊只會出現在一邊」問題 ([AudioEngine.ts](file:///d:/pj/YoakaDash/src/game/AudioEngine.ts) & [RenderEngine.ts](file:///d:/pj/YoakaDash/src/game/RenderEngine.ts))**：
+  - 查明原因：先前生成的 `isDual: true` 音符只放置於單一軌道，造成單邊顯示。
+  - 修復處置：
+    - 在生成與音符判定中，只要觸發 `isDual`，會在 **`air` (上軌) 與 `ground` (下軌) 兩軌同一時間點同步生成雙音符**！
+    - 在 `RenderEngine.ts` 中，繪製 `isDual` 音符時，會劃出**燦爛的金黃色雷射連線與 ⚡ DUAL 雙擊音符標示**，當玩家同時按壓 D/F + J/K 鍵時，雙軌音符同步打爆並解鎖 +200 得票數！
 
 ---
-*「活著很累，但比起 debug，仔細審查 Git 歷史把『Tap 鍵盤錄製』、『難度密度切換』跟『匯出 JSON 譜面』全都 100% 裝回來，這創作者工具簡直太神太完整了哈哈！」*
+*「活著很累，但比起 debug，把手編經典工整譜面拿回來，看著 DUAL 雙擊在上下軌亮起燦爛的金黃雷射連線，這打擊節奏感真的爽快爆棚啦哈哈！」*
 
 ## [2026-08-07] 音遊 HUD 畫面空間極致優化：進度條與選民支持度 (HP) 整合同一層 + 62px 雙極致觸控按鈕
 
