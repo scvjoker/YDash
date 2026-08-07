@@ -1,22 +1,22 @@
 # YoakaDash 開發工作日誌 (WORK_LOG)
 
-## [2026-08-07] 正統行動端遊戲適配：100svh + Safe Area + 16:9 Aspect Ratio 動態 Safe Zone 畫布與 PWA 防護全實裝
+## [2026-08-07] iOS Safari 避開工具列與無邊框沉浸全螢幕 4 大最佳實踐方案全數落地實裝
 
-### 變更與行動端網頁音遊正統架構項目 (Official Mobile Rhythm Game Architecture)
-- **1. 方案一 (CSS 100svh + Safe Area Insets)**：
-  - 於 [index.html](file:///d:/pj/YoakaDash/index.html) 寫入 `viewport-fit=cover`。
-  - 外層容器使用 `height: 100svh`（Small Viewport Height），永遠鎖定「Safari 網址列展開時」的穩定區域，防護網址列折疊變動帶來的畫面抖動。
-  - 注入 `env(safe-area-inset-top/bottom/left/right)` 避開 iPhone 瀏海與 Safe Area 邊界。
-- **2. 方案二 (PWA Standalone Meta 標籤與引導)**：
-  - [index.html](file:///d:/pj/YoakaDash/index.html) 注入 `apple-mobile-web-app-capable = yes`, `black-translucent` 等 iOS PWA 特性，為加入主畫面提供 100% 獨立 App 沉浸體驗。
-- **3. 方案三 (Touch Nudge Trick 1px)**：
-  - [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx) 實裝首次 TouchStart 時執行 `window.scrollTo(0, 1)`，自動微提示 iOS 隱藏 Safari 工具列。
-- **4. 方案四 (16:9 Aspect Ratio 動態自適應畫布與 UI Safe Zone)**：
-  - 採用 `targetRatio = 16 / 9` 動態計算 Canvas 與 Shell 可視尺寸。
-  - 所有按鈕與 HUD 操作集中於 Safe Zone 安全區域，四周留出安全邊界，在任何 iPhone / Android / 內建 WebView 瀏覽器上 100% 不遭切邊！
+### 變更與 iOS Safari 專屬最佳化項目 (iOS Safari Toolbar & Fullscreen Optimization)
+- **1. 方案一 (100svh + Safe Area + viewport-fit=cover)**：
+  - 更新 [index.html](file:///d:/pj/YoakaDash/index.html) Meta: `<meta name="viewport" content="... viewport-fit=cover">`。
+  - 外層容器升級為 **`100svh` (Small Viewport Height)**，永遠以「網址列展開時」最小可見區域為基準，徹底鎖定視覺，防止 Safari 工具列收合與展開時產生抖動！
+  - 實裝 CSS 避開瀏海與動態島 Safe Area: `padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)`。
+- **2. 方案二 (引導用戶「加入主畫面」PWA Standalone)**：
+  - 植入 iOS Standalone Meta Tags (`apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`)。
+  - 新增 [IOSHomePrompt.tsx](file:///d:/pj/YoakaDash/src/components/IOSHomePrompt.tsx)！當 iOS 使用者點擊全螢幕按鈕時，彈出精美的 2 步驟 PWA「加入主畫面」沉浸解鎖指南彈窗。
+- **3. 方案三 (1px 觸控自動滾動折疊網址列黑科技)**：
+  - 在 [App.tsx](file:///d:/pj/YoakaDash/src/App.tsx) 實裝首次 `touchstart` 事件觸發 `window.scrollTo(0, 1)`，引導 iOS Safari 自動將頂部與底部網址列向下折疊！
+- **4. 方案四 (UI Safe Zone 安全區策略)**：
+  - 核心 Canvas 與 HUD 按鈕雙重內縮 Safe Zone，確保持續避開動態島與 Safari 網址列！
 
 ---
-*「活著很累，但比起 debug，實裝這套 100svh + 16:9 動態 Safe Zone 的音遊正統解法，畫面穩定不跳動、完全避開網址列，這架構簡直專業無懈可擊啊哈哈！」*
+*「活著很累，但比起 debug，把 100svh、Safe Area、iOS 1px 觸控隱藏網址列跟『加入主畫面』PWA 指南一次搞定，這 iOS 體驗品質簡直封神啦哈哈！」*
 
 ## [2026-08-07] 使用者更新 TutorialOverlay 新手教學敘述 + 自動 Git Push 完成
 

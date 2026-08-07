@@ -15,19 +15,17 @@ import { ResultScreen } from './components/ResultScreen';
 import { LandscapePrompt } from './components/LandscapePrompt';
 import { SongSelectModal } from './components/SongSelectModal';
 import { TutorialOverlay } from './components/TutorialOverlay';
+import { IOSHomePrompt } from './components/IOSHomePrompt';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [showSongSelect, setShowSongSelect] = useState<boolean>(false);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
+  const [showIOSHomePrompt, setShowIOSHomePrompt] = useState<boolean>(false);
+
   const [isFullscreen, setIsFullscreen] = useState<boolean>(!!document.fullscreenElement);
-  
-  // Dynamic Aspect-Ratio Responsive Size (Solution 4)
-  const [containerDimensions, setContainerDimensions] = useState<{ width: number; height: number }>({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(false);
 
   const [currentSong, setCurrentSong] = useState<SongData>(SONG_REGISTRY[0]);
   const [currentDifficulty, setCurrentDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Normal');
@@ -48,65 +46,56 @@ export const App: React.FC = () => {
   });
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const innerShellRef = useRef<HTMLDivElement | null>(null);
   const gameLoopRef = useRef<GameLoop | null>(null);
 
   useEffect(() => {
     audioEngine.loadDefaultBGM();
-
-    // Solution 3: Nudge Trick (window.scrollTo(0,1)) on first TouchStart to collapse Safari address bar
-    const handleTouchNudge = () => {
-      window.scrollTo(0, 1);
-    };
-    window.addEventListener('touchstart', handleTouchNudge, { once: true });
-    return () => window.removeEventListener('touchstart', handleTouchNudge);
   }, []);
 
-  // Solution 1 & Solution 4: 100svh + 16:9 Aspect Ratio Dynamic Calculator
+  // 🚀 iOS Safari TouchStart Nudge Trick: Scroll 1px on first touch to auto-collapse Safari address bar
+  useEffect(() => {
+    const handleFirstTouch = () => {
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        if (canvasRef.current) {
+          canvasRef.current.width = window.innerWidth;
+          canvasRef.current.height = window.innerHeight;
+        }
+      }, 300);
+    };
+
+    window.addEventListener('touchstart', handleFirstTouch, { once: true });
+    return () => {
+      window.removeEventListener('touchstart', handleFirstTouch);
+    };
+  }, []);
+
+  // Monitor Fullscreen & Screen Size for Non-Fullscreen Mobile Scaling
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    const calculateResponsiveLayout = () => {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-      const targetRatio = 16 / 9;
-
-      let calcWidth = windowWidth;
-      let calcHeight = windowWidth / targetRatio;
-
-      if (calcHeight > windowHeight) {
-        calcHeight = windowHeight;
-        calcWidth = windowHeight * targetRatio;
-      }
-
-      setContainerDimensions({
-        width: Math.floor(calcWidth),
-        height: Math.floor(calcHeight)
-      });
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 920 || window.innerHeight <= 540;
+      setIsMobileScreen(isMobile);
 
       if (canvasRef.current) {
-        canvasRef.current.width = Math.floor(calcWidth);
-        canvasRef.current.height = Math.floor(calcHeight);
+        canvasRef.current.width = window.innerWidth;
+        canvasRef.current.height = window.innerHeight;
       }
     };
 
-    calculateResponsiveLayout();
+    handleResize();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    window.addEventListener('resize', calculateResponsiveLayout);
-    
-    // Additional delay timer for mobile orientation & Safari bar collapse transitions
-    const timerId = setTimeout(calculateResponsiveLayout, 250);
-
+    window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeout(timerId);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      window.removeEventListener('resize', calculateResponsiveLayout);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [isFullscreen]);
+  }, []);
 
-  // Auto-Pause when switching apps or leaving tab
+  // Auto-Pause when switching apps, leaving tab, or locking screen (visibilitychange & blur)
   useEffect(() => {
     const triggerAutoPause = () => {
       if (gameState === 'playing' && !isPaused && gameLoopRef.current) {
@@ -116,10 +105,14 @@ export const App: React.FC = () => {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) triggerAutoPause();
+      if (document.hidden) {
+        triggerAutoPause();
+      }
     };
 
-    const handleBlur = () => triggerAutoPause();
+    const handleBlur = () => {
+      triggerAutoPause();
+    };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleBlur);
@@ -139,6 +132,7 @@ export const App: React.FC = () => {
       gameLoopRef.current = null;
     }
 
+    // Force Reset Game Stats to Initial Fresh Values (Score = 0, SupportRate = 100%)
     const freshStats: GameStats = {
       score: 0,
       supportRate: 100,
@@ -171,16 +165,10 @@ export const App: React.FC = () => {
     };
 
     setTimeout(() => {
-      if (canvasRef.current && innerShellRef.current) {
-        const w = containerDimensions.width;
-        const h = containerDimensions.height;
-
-        canvasRef.current.width = w;
-        canvasRef.current.height = h;
-
+      if (canvasRef.current) {
         const renderEngine = new RenderEngine(canvasRef.current);
-        renderEngine.resize(w, h);
-        renderEngine.setSongBgImage(song.bg);
+        renderEngine.resize(window.innerWidth, window.innerHeight);
+        renderEngine.setSongBgImage(song.bg); // Dynamic MP4 Video or Image Background!
 
         const loop = new GameLoop(
           renderEngine,
@@ -233,38 +221,32 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, isPaused]);
 
+  // Non-fullscreen Mobile Viewport Scale Protection (Using 100svh + 0.76 scale for maximum stability)
+  const isStandaloneMode = (typeof window !== 'undefined') && (
+    (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches
+  );
+  const shouldScale78Percent = isMobileScreen && !isFullscreen && !isStandaloneMode;
+
   return (
     <div style={{
       width: '100vw',
-      height: '100svh', // Solution 1: 100svh (Small Viewport Height) to prevent Safari toolbar jump
+      height: '100svh', // Option 1: 100svh (Small Viewport Height) - Locks minimum visible area and prevents Safari toolbars jumping!
       position: 'relative',
       overflow: 'hidden',
       backgroundColor: '#050712',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      // Safe Area Protection
-      paddingTop: 'env(safe-area-inset-top, 0px)',
-      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      paddingLeft: 'env(safe-area-inset-left, 0px)',
-      paddingRight: 'env(safe-area-inset-right, 0px)',
-      boxSizing: 'border-box'
+      padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'
     }}>
-      {/* Solution 4: Dynamic 16:9 Aspect Ratio Safe Zone Canvas Shell */}
-      <div
-        ref={innerShellRef}
-        style={{
-          width: isFullscreen ? '100%' : `${containerDimensions.width}px`,
-          height: isFullscreen ? '100%' : `${containerDimensions.height}px`,
-          position: 'relative',
-          overflow: 'hidden',
-          backgroundColor: '#070814',
-          boxShadow: isFullscreen ? 'none' : '0 0 35px rgba(0, 240, 255, 0.4)',
-          borderRadius: isFullscreen ? '0px' : '14px',
-          border: isFullscreen ? 'none' : '2px solid #00f0ff',
-          transition: 'all 0.25s ease-out'
-        }}
-      >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        transform: shouldScale78Percent ? 'scale(0.76)' : 'none',
+        transformOrigin: 'center center',
+        transition: 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      }}>
         {/* Mobile Landscape Orientation Prompt */}
         <LandscapePrompt />
 
@@ -371,6 +353,7 @@ export const App: React.FC = () => {
               setIsPaused(false);
               setGameState('menu');
             }}
+            onShowIOSPrompt={() => setShowIOSHomePrompt(true)}
           />
         )}
 
@@ -384,6 +367,13 @@ export const App: React.FC = () => {
               if (gameLoopRef.current) gameLoopRef.current.stop();
               setGameState('menu');
             }}
+          />
+        )}
+
+        {/* 10. iOS PWA ADD TO HOME SCREEN PROMPT */}
+        {showIOSHomePrompt && (
+          <IOSHomePrompt
+            onClose={() => setShowIOSHomePrompt(false)}
           />
         )}
       </div>
