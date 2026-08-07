@@ -6,45 +6,73 @@ interface TutorialOverlayProps {
 
 export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [imgErrors, setImgErrors] = useState<{ [key: string]: boolean }>({});
+
+  const getImageSrc = (key: string, fallback: string) => {
+    if (imgErrors[key]) return '/assets/tissue_pack.png';
+    return fallback;
+  };
 
   const lessons = [
     {
       stepTitle: '第 1 課：Note 一般音符與投遞面紙',
       badge: '📘 音符基礎概念',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', width: '100%' }}>
-            {/* Air Note Card */}
-            <div style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1.5px solid #00f0ff', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#00f0ff', marginBottom: '4px' }}>
-                ☁️ 空中選民音符
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#ddd', marginBottom: '8px' }}>
-                按下鍵盤 <strong style={{ color: '#ffe600' }}>[D]</strong> 或 <strong style={{ color: '#ffe600' }}>[F]</strong> 切換到空中切換跳躍投遞面紙！
-              </p>
-              <div style={{ background: '#00f0ff', color: '#000', fontWeight: 900, padding: '4px', borderRadius: '6px', fontSize: '0.78rem' }}>
-                手機按鈕：空中按鈕 (AIR)
-              </div>
-            </div>
-
-            {/* Ground Note Card */}
-            <div style={{ background: 'rgba(255, 0, 127, 0.1)', border: '1.5px solid #ff007f', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ff007f', marginBottom: '4px' }}>
-                🏃 地面選民音符
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#ddd', marginBottom: '8px' }}>
-                按下鍵盤 <strong style={{ color: '#ffe600' }}>[J]</strong> 或 <strong style={{ color: '#ffe600' }}>[K]</strong> 切換到地面拜票發面紙！
-              </p>
-              <div style={{ background: '#ff007f', color: '#fff', fontWeight: 900, padding: '4px', borderRadius: '6px', fontSize: '0.78rem' }}>
-                手機按鈕：地面按鈕 (GROUND)
-              </div>
-            </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1.4rem', alignItems: 'center', width: '100%' }}>
+          {/* Left Hero Image */}
+          <div style={{ textAlign: 'center' }}>
+            <img
+              src={getImageSrc('lesson1', '/assets/tutorial_lesson1.png')}
+              onError={() => setImgErrors(prev => ({ ...prev, lesson1: true }))}
+              alt="Note 打擊教學"
+              style={{
+                maxHeight: '165px',
+                maxWidth: '220px',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                border: '2px solid #00f0ff',
+                boxShadow: '0 0 20px rgba(0,240,255,0.3)',
+                background: '#080a1e',
+                padding: '4px'
+              }}
+            />
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.5)', padding: '0.7rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', width: '100%', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: '#ffe600', fontWeight: 800 }}>
-              💡 拜票小秘訣：時機越精準（Perfect 完美聲勢），獲得的票數越高！
-            </p>
+          {/* Right Text Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+              {/* Air Note Card */}
+              <div style={{ background: 'rgba(0, 240, 255, 0.12)', border: '1.5px solid #00f0ff', borderRadius: '12px', padding: '0.75rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 900, color: '#00f0ff', marginBottom: '2px' }}>
+                  ☁️ 空中選民音符
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#ddd', marginBottom: '6px' }}>
+                  按下 <strong style={{ color: '#ffe600' }}>[D] / [F]</strong> 躍起投遞面紙拉票！
+                </p>
+                <div style={{ background: '#00f0ff', color: '#000', fontWeight: 900, padding: '3px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                  手機按鈕：空中按鈕 (AIR)
+                </div>
+              </div>
+
+              {/* Ground Note Card */}
+              <div style={{ background: 'rgba(255, 0, 127, 0.12)', border: '1.5px solid #ff007f', borderRadius: '12px', padding: '0.75rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff007f', marginBottom: '2px' }}>
+                  🏃 地面選民音符
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#ddd', marginBottom: '6px' }}>
+                  按下 <strong style={{ color: '#ffe600' }}>[J] / [K]</strong> 地面奔跑親切發面紙！
+                </p>
+                <div style={{ background: '#ff007f', color: '#fff', fontWeight: 900, padding: '3px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                  手機按鈕：地面按鈕 (GROUND)
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.5)', padding: '0.55rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,230,0,0.3)', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.82rem', color: '#ffe600', fontWeight: 800 }}>
+                💡 拜票小秘訣：抓準音符抵達 Hit Zone 的黃金瞬間（Perfect 完美聲勢），即可贏得大量選民支持票數！
+              </p>
+            </div>
           </div>
         </div>
       )
@@ -53,20 +81,40 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       stepTitle: '第 2 課：Dual Note 金黃雙擊',
       badge: '⚡ 雙連擊高潮',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
-          <div style={{ background: 'rgba(255, 230, 0, 0.1)', border: '2px solid #ffe600', borderRadius: '14px', padding: '1rem', width: '100%', textAlign: 'center' }}>
-            <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffe600', marginBottom: '6px' }}>
-              ⚡ 金黃連線發光雙音符 (DUAL NOTE)
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1.4rem', alignItems: 'center', width: '100%' }}>
+          {/* Left Hero Image */}
+          <div style={{ textAlign: 'center' }}>
+            <img
+              src={getImageSrc('lesson2', '/assets/tutorial_lesson2.png')}
+              onError={() => setImgErrors(prev => ({ ...prev, lesson2: true }))}
+              alt="Dual Note 金黃雙擊"
+              style={{
+                maxHeight: '165px',
+                maxWidth: '220px',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                border: '2px solid #ffe600',
+                boxShadow: '0 0 20px rgba(255,230,0,0.4)',
+                background: '#080a1e',
+                padding: '4px'
+              }}
+            />
+          </div>
+
+          {/* Right Text */}
+          <div style={{ background: 'rgba(255, 230, 0, 0.12)', border: '2px solid #ffe600', borderRadius: '14px', padding: '1.1rem', textAlign: 'center' }}>
+            <h4 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffe600', marginBottom: '6px' }}>
+              ⚡ 金黃連線雙音符 (DUAL STRIKE)
             </h4>
             <p style={{ fontSize: '0.88rem', color: '#fff', lineHeight: 1.5, marginBottom: '10px' }}>
-              當畫面上出現金黃色光束連接的上下軌音符時，請同時按下 <strong style={{ color: '#00f0ff' }}>空中[D/F]</strong> 與 <strong style={{ color: '#ff007f' }}>地面[J/K]</strong>！
+              當畫面上出現金黃色雷射光束連接的上下軌音符時，請同時按下 <strong style={{ color: '#00f0ff' }}>空中[D/F]</strong> 與 <strong style={{ color: '#ff007f' }}>地面[J/K]</strong>！
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-              <span style={{ background: '#ffe600', color: '#000', fontWeight: 900, padding: '6px 14px', borderRadius: '8px', fontSize: '0.9rem' }}>
+              <span style={{ background: '#ffe600', color: '#000', fontWeight: 900, padding: '5px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
                 得票加爆：+200 票數！！
               </span>
-              <span style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 800, padding: '6px 14px', borderRadius: '8px', fontSize: '0.9rem' }}>
+              <span style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 800, padding: '5px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
                 手機：左右雙手同時按壓！
               </span>
             </div>
@@ -78,18 +126,18 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       stepTitle: '第 3 課：Hater 6666狗頭板與霸道鯊魚',
       badge: '⚠️ 障礙物閃避',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', width: '100%' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', width: '100%' }}>
             {/* Dog Board */}
-            <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-              <img src="/assets/hater_dog_board.png" alt="6666狗頭板" style={{ height: '70px', objectFit: 'contain', marginBottom: '4px' }} />
+            <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img src="/assets/hater_dog_board.png" alt="6666狗頭板" style={{ height: '75px', objectFit: 'contain', marginBottom: '4px' }} />
               <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>6666 黑粉狗頭板</div>
               <p style={{ fontSize: '0.78rem', color: '#aaa', marginTop: '4px' }}>撞擊將扣減 6% 選民支持度！</p>
             </div>
 
             {/* Shark */}
-            <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center' }}>
-              <img src="/assets/hater_shark.png" alt="霸道鯊魚" style={{ height: '70px', objectFit: 'contain', marginBottom: '4px' }} />
+            <div style={{ background: 'rgba(255, 0, 85, 0.12)', border: '1.5px solid #ff0055', borderRadius: '12px', padding: '0.8rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img src="/assets/hater_shark.png" alt="霸道鯊魚" style={{ height: '75px', objectFit: 'contain', marginBottom: '4px' }} />
               <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ff0055' }}>霸道鯊魚障礙</div>
               <p style={{ fontSize: '0.78rem', color: '#aaa', marginTop: '4px' }}>切換至對側軌道即可成功閃避！</p>
             </div>
@@ -107,9 +155,29 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       stepTitle: '第 4 課：Fevertime 熱血爆發模式',
       badge: '🔥 全場雙倍狂歡',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
-          <div style={{ background: 'rgba(255, 0, 127, 0.15)', border: '2px solid #ff007f', borderRadius: '14px', padding: '1rem', width: '100%', textAlign: 'center' }}>
-            <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ff007f', marginBottom: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1.4rem', alignItems: 'center', width: '100%' }}>
+          {/* Left Hero Image */}
+          <div style={{ textAlign: 'center' }}>
+            <img
+              src={getImageSrc('lesson4', '/assets/tutorial_lesson4.png')}
+              onError={() => setImgErrors(prev => ({ ...prev, lesson4: true }))}
+              alt="Fevertime 熱血爆發"
+              style={{
+                maxHeight: '165px',
+                maxWidth: '220px',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                border: '2px solid #ff007f',
+                boxShadow: '0 0 20px rgba(255,0,127,0.4)',
+                background: '#080a1e',
+                padding: '4px'
+              }}
+            />
+          </div>
+
+          {/* Right Text */}
+          <div style={{ background: 'rgba(255, 0, 127, 0.15)', border: '2px solid #ff007f', borderRadius: '14px', padding: '1.1rem', textAlign: 'center' }}>
+            <h4 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ff007f', marginBottom: '6px' }}>
               🔥 FEVER TIME 雙倍得票熱血爆發！
             </h4>
             <p style={{ fontSize: '0.88rem', color: '#fff', lineHeight: 1.5, marginBottom: '8px' }}>
@@ -165,7 +233,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       padding: '0.8rem'
     }}>
       <div className="cyber-panel" style={{
-        width: '860px',
+        width: '880px',
         maxWidth: '94vw',
         maxHeight: '92vh',
         overflowY: 'auto',
